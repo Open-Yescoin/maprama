@@ -54,6 +54,11 @@ export function buildLabelEntries(world: WorldModel, proj: Projection): LabelEnt
   const inBounds = (x: number, z: number): boolean => x >= b.minX && x <= b.maxX && z >= b.minZ && z <= b.maxZ;
   const seen = new Map<string, number>();
   for (const d of world.districts) {
+    // A nameless feature has nothing to label. Roads have always been skipped
+    // this way (`!r.name` below); districts and POIs were not, and a POI whose
+    // name came through empty drew a card with an icon, a blank where the title
+    // belongs and a stranded subtitle.
+    if (!d.name) continue;
     const n = (seen.get(d.name) ?? 0) + 1;
     seen.set(d.name, n);
     const water = !!d.water;
@@ -94,6 +99,7 @@ export function buildLabelEntries(world: WorldModel, proj: Projection): LabelEnt
     }
   }
   for (const p of world.pois) {
+    if (!p.name) continue;
     out.push({
       id: `poi:${p.id}`, kind: 'poi', name: p.name, category: p.cat, subtitle: POI_SUBTITLES[p.cat],
       lngLat: proj.toLngLat({ x: p.x, z: p.z }), x: p.x, z: p.z, pri: 2, icon: p.cat,
