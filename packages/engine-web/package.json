@@ -1,6 +1,6 @@
 {
   "name": "@maprama/engine-web",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Maprama web render engine (three.js) implementing the @maprama/protocol message contract.",
   "keywords": [
     "maprama",
@@ -61,7 +61,7 @@
     "fixtures": "node scripts/make-glb-fixture.mjs"
   },
   "dependencies": {
-    "@maprama/protocol": "^0.1.0",
+    "@maprama/protocol": "^0.2.0",
     "pmtiles": "4.5.0",
     "three": "0.186.0"
   },

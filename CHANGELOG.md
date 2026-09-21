@@ -7,11 +7,15 @@ Until 1.0.0, minor versions may contain breaking changes.
 
 All packages in this repository share one version number.
 
-## [0.1.0] — Unreleased
+## [0.2.0] — Unreleased
 
-First public release of `@maprama/protocol`, `@maprama/engine-web`,
-`@maprama/react-native`, `@maprama/osm` and `@maprama/assets`. The v2 native engine
-(`@maprama/engine-native`) is in development and not part of this release.
+Everything below landed after the 0.1.0 tag. The v2 native engine
+(`@maprama/engine-native`) is still in development and not part of this release;
+where a feature is web-engine-only that is stated on the entry.
+
+**Nothing here breaks the 0.1.0 API.** Every protocol addition is an optional
+field or a new message, `PROTOCOL_VERSION` is unchanged, and a `world` of
+`kind: 'data' | 'url' | 'procedural'` renders exactly as it did.
 
 ### Added
 
@@ -350,3 +354,8 @@ First public release of `@maprama/protocol`, `@maprama/engine-web`,
   and stray NUL bytes were removed from sources.
 
 [0.1.0]: https://github.com/CraftsManShip001/maprama/releases/tag/v0.1.0
+
+## [0.1.0] — 2026-09-15
+
+First public release of `@maprama/protocol`, `@maprama/engine-web`,
+`@maprama/react-native`, `@maprama/osm` and `@maprama/assets`.
