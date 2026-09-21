@@ -156,3 +156,84 @@ export function epsg5174ToWgs84(x: number, y: number): [number, number] {
   const out = geocentricToGeodetic(tx, ty, tz, WGS84_A, WGS84_F);
   return [(out.lng * 180) / Math.PI, (out.lat * 180) / Math.PI];
 }
+
+// ---- EPSG:5179 (Korea 2000 / Unified CS, "UTM-K") ---------------------------
+
+/**
+ * One EPSG:5179 easting/northing in metres to `[lng, lat]` in WGS 84 degrees.
+ *
+ * The 국토지리정보원 연속수치지형도 layers on the V-World download (실폭하천,
+ * 하천경계, 호소) are published in this CRS, not the EPSG:5174 the 토지이음
+ * facility shapefiles use.
+ *
+ * This one is much simpler than {@link epsg5174ToWgs84}: EPSG:5179 sits on
+ * GRS80 / Korea 2000, which is geocentric and agrees with WGS 84 to well under
+ * the precision of the data, so there is **no datum shift** — just an inverse
+ * transverse Mercator. Applying a Bessel-style seven-parameter shift here would
+ * move every river by hundreds of metres.
+ */
+export function epsg5179ToWgs84(x: number, y: number): [number, number] {
+  const { lat, lng } = inverseTransverseMercatorGrs80(x, y, {
+    lat0: (38 * Math.PI) / 180,
+    lon0: (127.5 * Math.PI) / 180,
+    k0: 0.9996,
+    falseEasting: 1_000_000,
+    falseNorthing: 2_000_000,
+  });
+  return [(lng * 180) / Math.PI, (lat * 180) / Math.PI];
+}
+
+interface TmParams {
+  lat0: number;
+  lon0: number;
+  k0: number;
+  falseEasting: number;
+  falseNorthing: number;
+}
+
+/** Inverse transverse Mercator on GRS80 (Snyder 8-17…8-25), radians out. */
+function inverseTransverseMercatorGrs80(x: number, y: number, p: TmParams): { lat: number; lng: number } {
+  const a = WGS84_A;
+  const f = WGS84_F;
+  const e2 = 2 * f - f * f;
+  const ep2 = e2 / (1 - e2);
+  const e1 = (1 - Math.sqrt(1 - e2)) / (1 + Math.sqrt(1 - e2));
+  const meridian = (phi: number): number =>
+    a *
+    ((1 - e2 / 4 - (3 * e2 * e2) / 64 - (5 * e2 ** 3) / 256) * phi -
+      ((3 * e2) / 8 + (3 * e2 * e2) / 32 + (45 * e2 ** 3) / 1024) * Math.sin(2 * phi) +
+      ((15 * e2 * e2) / 256 + (45 * e2 ** 3) / 1024) * Math.sin(4 * phi) -
+      ((35 * e2 ** 3) / 3072) * Math.sin(6 * phi));
+
+  const M = meridian(p.lat0) + (y - p.falseNorthing) / p.k0;
+  const mu = M / (a * (1 - e2 / 4 - (3 * e2 * e2) / 64 - (5 * e2 ** 3) / 256));
+  const phi1 =
+    mu +
+    ((3 * e1) / 2 - (27 * e1 ** 3) / 32) * Math.sin(2 * mu) +
+    ((21 * e1 ** 2) / 16 - (55 * e1 ** 4) / 32) * Math.sin(4 * mu) +
+    ((151 * e1 ** 3) / 96) * Math.sin(6 * mu) +
+    ((1097 * e1 ** 4) / 512) * Math.sin(8 * mu);
+
+  const sinPhi1 = Math.sin(phi1);
+  const cosPhi1 = Math.cos(phi1);
+  const tanPhi1 = Math.tan(phi1);
+  const C1 = ep2 * cosPhi1 * cosPhi1;
+  const T1 = tanPhi1 * tanPhi1;
+  const N1 = a / Math.sqrt(1 - e2 * sinPhi1 * sinPhi1);
+  const R1 = (a * (1 - e2)) / (1 - e2 * sinPhi1 * sinPhi1) ** 1.5;
+  const D = (x - p.falseEasting) / (N1 * p.k0);
+
+  const lat =
+    phi1 -
+    ((N1 * tanPhi1) / R1) *
+      ((D * D) / 2 -
+        ((5 + 3 * T1 + 10 * C1 - 4 * C1 * C1 - 9 * ep2) * D ** 4) / 24 +
+        ((61 + 90 * T1 + 298 * C1 + 45 * T1 * T1 - 252 * ep2 - 3 * C1 * C1) * D ** 6) / 720);
+  const lng =
+    p.lon0 +
+    (D -
+      ((1 + 2 * T1 + C1) * D ** 3) / 6 +
+      ((5 - 2 * C1 + 28 * T1 - 3 * C1 * C1 + 8 * ep2 + 24 * T1 * T1) * D ** 5) / 120) /
+      cosPhi1;
+  return { lat, lng };
+}

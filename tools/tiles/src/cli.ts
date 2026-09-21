@@ -32,9 +32,16 @@ import {
   encodeKrParksFile,
   type KrParkGroup,
 } from './kr-parks.js';
+import {
+  convertKrWater,
+  encodeKrWaterFile,
+  DEFAULT_KR_WATER_MIN_AREA_M2,
+  KrWaterSource,
+  KR_WATER_ATTRIBUTION,
+} from './kr-water.js';
 import { OsmPbfSource } from './osm-source.js';
 import { openArchive, readTile } from './reader.js';
-import { DEFAULT_LAYER_ROUTING } from './sources.js';
+import { DEFAULT_LAYER_ROUTING, type TileSource } from './sources.js';
 import { LAYER_NAMES, type LayerName } from './types.js';
 import type { GeoBounds } from './mercator.js';
 
@@ -50,10 +57,16 @@ const USAGE = `maprama-tiles <command> [options]
   build   --pbf <file> --work <dir> --out <file.pmtiles>
           [--name <s>] [--bounds w,s,e,n] [--chunk-zoom 10] [--node-budget 6000000]
           [--max-chunks 64] [--extent 8192] [--buffer 256] [--zooms 13,15] [--pad 0.01]
-          [--kr-buildings <geojson>] [--kr-fill] [--kr-parks <file.json>] [--fresh]
+          [--kr-buildings <geojson>] [--kr-fill] [--kr-parks <file.json>]
+          [--kr-water <file.json>] [--fresh]
           Builds the archive, resuming from --work unless --fresh.
           --kr-parks routes the parks layer to the Korean national city-planning
           dataset instead of OSM. Without it the routing is all-OSM as before.
+
+  kr-water --src <dir> --out <file.json>
+          Converts the 국토지리정보원 연속수치지형도 water shapefiles (실폭하천 /
+          하천경계 / 호소, EPSG:5179) into the file --kr-water reads. CC BY, so a
+          build using it carries no ODbL share-alike from this layer.
 
   kr-parks --src <dir> --out <file.json>
           [--groups park,amusement] [--min-area 200] [--no-rescue]
@@ -179,8 +192,17 @@ async function cmdBuild(args: Args, log: (m: string) => void): Promise<void> {
   // The one place a layer changes hands. Everything downstream — tiler, encoder,
   // archive writer, attribution table — reads the routing and needs no edit.
   const krParksPath = str(args, 'kr-parks');
-  const sources = krParksPath ? [source, new KrParksSource({ file: krParksPath, log })] : [source];
-  const routing = krParksPath ? { ...DEFAULT_LAYER_ROUTING, parks: 'kr-parks' } : DEFAULT_LAYER_ROUTING;
+  const krWaterPath = str(args, 'kr-water');
+  const sources: TileSource[] = [source];
+  const routing: Record<LayerName, string> = { ...DEFAULT_LAYER_ROUTING };
+  if (krParksPath) {
+    sources.push(new KrParksSource({ file: krParksPath, log }));
+    routing.parks = 'kr-parks';
+  }
+  if (krWaterPath) {
+    sources.push(new KrWaterSource({ file: krWaterPath, log }));
+    routing.water = 'kr-water';
+  }
 
   let peakRss = 0;
   const sampler = setInterval(() => {
@@ -256,6 +278,25 @@ async function cmdKrParks(args: Args, log: (m: string) => void): Promise<void> {
   log(`  dropped    ${stats.droppedSmall.toLocaleString()} under ${minAreaM2} m², ${stats.droppedDuplicate.toLocaleString()} duplicates`);
   log(`  kept       ${stats.kept.toLocaleString()} polygons, ${stats.areaKm2.toFixed(1)} km²`);
   log(`  attribution ${JSON.stringify(KR_PARKS_ATTRIBUTION)}`);
+}
+
+/** `kr-water`: the V-World 연속수치지형도 water shapefiles -> the file `--kr-water` reads. */
+async function cmdKrWater(args: Args, log: (m: string) => void): Promise<void> {
+  const src = str(args, 'src');
+  const out = str(args, 'out');
+  if (!src || !out) throw new Error('kr-water needs --src <dir> and --out <file.json>');
+  const minAreaM2 = num(args, 'min-area', DEFAULT_KR_WATER_MIN_AREA_M2);
+  const { water, stats } = await convertKrWater(src, minAreaM2, (m) => {
+    if (args['verbose']) log(m);
+  });
+  await writeFile(out, JSON.stringify(encodeKrWaterFile(water, stats, minAreaM2)));
+  const bytes = (await stat(out)).size;
+  log(`kr-water   ${out}  (${(bytes / 2 ** 20).toFixed(1)} MiB)`);
+  log(`  read       ${stats.files} shapefiles, ${stats.records.toLocaleString()} records`);
+  log(`  rings      ${stats.rings.toLocaleString()}`);
+  log(`  dropped    ${stats.droppedSmall.toLocaleString()} under ${minAreaM2} m²`);
+  log(`  kept       ${stats.kept.toLocaleString()} polygons, ${stats.areaKm2.toFixed(1)} km²`);
+  log(`  attribution ${JSON.stringify(KR_WATER_ATTRIBUTION)}`);
 }
 
 async function cmdVerify(args: Args, log: (m: string) => void): Promise<void> {
@@ -443,6 +484,9 @@ export async function main(argv: readonly string[] = process.argv.slice(2)): Pro
         break;
       case 'kr-parks':
         await cmdKrParks(args, log);
+        break;
+      case 'kr-water':
+        await cmdKrWater(args, log);
         break;
       case 'verify':
         await cmdVerify(args, log);
