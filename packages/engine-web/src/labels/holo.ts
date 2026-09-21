@@ -57,7 +57,7 @@ export class HoloLabels {
       return e;
     };
     for (const e of entries) {
-      const root = el('div', `mpr-hl mpr-hl-${e.kind}`);
+      const root = el('div', `mpr-hl mpr-hl-${e.kind}${e.approximate ? ' mpr-hl-approx' : ''}`);
       root.dataset.labelId = e.id;
       const line = el('i', 'mpr-hl-line'), dot = el('i', 'mpr-hl-dot'), panel = el('div', 'mpr-hl-panel'), card = el('div', 'mpr-hl-card');
       const ico = el('span', 'mpr-hl-ico'), txt = el('span', 'mpr-hl-txt'), b = doc.createElement('b'), sm = doc.createElement('small');
@@ -99,7 +99,11 @@ export class HoloLabels {
       let onScreen = false, top = { x: 0, y: 0 };
       if (eligible) {
         this.applyContent(h, mode, entries);
-        const g = cam.worldToScreen(e.x, groundY, e.z), t = cam.worldToScreen(e.x, groundY + HOLO_HEIGHT[e.kind] * heightScale, e.z);
+        // An approximate POI (no building under it) gets no lift: the card sits
+        // on its dot instead of floating on a beam. The beam is a claim about
+        // where the thing *is*, and for these the data does not support it.
+        const lift = e.approximate ? 0 : HOLO_HEIGHT[e.kind] * heightScale;
+        const g = cam.worldToScreen(e.x, groundY, e.z), t = cam.worldToScreen(e.x, groundY + lift, e.z);
         onScreen = inFront(cam, e.x, e.z) && t.x >= X0 - 0.01 * W && t.x <= X0 + 1.01 * W && t.y >= Y0 + 0.01 * H && t.y <= Y0 + 0.99 * H;
         anchors.set(e.id, { gx: g.x, gy: g.y, tx: t.x });
         if (onScreen && !h.w) {
@@ -123,6 +127,7 @@ export class HoloLabels {
         const px = c.top.x, py = c.top.y, inset = Math.min(10, h.w / 2);
         const lx = Math.min(px + h.w / 2 - inset, Math.max(px - h.w / 2 + inset, a.tx));
         h.dot.style.transform = `translate(${g.x.toFixed(1)}px, ${g.y.toFixed(1)}px)`;
+        h.line.style.display = h.entry.approximate ? 'none' : '';
         h.line.style.transform = `translate(${g.x.toFixed(1)}px, ${g.y.toFixed(1)}px) rotate(${Math.atan2(py - g.y, lx - g.x).toFixed(3)}rad)`;
         h.line.style.width = `${Math.hypot(lx - g.x, py - g.y).toFixed(1)}px`;
         h.panel.style.transform = `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px) translate(-50%, calc(-100% - 2px))`;

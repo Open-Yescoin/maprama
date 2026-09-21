@@ -43,6 +43,19 @@ export interface LabelEntry extends LabelInfo {
   tx?: number;
   tz?: number;
   water?: boolean;
+  /**
+   * True when the POI is not attached to any building footprint — the build
+   * step found none within its snap radius, so all the data says is "somewhere
+   * around here".
+   *
+   * It matters because the holo style draws a ground dot, a leader line rising
+   * into the air and a card at the top, which reads as *this thing is at this
+   * point, and here are its details*. Measured over seven areas of the national
+   * extract, **26.1 % of POIs are unattached** (Gangnam 18.9 %, 구례읍 81.5 %),
+   * and drawing those with the full beam puts convenience stores in the middle
+   * of roads with the same confidence as one sitting on its own building.
+   */
+  approximate?: boolean;
 }
 
 const ROAD_START = 16, ROAD_STEP = 42, ROAD_END_MARGIN = 8, ROAD_DEDUPE = 30;
@@ -100,10 +113,36 @@ export function buildLabelEntries(world: WorldModel, proj: Projection): LabelEnt
   }
   for (const p of world.pois) {
     if (!p.name) continue;
-    out.push({
+    const e: LabelEntry = {
       id: `poi:${p.id}`, kind: 'poi', name: p.name, category: p.cat, subtitle: POI_SUBTITLES[p.cat],
       lngLat: proj.toLngLat({ x: p.x, z: p.z }), x: p.x, z: p.z, pri: 2, icon: p.cat,
-    });
+    };
+    if (p.buildingId === undefined) e.approximate = true;
+    out.push(e);
+  }
+  return dedupeById(out);
+}
+
+/**
+ * One entry per id.
+ *
+ * A tile world can hand the same feature to the assembler twice: geometry is
+ * clipped to the tile *plus* its buffer, so a road that runs along a boundary
+ * arrives from both tiles and keeps its id. The label ids derived from it then
+ * collide, and a duplicate is worse than it sounds — `placeHolo` returns the
+ * placed boxes in a `Map` keyed by id, so the twin that was never made
+ * eligible (never measured, never given content) finds its sibling's box and
+ * is drawn anyway: an empty card sitting on top of the real one, with the real
+ * one's text spilling past it. Measured on a tile boundary in 기장:
+ * `road:w37397866:0` appeared twice, once with "차성서로" and once blank.
+ */
+function dedupeById(entries: readonly LabelEntry[]): LabelEntry[] {
+  const seenIds = new Set<string>();
+  const out: LabelEntry[] = [];
+  for (const e of entries) {
+    if (seenIds.has(e.id)) continue;
+    seenIds.add(e.id);
+    out.push(e);
   }
   return out;
 }

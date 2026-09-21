@@ -193,6 +193,46 @@ async function load(hash) {
   }
 }
 
+/**
+ * Dumps what every holo card actually measured, for the frame on screen.
+ *
+ * `placeHolo` decides overlap from the card's measured width and height, and
+ * `clampLabelX` keeps it inside the viewport from the same width. A card whose
+ * width came out 0 (or far too small) is therefore both un-clamped and
+ * invisible to collision — which is exactly what a card with its text hanging
+ * past its own edge, overlapping a second card, looks like. This prints the
+ * numbers instead of guessing at them. Set MAPRAMA_DUMP_CARDS=1.
+ */
+async function dumpCards(name) {
+  if (!process.env.MAPRAMA_DUMP_CARDS) return;
+  const rows = await evaluate(`(() => {
+    const out = [];
+    for (const root of document.querySelectorAll('.mpr-hl')) {
+      const card = root.querySelector('.mpr-hl-card');
+      const b = root.querySelector('b');
+      const sm = root.querySelector('small');
+      const panel = root.querySelector('.mpr-hl-panel');
+      const r = card ? card.getBoundingClientRect() : null;
+      out.push({
+        id: root.dataset.labelId || '',
+        on: root.classList.contains('on'),
+        display: root.style.display,
+        offsetW: card ? card.offsetWidth : -1,
+        rectW: r ? Math.round(r.width) : -1,
+        rectX: r ? Math.round(r.left) : -1,
+        title: b ? b.textContent : '',
+        sub: sm ? sm.textContent : '',
+        panelT: panel ? panel.style.transform : '',
+      });
+    }
+    return out.filter((r) => r.on);
+  })()`, false);
+  console.log(`\n  cards on screen at ${name}: ${rows.length}`);
+  for (const r of rows) {
+    console.log(`    ${r.id.padEnd(26)} offsetW=${String(r.offsetW).padStart(4)} rectW=${String(r.rectW).padStart(4)} x=${String(r.rectX).padStart(5)}  "${r.title}" / "${r.sub}"`);
+  }
+}
+
 async function shot(name) {
   const { data } = await cmd('Page.captureScreenshot', { format: 'png' });
   const file = join(outDir, `${name}.png`);
@@ -316,6 +356,7 @@ if (want('scenes')) {
     await load(hash);
     const wall = Date.now() - t0;
     await shot(s.name);
+    await dumpCards(s.name);
     const info = await evaluate(sceneInfo);
     results.push({ scene: s, info, wall, requests: httpRequests, ranged: rangeRequests, bytes: httpBytes });
     console.log(`\n  ${s.name}  ${s.label}`);

@@ -39,14 +39,40 @@ export class LabelController {
   private contentVersion = 0;
   private lastStyle = '';
   private lastIndexJson = '';
+  private fontsWatched = false;
 
   constructor(private readonly scene: SceneApi) {}
+
+  /**
+   * Re-measure every card once the document's webfonts have loaded.
+   *
+   * Card widths are measured from the DOM the first time a card comes on
+   * screen and then cached — nothing re-measures them on its own. A card
+   * measured while the text is still in the fallback font keeps that width for
+   * the rest of the session, and a width that is too small breaks two things at
+   * once: `clampLabelX` no longer keeps the card inside the viewport, and
+   * `placeHolo` sees a box too small to collide, so two cards can sit on top of
+   * each other. Both were visible on the same screenshot — a road label with
+   * its text spilling past its own edge, overlapping a second card.
+   */
+  private watchFonts(doc: Document): void {
+    if (this.fontsWatched) return;
+    this.fontsWatched = true;
+    const fonts = (doc as Document & { fonts?: FontFaceSet }).fonts;
+    if (!fonts?.ready) return;
+    void fonts.ready.then(() => {
+      this.dom?.invalidate();
+      this.holo?.invalidate();
+      this.scene.requestRender?.();
+    });
+  }
 
   /** The DOM layer labels and name tags are drawn into (created on demand). */
   domLayer(): HTMLDivElement {
     if (!this.layer) {
       const doc = this.scene.overlayLayer.ownerDocument;
       ensureLabelStyles(doc);
+      this.watchFonts(doc);
       this.layer = doc.createElement('div');
       this.layer.className = 'mpr-labels';
       this.scene.overlayLayer.appendChild(this.layer);

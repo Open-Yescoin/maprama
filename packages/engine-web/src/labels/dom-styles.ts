@@ -60,6 +60,8 @@ const CSS = `
 .mpr-hl-dot{width:0;height:0}
 .mpr-hl-dot::before{content:"";position:absolute;left:-4px;top:-4px;width:8px;height:8px;border-radius:50%;background:#6FB7FF;box-shadow:0 0 0 2px rgba(255,255,255,.9),0 0 12px 2px rgba(111,183,255,.85);transform:scale(0);transition:transform .18s ease-out}
 .mpr-hl-dot::after{content:"";position:absolute;left:-12px;top:-12px;width:24px;height:24px;border-radius:50%;border:1.5px solid rgba(111,183,255,.75);opacity:0}
+/* An approximate POI: hollow dot, no beam. The data knows the area, not the point. */
+.mpr-hl-approx .mpr-hl-dot::before{background:transparent;border:2px solid #6FB7FF;box-shadow:0 0 0 2px rgba(255,255,255,.75)}
 .mpr-hl.on .mpr-hl-dot::before{transform:scale(1)}
 .mpr-hl.on .mpr-hl-dot::after{animation:mpr-hlring 1.8s ease-out .1s infinite}
 @keyframes mpr-hlring{0%{transform:scale(.3);opacity:.9}100%{transform:scale(1.5);opacity:0}}
