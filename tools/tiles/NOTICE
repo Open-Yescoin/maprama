@@ -1,0 +1,147 @@
+Maprama
+Copyright 2026 The Maprama Authors
+
+This product is licensed under the Apache License, Version 2.0.
+See the LICENSE file for the full license text.
+
+------------------------------------------------------------------------------
+Third-party notices
+------------------------------------------------------------------------------
+
+MapLibre Native
+  The native rendering engine (v2, packages/engine-native) renders with the
+  official prebuilt MapLibre Native SDKs (https://github.com/maplibre/maplibre-native),
+  which apps link as dependencies. packages/engine-native/android/src/main/cpp/
+  vendor/maplibre contains unmodified copies of three MapLibre Native headers
+  (include/mln/style/layers/custom_layer_host.hpp, custom_layer_init_parameters.hpp,
+  custom_layer_render_parameters.hpp, tag android-v13.6.1) under this license:
+
+  BSD 2-Clause License
+
+  Copyright (c) 2021 MapLibre contributors
+  Copyright (c) 2018-2021 MapTiler.com
+  Copyright (c) 2014-2020 Mapbox
+
+  Redistribution and use in source and binary forms, with or without
+  modification, are permitted provided that the following conditions are
+  met:
+
+  * Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+  * Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in
+    the documentation and/or other materials provided with the
+    distribution.
+
+  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+  IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+  THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+  PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+  CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+  EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+  PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+  PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+  LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+  NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+cgltf
+  The native rendering engine (v2, packages/engine-native) loads glTF 2.0 / GLB
+  models with cgltf (https://github.com/jkuhlmann/cgltf). packages/engine-native/
+  cpp/vendor/cgltf contains an unmodified copy of cgltf.h from tag v1.15 under
+  this license:
+
+  MIT License
+
+  Copyright (c) 2018-2021 Johannes Kuhlmann
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+OpenStreetMap
+  Map data is built from OpenStreetMap.
+  (c) OpenStreetMap contributors (https://www.openstreetmap.org/copyright).
+  OpenStreetMap data is available under the Open Database License (ODbL) 1.0
+  (https://opendatacommons.org/licenses/odbl/1-0/). Derived databases and
+  produced works must carry this attribution. The sample world
+  tools/osm/samples/seongsu.world.json is a derived database of OpenStreetMap
+  data and is licensed under ODbL 1.0, not Apache-2.0.
+
+토지이음 (도시계획)시설정보 — 국토교통부
+  The optional `kr-parks` tile source (tools/tiles, `maprama-tiles build
+  --kr-parks`) builds the parks layer from 토지이음 (도시계획)시설정보 layer
+  UQ153, published by 국토교통부 (https://www.eum.go.kr/) under
+  공공누리 제1유형 (출처표시) — free use including commercial use and
+  modification, on condition that the source is stated.
+  Archives built with that option carry the attribution line
+  "공원: 토지이음 (도시계획)시설정보 — 국토교통부 (공공누리 제1유형)" in their
+  metadata, and every tile that received a polygon from it stores that line's
+  index. The default build does not use this source.
+  tools/tiles/test/fixtures/kr-parks/ holds six records (34 KB) cut unmodified
+  out of the 2026-08 Seoul issue of that dataset, as a test fixture. It is
+   토지이음 data under 공공누리 제1유형, not Apache-2.0.
+
+Additional data sources (for example Korean public building data) will be
+listed here with their licenses and attribution requirements as they are added.
+
+------------------------------------------------------------------------------
+Third-party libraries
+------------------------------------------------------------------------------
+
+The following open source libraries are used by packages in this repository.
+Each is distributed under its own license; the license texts ship with the
+packages (node_modules/<package>, license file or package.json `license`)
+and are available at the URLs below.
+
+three.js (three) - MIT License
+  Copyright (c) 2010-2026 three.js authors. https://github.com/mrdoob/three.js
+  Bundled into @maprama/engine-web (including the GLTFLoader, DRACOLoader and
+  meshopt decoder example modules).
+
+glTF Transform (@gltf-transform/core, /extensions, /functions) - MIT License
+  Copyright (c) 2024 Don McCurdy. https://github.com/donmccurdy/glTF-Transform
+  Used by tools/assets, and by packages/engine-web to generate its test fixture.
+
+meshoptimizer (meshoptimizer) - MIT License
+  Copyright (c) 2016-2026 Arseny Kapoulkine. https://github.com/zeux/meshoptimizer
+  Used by tools/assets.
+
+Draco (draco3dgltf) - Apache License 2.0
+  https://github.com/google/draco
+  Used by tools/assets. @maprama/engine-web loads the Draco decoder at runtime
+  from gstatic.com only for Draco-compressed models; it is not bundled.
+
+osm-pbf-parser-node (osm-pbf-parser-node) - MIT License
+  Copyright (c) 2019-2023 Boris Gontar.
+  https://github.com/borisgontar/osm-pbf-parser-node
+  Used by tools/osm to stream OpenStreetMap PBF extracts. It bundles the
+  OSM-binary .proto definitions (fileformat.proto, osmformat.proto), which the
+  OpenStreetMap project publishes for interoperability.
+
+pbf (pbf) - BSD 3-Clause License
+  Copyright (c) 2017, Mapbox. https://github.com/mapbox/pbf
+  Protocol-buffer codec used by osm-pbf-parser-node, and by tools/osm's
+  fixture-generation script.
+
+PMTiles (pmtiles) - BSD 3-Clause License
+  https://github.com/protomaps/PMTiles
+  Used by services/api, and bundled into @maprama/engine-web, which reads a
+  streamed tile world's archive (`WorldSource { kind: 'tiles' }`) with HTTP
+  range requests. It depends on fflate (MIT, https://github.com/101arrowz/fflate)
+  for gzip where DecompressionStream is unavailable; fflate is bundled with it.
+
+Hono (hono) - MIT License
+  Copyright (c) 2021 - present, Yusuke Wada and Hono contributors. https://github.com/honojs/hono
+  Used by services/api.
+
+VitePress (vitepress) - MIT License
+  Copyright (c) 2019-present, Yuxi (Evan) You. https://github.com/vuejs/vitepress
+  Used to build the documentation site (docs/); not part of any published package.
+
+Test fixture
+  packages/engine-web/dev/fixtures/box-character.glb is generated by
+  packages/engine-web/scripts/make-glb-fixture.mjs and dedicated to the public
+  domain (CC0 1.0).

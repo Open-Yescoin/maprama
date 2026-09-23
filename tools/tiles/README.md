@@ -163,3 +163,29 @@ spec agreeing, which is the only check worth anything for hand-written bytes.
   chunks by cost before packing would fix it, at the price of losing the archive
   order that the streaming assembly depends on — so it would need the shard
   writing and the assembly order decoupled first.
+
+## Licences and attribution
+
+This package ships no map data. It writes archives from whatever it is pointed
+at, and the output carries the terms of the input.
+
+- **OpenStreetMap** (`--pbf`): an archive built from an OSM extract is a
+  **derivative database** under the [Open Database License 1.0](https://opendatacommons.org/licenses/odbl/).
+  It must credit `© OpenStreetMap contributors`, and distributing it publicly
+  carries the ODbL's share-alike terms.
+- **Korean public data** (`--kr-parks`, `--kr-water`): 공공누리 제1유형 or CC BY —
+  attribution required, commercial use and derivative works permitted, **no
+  share-alike**. This is why a build sourced entirely from Korean public data
+  can be distributed without ODbL obligations.
+
+Attribution strings travel in the archive metadata and every tile references
+the sources that actually contributed to it, so a tile whose parks came from
+Korean public data is distinguishable from one whose parks came from OSM. The
+engine draws these strings; do not strip them.
+
+`design/korea-data-sources.md` in the repository records which dataset each
+layer can legally come from — **including the traps**, such as the same source
+being 공공누리 제1유형 down one path and 제4유형 (no commercial use) down another,
+and a 제4유형 dataset sitting next to the usable one under a near-identical name.
+
+This section is a practical summary, not legal advice.

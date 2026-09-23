@@ -1,7 +1,6 @@
 {
   "name": "@maprama/tiles",
-  "version": "0.1.0",
-  "private": true,
+  "version": "0.2.0",
   "description": "Builds an MTIL v1 / PMTiles archive for a whole country from Maprama WorldData sources.",
   "license": "Apache-2.0 AND ODbL-1.0",
   "author": "The Maprama Authors",
@@ -29,13 +28,32 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@maprama/osm": "^0.1.0",
-    "@maprama/protocol": "^0.1.0",
+    "@maprama/osm": "^0.2.0",
+    "@maprama/protocol": "^0.2.0",
     "pmtiles": "4.5.0"
   },
   "devDependencies": {
     "@types/node": "26.5.1",
     "typescript": "5.9.3",
     "vitest": "5.0.0"
+  },
+  "files": [
+    "dist",
+    "!dist/**/*.map",
+    "README.md",
+    "LICENSE",
+    "NOTICE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/CraftsManShip001/maprama.git",
+    "directory": "tools/osm"
+  },
+  "homepage": "https://github.com/CraftsManShip001/maprama/tree/main/tools/osm#readme",
+  "bugs": {
+    "url": "https://github.com/CraftsManShip001/maprama/issues"
   }
 }

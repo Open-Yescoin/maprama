@@ -7,7 +7,17 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const packages = ['packages/protocol', 'packages/engine-web', 'packages/react-native', 'tools/osm', 'tools/assets'];
+// Every workspace that is published to npm needs its own LICENSE and NOTICE in
+// the tarball. Keep this in step with the `private: true` flags: a package that
+// loses that flag has to be added here, or it ships without its licence.
+const packages = [
+  'packages/protocol',
+  'packages/engine-web',
+  'packages/react-native',
+  'tools/osm',
+  'tools/assets',
+  'tools/tiles',
+];
 const files = ['LICENSE', 'NOTICE'];
 const write = process.argv.includes('--write');
 

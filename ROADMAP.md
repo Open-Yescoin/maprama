@@ -4,17 +4,18 @@ This file is the hand-off summary: what works today, what is known to be missing
 milestone is meant to contain. `README.md` describes the library, `packages/engine-native/DESIGN.md` the
 native engine's design and parity matrix, `CHANGELOG.md` the released versions.
 
-_Last updated: 2026-09-17._
+_Last updated: 2026-09-23._
 
 ## Where the project stands
 
 | Part | State |
 | --- | --- |
-| `@maprama/protocol`, `@maprama/engine-web`, `@maprama/react-native`, `@maprama/osm`, `@maprama/assets` | Released as **v0.1.0** (GitHub release with tarballs). The web engine implements the whole protocol. |
+| `@maprama/protocol`, `@maprama/engine-web`, `@maprama/react-native`, `@maprama/osm`, `@maprama/assets`, `@maprama/tiles` | **0.2.0, unreleased.** v0.1.0 is the last tag (GitHub release with tarballs); 0.2.0 adds nationwide tile streaming and is waiting on `npm login`. `@maprama/tiles` is newly publishable — a customer that cannot build its own archive is tied to ours, which is half a library. |
 | `@maprama/engine-native` (v2 engine) | **Beta candidate, private, not published.** M1–M4 done on iOS and Android on the official MapLibre SDKs. |
 | `services/api` | Private Cloudflare Workers service; no hardening pass yet. |
 | Docs | <https://craftsmanship001.github.io/maprama/> (Korean), built from `docs/` and deployed by CI. |
-| npm | **Not published.** The packages are ready; publishing needs `npm login` by the maintainer. |
+| npm | **Not published.** All six packages carry LICENSE + NOTICE and pack cleanly (`npm pack` verified); publishing needs `npm login` by the maintainer. |
+| Nationwide archive | Built and verified (126.9 MiB). Decision taken: **we host it, on a public CDN with no authentication** — the data is OSM and Korean public data, both freely usable, so locking the file costs caching and buys nothing. Metering belongs on SDK usage, not on tiles. |
 
 ### Native engine milestones (all merged to `main`, CI green)
 
@@ -89,10 +90,22 @@ _Last updated: 2026-09-17._
 
 ## In progress
 
-`feat/tile-streaming` (unmerged): streamed tile worlds in engine-web, the MTIL v1 reader in
-`@maprama/protocol` and in the C++ core, and the `docs/guide/tile-worlds.md` guide. See the limitation
-above for what is left. The native engine has no capability gap left against the parity matrix; what remains
-are the visual deviations and limitations listed above, real-device measurements, and the M5 work below.
+Nothing is in flight; tile streaming is merged (see the limitation above for what is left in it).
+
+Waiting on the maintainer, not on code:
+
+- **`npm login`** — 0.2.0 is packed and verified but cannot be published without it.
+- **Water data** — the V-World download (`dsId=30207` / `30248` / `30256`) needs one manual login. The
+  converter and the `--kr-water` routing are already written and will refuse rather than guess if the
+  shapefiles turn out to hold polylines. Until then the nationwide archive keeps OSM water, and with it
+  ODbL share-alike.
+- **상가(상권)정보 API key** — applied for; once it arrives, POI coordinate quality gets measured the same
+  way OSM's was (26.1 % of POIs unattached to any building across seven areas, 81–87 % in small towns)
+  before anything is swapped.
+- **A real device** — every performance figure in this file is simulator or headless software GL.
+
+The native engine has no capability gap left against the parity matrix; what remains are the visual
+deviations and limitations listed above, real-device measurements, and the M5 work below.
 
 ## Next milestone — M5: app-integration API
 
