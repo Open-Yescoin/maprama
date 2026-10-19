@@ -39,9 +39,11 @@ import {
   checkGeofenceSpec,
   checkLocationFix,
   checkMapUiSpec,
+  checkModelSource,
   checkMarkerSpec,
   LOCATION_SOURCE_KINDS,
   MARKER_ANCHORS,
+  MARKER_ANCHOR_HEIGHTS,
   TRAVEL_MODES,
   type BuildingStyle,
   type CameraSpec,
@@ -52,7 +54,10 @@ import {
   type LocationSourceKind,
   type MapUiSpec,
   type MarkerAnchor,
+  type MarkerAnchorHeight,
+  type MarkerSnapToBuilding,
   type MarkerSpec,
+  type ModelSource,
   type TravelMode,
 } from './entities.js';
 import {
@@ -274,6 +279,23 @@ export interface SetBuildingStyleCommand {
   style: BuildingStyle | null;
 }
 
+/** Persistent authored buildings; independent from collectible drop layers. */
+export interface StaticBuildingSpec {
+  id: string;
+  coordinate: LngLat;
+  model: ModelSource;
+  rotationDeg: number;
+  scale: number;
+  footprintMeters: { width: number; depth: number };
+  heightMeters?: number;
+}
+
+export interface SetStaticBuildingLayerCommand {
+  type: 'setStaticBuildingLayer';
+  layerId: string;
+  buildings: StaticBuildingSpec[];
+}
+
 /** An anchor for a host overlay view. */
 export interface OverlayAnchor {
   id: string;
@@ -284,6 +306,119 @@ export interface OverlayAnchor {
 export interface SetOverlayAnchorsCommand {
   type: 'setOverlayAnchors';
   anchors: OverlayAnchor[];
+}
+
+/**
+ * One avatar rendered as a **3D object in the world model** rather than as a
+ * DOM element in the overlay layer.
+ *
+ * The texture is either `uri` (a character portrait) or, when that is absent,
+ * rasterised from `fallbackLabel` — the first letter of a name — so a resident
+ * without a picture still gets an avatar.
+ */
+export interface WorldAvatarFaceSpec {
+  /** Portrait URI for one face in a composed stack. */
+  uri?: string;
+  /** Fallback label when the portrait cannot be loaded. */
+  fallbackLabel?: string;
+  /** Accent colour for this face's inner rim. */
+  color?: string;
+}
+
+export interface WorldAvatarStackSpec {
+  /** Faces to draw in a compact facepile. */
+  faces: WorldAvatarFaceSpec[];
+  /** Count badge text, for example "+3". */
+  overflowLabel?: string;
+  /** Selected stacks get a stronger rim and glow in the generated texture. */
+  selected?: boolean;
+}
+
+export interface WorldAvatarSpec {
+  /** Stable id, unique within its layer. */
+  id: string;
+  /** World position the avatar stands on. */
+  coordinate: LngLat;
+  /** Portrait URI. When absent, `fallbackLabel` is rasterised instead. */
+  uri?: string;
+  /** Avatar width in world units. Height matches it (avatars are round). */
+  widthMeters?: number;
+  /** Optional independent height for non-round composed textures. Defaults to `widthMeters`. */
+  heightMeters?: number;
+  /** Which point of the avatar sits on the coordinate. Default `'bottom'`. */
+  anchor?: MarkerAnchor;
+  /** How high above the coordinate it sits; `'roof'` snaps to the building top. Default `'roof'`. */
+  anchorHeight?: MarkerAnchorHeight;
+  /** Move the avatar onto the nearest building within this radius. Default off. */
+  snapToBuilding?: boolean | MarkerSnapToBuilding;
+  /** Ring / accent colour as a CSS hex string. */
+  color?: string;
+  /** Letter drawn when `uri` is absent. */
+  fallbackLabel?: string;
+  /**
+   * Extra height above the resolved anchor, in metres. The anchor already
+   * accounts for the building's base and height; this is a deliberate lift, for
+   * example to keep a portrait clear of roof furniture. Default 0.
+   */
+  elevationMeters?: number;
+  /**
+   * Multiplier on the texture's brightness. Sprite materials are unlit, so an
+   * avatar is not lit by the scene; this keeps it from reading too dark against
+   * a night theme. Default 1.
+   */
+  brightness?: number;
+  /**
+   * Draw a downward pointer at the anchor so the avatar visibly belongs to the
+   * coordinate instead of floating over it. Default false.
+   */
+  pointer?: boolean;
+  /**
+   * Vertical bob, in metres, applied on top of `elevationMeters`. Default off.
+   *
+   * Avatars are canvas sprites and therefore sit under the DOM `mpr-haze` /
+   * vignette layers (which are above the canvas), so in practice a host that
+   * wants them to read as markers also needs `brightness` — see the note there.
+   */
+  float?: { amplitudeMeters: number; periodMs?: number };
+  /**
+   * Entrance animation: avatars pop in with an overshoot, staggered by their
+   * order in the layer. `delayMs` shifts the whole layer's start.
+   */
+  entrance?: { delayMs?: number; staggerMs?: number; durationMs?: number };
+  /**
+   * Continuous attention pulse: an expanding accent halo behind the avatar.
+   * Off by default; a host turns it on for the "look here" case.
+   */
+  pulse?: { periodMs?: number; scale?: number };
+  /**
+   * Subtle scale animation applied to the avatar itself, without creating an
+   * extra halo or glow layer.
+   */
+  breathe?: { periodMs?: number; scale?: number };
+  /** Composed facepile texture. When present, `uri` is ignored for the main image. */
+  stack?: WorldAvatarStackSpec;
+  /** Draw order; higher draws on top. Default 0. */
+  z?: number;
+}
+
+/**
+ * Creates or replaces one layer of world-model avatars, keyed by `layerId`.
+ *
+ * The 3D counterpart of a `setMarkerLayer` whose icon is a portrait: avatars
+ * scale with zoom, turn with the camera and are occluded by the world like any
+ * other object, instead of being drawn as DOM in `mpr-overlay`. Entries are
+ * matched by `id`.
+ */
+export interface SetWorldAvatarsCommand {
+  type: 'setWorldAvatars';
+  layerId: string;
+  avatars: WorldAvatarSpec[];
+}
+
+/** Removes a world-avatar layer. */
+export interface RemoveWorldAvatarsCommand {
+  type: 'removeWorldAvatars';
+  layerId: string;
 }
 
 /**
@@ -542,13 +677,16 @@ export type EngineCommand =
   | RemoveMarkerLayerCommand
   | SetGeofencesCommand
   | SetBuildingStyleCommand
+  | SetStaticBuildingLayerCommand
   | SetOverlayAnchorsCommand
   | SubscribeCommand
   | UnsubscribeCommand
   | RequestCommand
   | SetInfoCardCommand
   | RemoveInfoCardCommand
-  | SetViewCommand;
+  | SetViewCommand
+  | SetWorldAvatarsCommand
+  | RemoveWorldAvatarsCommand;
 
 /** Command `type` tag. */
 export type EngineCommandType = EngineCommand['type'];
@@ -1066,6 +1204,39 @@ const commandChecks: { [K in EngineCommandType]: Check } = {
   removeInfoCard: object({ id }),
   // view.ts, appended after the info-card commands.
   setView: object({ view: checkViewMode }, { animate: anyOf(boolean, object({ durationMs: nonNegativeNumber })) }),
+  // World-model avatars, appended after `setView`.
+  setWorldAvatars: object({
+    layerId: id,
+    avatars: array(
+      object(
+        { id, coordinate: checkLngLat },
+        {
+          uri: nonEmptyString,
+          widthMeters: positiveNumber,
+          heightMeters: positiveNumber,
+          anchor: oneOf(MARKER_ANCHORS),
+          anchorHeight: anyOf(oneOf(MARKER_ANCHOR_HEIGHTS), number),
+          snapToBuilding: anyOf(boolean, object({}, { maxDistanceMeters: positiveNumber })),
+          color: nonEmptyString,
+          fallbackLabel: string,
+          elevationMeters: number,
+          brightness: number,
+          pointer: boolean,
+          float: object({ amplitudeMeters: nonNegativeNumber }, { periodMs: positiveNumber }),
+          entrance: object({}, { delayMs: nonNegativeNumber, staggerMs: nonNegativeNumber, durationMs: positiveNumber }),
+          pulse: object({}, { periodMs: positiveNumber, scale: positiveNumber }),
+          breathe: object({}, { periodMs: positiveNumber, scale: positiveNumber }),
+          stack: object(
+            { faces: array(object({}, { uri: nonEmptyString, fallbackLabel: string, color: nonEmptyString }), { min: 1 }) },
+            { overflowLabel: string, selected: boolean },
+          ),
+          z: number,
+        },
+      ),
+    ),
+  }),
+  removeWorldAvatars: object({ layerId: id }),
+  setStaticBuildingLayer: object({ layerId: id, buildings: array(object({ id, coordinate: checkLngLat, model: checkModelSource, rotationDeg: number, scale: positiveNumber, footprintMeters: object({ width: positiveNumber, depth: positiveNumber }) }, { heightMeters: positiveNumber })) }),
 };
 
 const cameraState: Check = object({

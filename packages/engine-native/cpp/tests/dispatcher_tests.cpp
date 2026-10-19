@@ -176,9 +176,9 @@ MAPRAMA_TEST(engine_skeleton_behaviour) {
       // M5: handled by the session's `MarkerSystem` (no "not implemented" warning). Nothing is emitted —
       // marker cards need a map view, and there is none here.
       ctx.check(newEvents == 0 && !notImplemented, "[" + name + "] handled by the marker system");
-    } else if (type == "setInfoCard" || type == "removeInfoCard" || type == "setView") {
-      // Info cards are implemented by engine-web (v1); the native core decodes and validates them, then
-      // warn-logs and ignores them until the native views land (DESIGN.md §5.1, M5).
+    } else if (type == "setInfoCard" || type == "removeInfoCard" || type == "setView" ||
+               type == "setWorldAvatars" || type == "removeWorldAvatars" || type == "setStaticBuildingLayer") {
+      // Web-only features are decoded and validated, then warn-logged and ignored until native parity lands.
       ctx.check(newEvents == 0 && notImplemented, "[" + name + "] warn-logged as an ignored command");
     } else {
       ctx.check(false, "[" + name + "] command type not covered by the dispatcher test");

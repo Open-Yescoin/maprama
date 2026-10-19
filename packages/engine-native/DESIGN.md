@@ -359,7 +359,7 @@ Error strings match the TS codec exactly, except the V8-specific text after `$: 
 Statuses: **Current (M1)** is what the core does today [V: `cpp/src/Dispatcher.cpp`, `cpp/src/MapSession.cpp`,
 `cpp/tests/map_session_tests.cpp`]. **Mn** is the milestone that implements the command fully (§11).
 
-### 5.1 Commands (host → engine) — all 24 `ENGINE_COMMAND_TYPES`
+### 5.1 Commands (host → engine) — all 28 `ENGINE_COMMAND_TYPES`
 
 <!-- protocol-commands:start -->
 | Command | Kind | Core subsystem(s) | Behaviour | Current (M1) | Full in |
@@ -389,9 +389,12 @@ Statuses: **Current (M1)** is what the core does today [V: `cpp/src/Dispatcher.c
 | `setInfoCard` | fire-and-forget | info cards (not built yet; `engine-web` draws them as DOM cards in the label layer) | Creates or replaces **one** card, keyed by `card.id`: coordinate, `anchor` (`ground` / `roof` / `auto`), `heightMeters` and the structured `content` (title, subtitle, place icon, badges, rating, rows, actions). Several cards can be on screen; a card wins every collision and registers its own box as an exclusion for the markers and labels. The engine never opens a card by itself. | decoded and validated, then warn-logged and ignored (`Dispatcher::ignoreNotImplemented`) | **M5** (native info-card views) |
 | `removeInfoCard` | fire-and-forget | info cards | Removes the card with this id (unknown ids are ignored) | decoded and validated, then warn-logged and ignored | **M5** |
 | `setView` | fire-and-forget | view mode (not built yet; `engine-web` draws the flat view with `render/flat-buildings.ts` and `render/view-mode.ts`) | Switches the render view mode between `2.5d` (the tilted diorama) and `2d` (a flat map: filled footprints with an outline instead of extruded buildings, no shadow pass, no distance fog, no street clutter, anchors flattened to the ground, pitch pinned at 0 and locked against gestures). `animate` (default `true`) interpolates the building height and the pitch over `VIEW_TRANSITION_MS`; a second `setView` retargets from the current flatness. The engine never changes the mode by itself. | decoded and validated, then warn-logged and ignored (`Dispatcher::ignoreNotImplemented`) | **M5** (native flat view) |
+| `setWorldAvatars` | fire-and-forget | world-sized portrait sprites | Replaces one avatar layer; web engine resolves its roof anchors, textures and animation | decoded and validated, then reported as unsupported; native rendering is not implemented | later native parity |
+| `removeWorldAvatars` | fire-and-forget | world-sized portrait sprites | Removes one avatar layer | decoded and validated, then reported as unsupported | later native parity |
+| `setStaticBuildingLayer` | fire-and-forget | authored building layer | Replaces one layer of authored buildings, including model and footprint transforms | decoded and validated, then reported as unsupported; native world mutation and rendering are not implemented | later native parity |
 <!-- protocol-commands:end -->
 
-### 5.2 Events (engine → host) — all 20 `ENGINE_EVENT_TYPES`
+### 5.2 Events (engine → host) — all 21 `ENGINE_EVENT_TYPES`
 
 <!-- protocol-events:start -->
 | Event | Emitted by | Trigger | Delivery | Current (M1) | Full in |

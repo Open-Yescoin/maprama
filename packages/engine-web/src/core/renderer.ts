@@ -42,7 +42,9 @@ import {
 import type { RenderParams } from '../theme/params.js';
 import type { CameraController } from './camera.js';
 import { FrameScheduler } from './frame-scheduler.js';
-import { SHADOW_INERT_SOURCES, ShadowUpdatePolicy, shadowMapSizeFor } from './shadow-update.js';
+import { DEFAULT_FRAME_CAPTURE_LIMIT, FrameCapture, type CapturedFrame } from './frame-capture.js';
+import { SHADOW_INERT_SOURCES, ShadowUpdatePolicy, shadowMapSizeFor, type ShadowState } from './shadow-update.js';
+import { SilhouetteRegistry } from './silhouette-registry.js';
 
 /** Frame hook: `dt` seconds (clamped to 0.05), `t` total seconds. */
 export type FrameHook = (dt: number, t: number) => void;
@@ -59,9 +61,42 @@ export interface SilhouetteService {
   addOccluder(obj: Object3D): void;
   /** Puts an object on the silhouette layer only; draw it with {@link createMaterial}. */
   addSilhouette(obj: Object3D): void;
+  /**
+   * Releases a silhouette registered with {@link addSilhouette}. The two extra
+   * passes stay on while any other silhouette is registered; removing an object
+   * that was never added is a no-op.
+   */
+  removeSilhouette(obj: Object3D): void;
   /** Material that renders only where the object is hidden behind occluders. */
   createMaterial(color: number, opacity?: number): MeshBasicMaterial;
 }
+
+/** Point-in-time frame-budget counters (see {@link RenderCore.frameBudget}). */
+export interface FrameBudget {
+  /** Frames rendered since the last {@link RenderCore.resetFrameBudget}. */
+  frames: number;
+  /** Frames that redrew the shadow map. */
+  shadowRedraws: number;
+  /** Passes the last frame ran: 1, or 3 while the silhouette passes are on. */
+  passes: number;
+  /**
+   * Draw calls of the last frame. three resets `info.render.calls` inside every
+   * `render()` call, so this is the sum over the frame's passes.
+   */
+  drawCalls: number;
+  /** Draw calls accumulated since the last {@link RenderCore.resetFrameBudget}. */
+  drawCallsTotal: number;
+  /** Tags currently holding the loop awake. */
+  activeSources: string[];
+}
+
+/**
+ * One frame recorded by {@link RenderCore.startFrameCapture}. The shape lives in
+ * {@link FrameCapture}, which owns the buffer; it is re-exported here so the
+ * scene API and the app keep one import path.
+ */
+export type { CapturedFrame } from './frame-capture.js';
+export { DEFAULT_FRAME_CAPTURE_LIMIT } from './frame-capture.js';
 
 export class RenderCore {
   readonly renderer: WebGLRenderer;
@@ -72,7 +107,18 @@ export class RenderCore {
   readonly silhouette: SilhouetteService;
   readonly anisotropy: number;
   sunDir: [number, number, number] = [30, 30, 24];
+  /** Frames rendered over the engine's lifetime. Never reset (`SceneApi.frames`). */
   frames = 0;
+  /** Frames rendered since the last {@link resetFrameBudget}; the measurement window. */
+  windowFrames = 0;
+  /** Frames whose shadow map was redrawn (see {@link frameBudget}). */
+  shadowRedraws = 0;
+  /** Passes the last frame ran: 1, or 3 while the silhouette passes are on. */
+  passes = 0;
+  /** Draw calls of the last frame (see {@link frameBudget}). */
+  drawCalls = 0;
+  /** Draw calls accumulated since {@link resetFrameBudget}. */
+  drawCallsTotal = 0;
   private hooks = new Set<FrameHook>();
   private renderHooks = new Set<FrameHook>();
   private raf = 0;
@@ -80,10 +126,15 @@ export class RenderCore {
   private time = 0;
   private running = false;
   private contextLost = false;
+  private captureRedrawMark = 0;
+  private readonly capture = new FrameCapture();
   private readonly scheduler = new FrameScheduler();
   private readonly shadows = new ShadowUpdatePolicy();
+  private readonly silhouettes = new SilhouetteRegistry();
   private readonly canvas: HTMLCanvasElement;
   private readonly depthOnly = new MeshBasicMaterial({ colorWrite: false });
+  /** Reused per frame: {@link ShadowUpdatePolicy.next} does not retain the state it is given. */
+  private readonly shadowState: ShadowState = { enabled: false, x: 0, z: 0, dirX: 0, dirY: 0, dirZ: 0, extent: 0, far: 0, moving: false };
 
   constructor(canvas: HTMLCanvasElement, private readonly cam: CameraController) {
     this.renderer = new WebGLRenderer({ canvas, antialias: true });
@@ -116,19 +167,24 @@ export class RenderCore {
       },
       addSilhouette(obj) {
         obj.traverse((o) => o.layers.set(LAYER_SILHOUETTE));
-        self.hasSilhouettes = true;
+        // Reference counted per object: the extra passes come on with the first
+        // registered silhouette and off again when the last one is removed, so
+        // re-registering the same object changes nothing.
+        if (!self.silhouettes.add(obj)) return;
         // A new silhouette (and the first one, which turns the extra passes on) changes the picture.
         self.requestRender();
         self.requestShadowUpdate();
+      },
+      removeSilhouette(obj) {
+        if (!self.silhouettes.remove(obj)) return;
+        // The next frame is the first one that may skip the extra passes.
+        self.requestRender();
       },
       createMaterial(color, opacity = 0.9) {
         return new MeshBasicMaterial({ color, depthFunc: GreaterDepth, depthWrite: false, fog: false, transparent: true, opacity });
       },
     };
   }
-
-  /** Set by {@link SilhouetteService.addSilhouette}; the extra passes are skipped until something uses them. */
-  hasSilhouettes = false;
 
   applyTheme(p: RenderParams): void {
     const r = this.renderer;
@@ -192,6 +248,62 @@ export class RenderCore {
     return this.scheduler.tags;
   }
 
+  /**
+   * Frame-budget counters for diagnostics. Allocates a snapshot (and the source
+   * list), so read it from tooling — never from the frame path. `frames` is the
+   * current measurement window; {@link frames} itself stays the lifetime count.
+   */
+  frameBudget(): FrameBudget {
+    return {
+      frames: this.windowFrames,
+      shadowRedraws: this.shadowRedraws,
+      passes: this.passes,
+      drawCalls: this.drawCalls,
+      drawCallsTotal: this.drawCallsTotal,
+      activeSources: this.activeSources(),
+    };
+  }
+
+  /**
+   * Restarts the {@link frameBudget} measurement window. The lifetime
+   * {@link frames} counter is deliberately left alone: it backs
+   * `SceneApi.frames()`, and tooling resetting a window must not rewind it.
+   */
+  resetFrameBudget(): void {
+    this.windowFrames = 0;
+    this.shadowRedraws = 0;
+    this.passes = 0;
+    this.drawCalls = 0;
+    this.drawCallsTotal = 0;
+  }
+
+  /**
+   * Starts (or restarts) a bounded per-frame capture for offline attribution
+   * (plan item M1). Off by default, so {@link step} allocates nothing until
+   * tooling asks for it — a captured frame allocates one sample plus the source
+   * list, which is why it is not left on.
+   */
+  startFrameCapture(limit: number = DEFAULT_FRAME_CAPTURE_LIMIT): CapturedFrame[] {
+    const previous = this.capture.start(limit);
+    this.captureRedrawMark = this.shadowRedraws;
+    return previous;
+  }
+
+  /** Stops recording. Frames captured so far stay readable. */
+  stopFrameCapture(): void {
+    this.capture.stop();
+  }
+
+  /** Copies the captured frames, oldest first. Allocates. */
+  capturedFrames(): CapturedFrame[] {
+    return this.capture.frames();
+  }
+
+  /** True while this capture still has room for more frames. */
+  get capturing(): boolean {
+    return this.capture.capturing;
+  }
+
   /** True while a frame is queued or a source is held (i.e. the engine is not idle). */
   get busy(): boolean {
     return this.scheduler.busy;
@@ -215,12 +327,13 @@ export class RenderCore {
     const loop = (now: number): void => {
       if (!this.running) return;
       this.raf = requestAnimationFrame(loop);
-      const dt = Math.min(0.05, Math.max(0, (now - this.last) / 1000));
+      const frameMs = Math.max(0, now - this.last);
+      const dt = Math.min(0.05, frameMs / 1000);
       // `last` is refreshed even on a skipped frame, so `dt` never accumulates across an idle stretch.
       this.last = now;
       if (this.contextLost) return; // keep the pending request for the restore
       if (!this.scheduler.take()) return;
-      this.step(dt);
+      this.step(dt, frameMs);
     };
     this.raf = requestAnimationFrame(loop);
   }
@@ -243,8 +356,13 @@ export class RenderCore {
     this.requestShadowUpdate();
   };
 
-  /** Runs hooks, updates the camera / sun and renders one frame. */
-  step(dt: number): void {
+  /**
+   * Runs hooks, updates the camera / sun and renders one frame. `frameMs` is the
+   * unclamped interval between rAF ticks: `dt` clamps to 50ms to keep simulations
+   * stable, but a capture must see the real wall time or a stall would read as a
+   * perfect frame.
+   */
+  step(dt: number, frameMs: number = dt * 1000): void {
     this.time += dt;
     for (const h of [...this.hooks]) h(dt, this.time);
     this.cam.update(dt);
@@ -256,6 +374,22 @@ export class RenderCore {
     this.updateShadowMap();
     this.render();
     this.frames++;
+    this.windowFrames++;
+    this.captureFrame(frameMs);
+  }
+
+  /** Records one frame while a capture is armed. Allocates only while armed. */
+  private captureFrame(frameMs: number): void {
+    if (!this.capture.capturing) return;
+    const redrawn = this.shadowRedraws !== this.captureRedrawMark;
+    this.captureRedrawMark = this.shadowRedraws;
+    this.capture.record({
+      dt: frameMs,
+      shadowRedrawn: redrawn,
+      passes: this.passes,
+      drawCalls: this.drawCalls,
+      activeSources: this.activeSources(),
+    });
   }
 
   /**
@@ -264,18 +398,19 @@ export class RenderCore {
    * that is about to be drawn.
    */
   private updateShadowMap(): void {
-    const sc = this.sun.shadow.camera, t = this.sun.target.position, d = this.sunDir;
-    this.renderer.shadowMap.needsUpdate = this.shadows.next({
-      enabled: this.sun.castShadow,
-      x: t.x,
-      z: t.z,
-      dirX: d[0],
-      dirY: d[1],
-      dirZ: d[2],
-      extent: sc.right,
-      far: sc.far,
-      moving: this.scheduler.hasSourceExcept(SHADOW_INERT_SOURCES),
-    });
+    const sc = this.sun.shadow.camera, t = this.sun.target.position, d = this.sunDir, s = this.shadowState;
+    s.enabled = this.sun.castShadow;
+    s.x = t.x;
+    s.z = t.z;
+    s.dirX = d[0];
+    s.dirY = d[1];
+    s.dirZ = d[2];
+    s.extent = sc.right;
+    s.far = sc.far;
+    s.moving = this.scheduler.hasSourceExcept(SHADOW_INERT_SOURCES);
+    const need = this.shadows.next(s);
+    if (need) this.shadowRedraws++;
+    this.renderer.shadowMap.needsUpdate = need;
   }
 
   render(): void {
@@ -283,16 +418,25 @@ export class RenderCore {
     r.clear();
     camera.layers.set(LAYER_DEFAULT);
     r.render(this.scene, camera);
-    if (this.silhouette.enabled && this.hasSilhouettes) {
+    // three resets `info.render.calls` inside every `render()`, so the frame's
+    // draw calls are the sum over the passes that just ran.
+    let passes = 1, calls = r.info.render.calls;
+    if (this.silhouette.enabled && this.silhouettes.active) {
       r.clearDepth();
       camera.layers.set(LAYER_OCCLUDER);
       this.scene.overrideMaterial = this.depthOnly;
       r.render(this.scene, camera);
       this.scene.overrideMaterial = null;
+      calls += r.info.render.calls;
       camera.layers.set(LAYER_SILHOUETTE);
       r.render(this.scene, camera);
+      passes = 3;
+      calls += r.info.render.calls;
     }
     camera.layers.set(LAYER_DEFAULT);
+    this.passes = passes;
+    this.drawCalls = calls;
+    this.drawCallsTotal += calls;
   }
 
   dispose(): void {
@@ -301,6 +445,9 @@ export class RenderCore {
     this.canvas.removeEventListener('webglcontextrestored', this.onContextRestored);
     this.hooks.clear();
     this.renderHooks.clear();
+    // Drop silhouette registrations with the scene: a disposed core must not keep
+    // objects alive through the registry, and `enabled` is about to go with it.
+    this.silhouettes.clear();
     this.depthOnly.dispose();
     this.renderer.dispose();
   }

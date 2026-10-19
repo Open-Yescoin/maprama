@@ -33,12 +33,51 @@
  */
 
 /**
- * Active-source tags that provably cannot change the shadow map: `labels` only
- * animates DOM cards above the canvas, `camera:change` only keeps the loop
- * alive until a throttled event goes out. Every other tag — including unknown
- * ones — is treated as scene motion.
+ * Active-source tags that provably cannot change the shadow map.
+ *
+ * The shadow camera is compared independently by {@link ShadowUpdatePolicy}
+ * over `x`, `z`, `dirX`, `dirY`, `dirZ` and the frustum `extent` / `far`, and
+ * the sun is re-derived from the map camera target every frame, so each tag
+ * below is inert for a concrete reason:
+ *
+ * - `labels` / `infoCards` only animate DOM cards above the canvas;
+ * - `camera:change` only keeps the loop alive until a throttled event goes out;
+ * - `camera:idle` only emits that one throttled event after the tail delay;
+ * - `camera` / `zoomOut` move the **viewer**: zoom-out writes the shadow
+ *   camera's `extent` / `far` itself and a pan moves the sun target (`x` / `z`),
+ *   both of which `same()` already detects, while a pure rotation, pitch or
+ *   near zoom leaves the shadow map valid because no shadow caster moved.
+ *
+ * `view` (the 2D / 2.5D flatten transition) is deliberately **not** in this
+ * set, even though it also only moves the viewer: `engine.ts` feeds
+ * `zoomOut.scaleY * (1 - view.t)` to `BuildingRenderer.step` every frame, so
+ * the transition scales every building — a shadow caster — while leaving the
+ * shadow camera untouched. Treating it as inert would freeze the depth map and
+ * leave flattened-building shadows behind after a 2D → 2.5D switch.
+ *
+ * Avatar sprites never cast shadows. Building colour/glow animation uses
+ * `buildings`; geometry motion separately holds `building:shadow` (including
+ * the final bounce/height frame). Neither colour-only tag changes depth.
+ * Entity tags (characters, vehicles, drops, geofences, traffic, location,
+ * building:shadow) move shadow casters and must stay out of this set. Every
+ * other tag — including unknown ones — is treated as scene motion, so
+ * extensions are safe by default.
+ *
+ * Because `addActiveSource(tag)` is public, the names below are **reserved**:
+ * a new caller that animates a shadow caster must not borrow `camera` or
+ * `zoomOut` (or any other name here) for it, since inertness is matched by
+ * string. An unfamiliar tag is always the safe choice.
  */
-export const SHADOW_INERT_SOURCES: ReadonlySet<string> = new Set(['labels', 'camera:change']);
+export const SHADOW_INERT_SOURCES: ReadonlySet<string> = new Set([
+  'labels',
+  'infoCards',
+  'camera:change',
+  'camera:idle',
+  'camera',
+  'zoomOut',
+  'avatars',
+  'buildings',
+]);
 
 /** Everything about a frame that can invalidate the shadow map by itself. */
 export interface ShadowState {

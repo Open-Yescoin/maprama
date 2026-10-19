@@ -48,7 +48,7 @@ export class HoloLabels {
     return this.holos.some((h) => !h.on && h.root.style.display !== 'none');
   }
 
-  build(entries: readonly LabelEntry[]): void {
+  build(entries: readonly LabelEntry[], onPress?: (id: string) => void): void {
     this.clear();
     const doc = this.layer.ownerDocument;
     const el = <K extends keyof HTMLElementTagNameMap>(tag: K, cls: string): HTMLElementTagNameMap[K] => {
@@ -57,12 +57,17 @@ export class HoloLabels {
       return e;
     };
     for (const e of entries) {
-      const root = el('div', `mpr-hl mpr-hl-${e.kind}${e.approximate ? ' mpr-hl-approx' : ''}`);
+      const root = el('div', `mpr-hl mpr-hl-${e.kind}`);
       root.dataset.labelId = e.id;
       const line = el('i', 'mpr-hl-line'), dot = el('i', 'mpr-hl-dot'), panel = el('div', 'mpr-hl-panel'), card = el('div', 'mpr-hl-card');
       const ico = el('span', 'mpr-hl-ico'), txt = el('span', 'mpr-hl-txt'), b = doc.createElement('b'), sm = doc.createElement('small');
       txt.append(b, sm);
       card.append(ico, txt);
+      if (onPress) {
+        card.style.pointerEvents = 'auto';
+        card.style.cursor = 'pointer';
+        card.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); onPress(e.id); });
+      }
       panel.append(card);
       root.append(line, dot, panel);
       root.style.display = 'none';
@@ -95,15 +100,12 @@ export class HoloLabels {
     const anchors = new Map<string, { gx: number; gy: number; tx: number }>();
     for (const h of this.holos) {
       const e = h.entry, dT = Math.hypot(e.x - tx, e.z - tz);
-      const eligible = holoEligible(e.kind, dT, dist);
+      const eligible = holoEligible(e.kind, dT, dist) && (e.maxDistance === undefined || dist <= e.maxDistance);
       let onScreen = false, top = { x: 0, y: 0 };
       if (eligible) {
         this.applyContent(h, mode, entries);
-        // An approximate POI (no building under it) gets no lift: the card sits
-        // on its dot instead of floating on a beam. The beam is a claim about
-        // where the thing *is*, and for these the data does not support it.
-        const lift = e.approximate ? 0 : HOLO_HEIGHT[e.kind] * heightScale;
-        const g = cam.worldToScreen(e.x, groundY, e.z), t = cam.worldToScreen(e.x, groundY + lift, e.z);
+        const anchorY = e.anchorY === undefined ? groundY : groundY + (e.anchorY - groundY) * heightScale;
+        const g = cam.worldToScreen(e.x, anchorY, e.z), t = cam.worldToScreen(e.x, anchorY + (e.lift ?? HOLO_HEIGHT[e.kind]) * heightScale, e.z);
         onScreen = inFront(cam, e.x, e.z) && t.x >= X0 - 0.01 * W && t.x <= X0 + 1.01 * W && t.y >= Y0 + 0.01 * H && t.y <= Y0 + 0.99 * H;
         anchors.set(e.id, { gx: g.x, gy: g.y, tx: t.x });
         if (onScreen && !h.w) {
@@ -127,7 +129,6 @@ export class HoloLabels {
         const px = c.top.x, py = c.top.y, inset = Math.min(10, h.w / 2);
         const lx = Math.min(px + h.w / 2 - inset, Math.max(px - h.w / 2 + inset, a.tx));
         h.dot.style.transform = `translate(${g.x.toFixed(1)}px, ${g.y.toFixed(1)}px)`;
-        h.line.style.display = h.entry.approximate ? 'none' : '';
         h.line.style.transform = `translate(${g.x.toFixed(1)}px, ${g.y.toFixed(1)}px) rotate(${Math.atan2(py - g.y, lx - g.x).toFixed(3)}rad)`;
         h.line.style.width = `${Math.hypot(lx - g.x, py - g.y).toFixed(1)}px`;
         h.panel.style.transform = `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px) translate(-50%, calc(-100% - 2px))`;

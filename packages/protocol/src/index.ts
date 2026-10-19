@@ -247,6 +247,7 @@ export type {
   RemoveDropLayerCommand,
   RemoveInfoCardCommand,
   RemoveMarkerLayerCommand,
+  RemoveWorldAvatarsCommand,
   RequestCommand,
   RequestCommandOf,
   RequestMethod,
@@ -259,6 +260,8 @@ export type {
   RouteResult,
   ScreenPoint,
   SetBuildingStyleCommand,
+  SetStaticBuildingLayerCommand,
+  StaticBuildingSpec,
   SetCameraCommand,
   SetDropLayerCommand,
   SetGeofencesCommand,
@@ -271,6 +274,7 @@ export type {
   SetThemeCommand,
   SetUiCommand,
   SetViewCommand,
+  SetWorldAvatarsCommand,
   SnapToBuildingResult,
   SnapToRoadResult,
   SubscribeCommand,
@@ -284,6 +288,9 @@ export type {
   UnsubscribeCommand,
   UpsertCharactersCommand,
   ViewChangeEvent,
+  WorldAvatarFaceSpec,
+  WorldAvatarSpec,
+  WorldAvatarStackSpec,
 } from './messages.js';
 
 export { DEFAULT_VIEW_MODE, VIEW_MODES, VIEW_TRANSITION_MS } from './view.js';

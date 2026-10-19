@@ -14,13 +14,13 @@
     "ios",
     "android"
   ],
-  "homepage": "https://github.com/CraftsManShip001/maprama/tree/main/packages/react-native#readme",
+  "homepage": "https://github.com/Open-Yescoin/maprama/tree/main/packages/react-native#readme",
   "bugs": {
-    "url": "https://github.com/CraftsManShip001/maprama/issues"
+    "url": "https://github.com/Open-Yescoin/maprama/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CraftsManShip001/maprama.git",
+    "url": "git+https://github.com/Open-Yescoin/maprama.git",
     "directory": "packages/react-native"
   },
   "license": "Apache-2.0",

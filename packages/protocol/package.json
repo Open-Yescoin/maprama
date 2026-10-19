@@ -1,6 +1,6 @@
 {
   "name": "@maprama/protocol",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Shared contract for Maprama engines and hosts: types, message codec, geo projection and theme presets.",
   "keywords": [
     "maprama",
@@ -11,13 +11,13 @@
     "openstreetmap",
     "typescript"
   ],
-  "homepage": "https://github.com/CraftsManShip001/maprama/tree/main/packages/protocol#readme",
+  "homepage": "https://github.com/Open-Yescoin/maprama/tree/main/packages/protocol#readme",
   "bugs": {
-    "url": "https://github.com/CraftsManShip001/maprama/issues"
+    "url": "https://github.com/Open-Yescoin/maprama/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CraftsManShip001/maprama.git",
+    "url": "git+https://github.com/Open-Yescoin/maprama.git",
     "directory": "packages/protocol"
   },
   "license": "Apache-2.0",

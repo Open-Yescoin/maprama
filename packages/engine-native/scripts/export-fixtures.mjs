@@ -368,6 +368,21 @@ const commandSamples = {
   setView: { type: 'setView', view: '2d' },
   setView_animated: { type: 'setView', view: '2.5d', animate: { durationMs: 400 } },
   setView_instant: { type: 'setView', view: '2d', animate: false },
+  setWorldAvatars: {
+    type: 'setWorldAvatars', layerId: 'residents', avatars: [{
+      id: 'resident-1', coordinate: ll, uri: 'https://example.com/avatar.webp', widthMeters: 2.4, heightMeters: 2.6,
+      anchor: 'bottom', anchorHeight: 'roof', snapToBuilding: { maxDistanceMeters: 40 }, color: '#fc2a77',
+      fallbackLabel: 'A', elevationMeters: 0.2, brightness: 1, pointer: true,
+      float: { amplitudeMeters: 0.3, periodMs: 3200 }, entrance: { delayMs: 0, staggerMs: 90, durationMs: 520 },
+      pulse: { periodMs: 2400, scale: 1.5 }, breathe: { periodMs: 2600, scale: 1.05 },
+      stack: { faces: [{ uri: 'https://example.com/face.webp', fallbackLabel: 'A', color: '#18ddd9' }], overflowLabel: '+2', selected: true }, z: 10,
+    }],
+  },
+  removeWorldAvatars: { type: 'removeWorldAvatars', layerId: 'residents' },
+  setStaticBuildingLayer: { type: 'setStaticBuildingLayer', layerId: 'authored', buildings: [{
+    id: 'custom:building-1', coordinate: ll, model: { uri: 'https://example.com/building.glb', rotationDeg: 30, scale: 1.2, offsetMeters: { x: 1, z: -2 }, widthMeters: 12, depthMeters: 10, heightMeters: 18 },
+    rotationDeg: 20, scale: 1, footprintMeters: { width: 12, depth: 10 }, heightMeters: 18,
+  }] },
 };
 
 const eventSamples = {

@@ -21,6 +21,7 @@ type Gesture =
   | { type: 'two'; len: number; ang: number; midY: number; dist0: number; bearing0: number; pitch0: number };
 
 export class GestureController {
+  private enabled = true;
   private pointers = new Map<number, { x: number; y: number }>();
   private gesture: Gesture | null = null;
   private readonly off: (() => void)[] = [];
@@ -37,6 +38,7 @@ export class GestureController {
     on('pointercancel', (e) => this.end(e));
     on('wheel', (e) => {
       e.preventDefault();
+      if (!this.enabled) return;
       this.cam.zoomTo(this.cam.orbit.distance * (1 + e.deltaY * 0.0012));
     }, { passive: false });
   }
@@ -53,6 +55,7 @@ export class GestureController {
   }
 
   private down(e: PointerEvent): void {
+    if (!this.enabled) return;
     try { this.el.setPointerCapture(e.pointerId); } catch { /* synthetic events */ }
     const p = this.local(e);
     this.pointers.set(e.pointerId, p);
@@ -63,6 +66,7 @@ export class GestureController {
   }
 
   private move(e: PointerEvent): void {
+    if (!this.enabled) return;
     const g = this.gesture;
     if (!this.pointers.has(e.pointerId) || !g) return;
     const p = this.local(e);
@@ -92,6 +96,7 @@ export class GestureController {
   }
 
   private end(e: PointerEvent): void {
+    if (!this.enabled) return;
     if (!this.pointers.has(e.pointerId)) return;
     const g = this.gesture;
     const wasTap = !!g && g.type === 'maybe' && this.pointers.size === 1 && e.type === 'pointerup';
@@ -109,5 +114,10 @@ export class GestureController {
   dispose(): void {
     for (const f of this.off) f();
     this.off.length = 0;
+  }
+
+  setEnabled(enabled: boolean): void {
+    this.enabled = enabled;
+    if (!enabled) { this.pointers.clear(); this.gesture = null; }
   }
 }

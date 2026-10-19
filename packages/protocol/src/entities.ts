@@ -30,6 +30,14 @@ export type JsonValue = null | boolean | number | string | JsonValue[] | { [key:
 /** A 3D model reference: a glTF 2.0 / GLB file URI (http(s), file or bundled asset URI). */
 export interface ModelSource {
   uri: string;
+  /** Authoring transform, independent of physical building attributes. */
+  rotationDeg?: number;
+  scale?: number;
+  offsetMeters?: { x: number; z: number };
+  /** Optional visual bounds; the source world footprint remains authoritative. */
+  widthMeters?: number;
+  depthMeters?: number;
+  heightMeters?: number;
 }
 
 /** Conventional animation clip names. */
@@ -236,6 +244,14 @@ export interface BuildingStyle {
   massing?: Massing;
   /** Replace the extruded building with a custom glTF/GLB model. */
   replaceModel?: ModelSource;
+  /** Visual height of the native massing; does not imply a real floor count. */
+  heightScale?: number;
+  /** Visual width multiplier of the native massing; does not change source world geometry. */
+  widthScale?: number;
+  /** Visual depth multiplier of the native massing; does not change source world geometry. */
+  depthScale?: number;
+  /** Visual yaw of the native massing in degrees; its world footprint stays fixed. */
+  rotationDeg?: number;
   /** Free-form host state (e.g. `'captured'`), usable by engine-side style rules. */
   state?: string;
 }
@@ -381,7 +397,7 @@ export interface MapUiSpec {
 }
 
 /** @internal */
-export const checkModelSource: Check = object({ uri: nonEmptyString });
+export const checkModelSource: Check = object({ uri: nonEmptyString }, { rotationDeg: number, scale: positiveNumber, offsetMeters: object({ x: number, z: number }), widthMeters: positiveNumber, depthMeters: positiveNumber, heightMeters: positiveNumber });
 
 /** CSS hex color `#RGB`, `#RRGGBB` or `#RRGGBBAA`. */
 const cssHexColor: Check = (v, p) =>
@@ -460,6 +476,10 @@ export const checkBuildingStyle: Check = object(
     decorations: array(oneOf(BUILDING_DECORATIONS)),
     massing: oneOf(MASSING_MODES),
     replaceModel: checkModelSource,
+    heightScale: positiveNumber,
+    widthScale: positiveNumber,
+    depthScale: positiveNumber,
+    rotationDeg: number,
     state: string,
   },
 );

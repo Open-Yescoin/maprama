@@ -265,6 +265,8 @@ export class DropVisuals {
   private themed = new Map<string, Material>();
   private fxMats = new Map<string, Material>();
   private textures = new Map<string, Texture>();
+  /** Reused per-frame list of item keys whose collect pop finished (see {@link step}). */
+  private readonly removals: string[] = [];
   private audio: AudioContext | null = null;
   private readonly unlockAudio = (): void => {
     try {
@@ -369,7 +371,11 @@ export class DropVisuals {
 
   step(dt: number, t: number): void {
     const rm = this.scene.reduceMotion;
-    for (const it of [...this.items.values()]) {
+    // Collect-then-delete: the loop still sees every item that was live when the frame started
+    // (what the old snapshot did), but `removeImmediate` never mutates `items` mid-iteration.
+    const removals = this.removals;
+    removals.length = 0;
+    for (const it of this.items.values()) {
       const g = it.g;
       if (it.state === 'appear' || it.state === 'idle') {
         it.t += dt;
@@ -387,10 +393,12 @@ export class DropVisuals {
           const appear = Math.min(1, it.t / 0.5);
           it.beam.scale.set(1, Math.max(0.001, appear * (it.drop.spec.rarity === 'legendary' ? 1.5 : 1)), 1);
           it.ring.scale.setScalar(0.8 + (rm ? 0 : Math.sin(t * 3 + it.phase) * 0.12));
-          it.sprites.forEach((s, k) => {
+          const sprites = it.sprites;
+          for (let k = 0; k < sprites.length; k++) {
+            const s = sprites[k]!;
             const a = t * 1.1 + it.phase + k * 2.094;
             s.position.set(g.position.x + Math.cos(a) * 0.62, g.position.y + 0.35 + Math.sin(t * 2 + k) * 0.25, g.position.z + Math.sin(a) * 0.62);
-          });
+          }
         }
       } else {
         it.t += dt;
@@ -400,9 +408,10 @@ export class DropVisuals {
         g.scale.setScalar(k < 0.4 ? 1 + k * 1.5 : Math.max(0.001, (1.6 * (1 - k)) / 0.6));
         if (it.beam) it.beam.scale.y = Math.max(0.001, 1 - k);
         for (const s of it.sprites) s.position.y += dt * 3;
-        if (k >= 1 || rm) this.removeImmediate(it.key);
+        if (k >= 1 || rm) removals.push(it.key);
       }
     }
+    for (const key of removals) this.removeImmediate(key);
   }
 
   onThemeChange(): void {

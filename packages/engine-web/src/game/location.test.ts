@@ -84,3 +84,19 @@ describe('road matching and demo loop', () => {
     for (const p of loop) expect(Math.min(Math.abs(p.z), Math.abs(p.x))).toBeLessThan(1e-6);
   });
 });
+
+describe('SimulatedWalker', () => {
+  it('writes the ground truth in place instead of allocating a new point every step', () => {
+    const walker = new SimulatedWalker([{ x: 0, z: 0 }, { x: 10, z: 0 }, { x: 10, z: 10 }], mulberry32(7));
+    const truth = walker.truth;
+    walker.step(0.5);
+    // Same object: only x/z change, so a reader that held it never sees a stale value.
+    expect(walker.truth).toBe(truth);
+    expect(walker.truth.x).toBeGreaterThan(0);
+    expect(walker.truth.z).toBe(0);
+    walker.step(3);
+    expect(walker.truth).toBe(truth);
+    expect(walker.truth.x).toBeCloseTo(10, 5);
+    expect(walker.truth.z).toBeGreaterThan(0);
+  });
+});

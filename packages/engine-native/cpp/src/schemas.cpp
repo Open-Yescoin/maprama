@@ -175,7 +175,13 @@ struct Schemas {
                 {"dismissible", boolean}});
 
     // entities.ts
-    const Check modelSource = object({{"uri", nonEmptyString}});
+    const Check modelSource = object({{"uri", nonEmptyString}},
+                                     {{"rotationDeg", number},
+                                      {"scale", positiveNumber},
+                                      {"offsetMeters", object({{"x", number}, {"z", number}})},
+                                      {"widthMeters", positiveNumber},
+                                      {"depthMeters", positiveNumber},
+                                      {"heightMeters", positiveNumber}});
     Fields animationFields;
     for (std::string_view name : EnumNames<AnimationName>::values) animationFields.emplace_back(std::string(name), str);
     const Check animationMap = object({}, animationFields);
@@ -217,6 +223,10 @@ struct Schemas {
                                                {"decorations", array(oneOfEnum<BuildingDecoration>())},
                                                {"massing", oneOfEnum<Massing>()},
                                                {"replaceModel", modelSource},
+                                               {"heightScale", positiveNumber},
+                                               {"widthScale", positiveNumber},
+                                               {"depthScale", positiveNumber},
+                                               {"rotationDeg", number},
                                                {"state", str},
                                            });
     const Check locationFix =
@@ -344,6 +354,32 @@ struct Schemas {
         // view.ts, appended after the info-card commands.
         {"setView", object({{"view", viewMode}},
                            {{"animate", anyOf({boolean, object({{"durationMs", nonNeg}})})}})},
+        {"setWorldAvatars", object({{"layerId", id},
+                                     {"avatars", array(object({{"id", id}, {"coordinate", lngLat}},
+                                                              {{"uri", nonEmptyString},
+                                                               {"widthMeters", positiveNumber},
+                                                               {"heightMeters", positiveNumber},
+                                                               {"anchor", oneOf({"bottom", "center", "top"})},
+                                                               {"anchorHeight", anyOf({oneOf({"ground", "roof"}), number})},
+                                                               {"snapToBuilding", anyOf({boolean, object({}, {{"maxDistanceMeters", positiveNumber}})})},
+                                                               {"color", nonEmptyString},
+                                                               {"fallbackLabel", str},
+                                                               {"elevationMeters", number},
+                                                               {"brightness", number},
+                                                               {"pointer", boolean},
+                                                               {"float", object({{"amplitudeMeters", nonNeg}}, {{"periodMs", positiveNumber}})},
+                                                               {"entrance", object({}, {{"delayMs", nonNeg}, {"staggerMs", nonNeg}, {"durationMs", positiveNumber}})},
+                                                               {"pulse", object({}, {{"periodMs", positiveNumber}, {"scale", positiveNumber}})},
+                                                               {"breathe", object({}, {{"periodMs", positiveNumber}, {"scale", positiveNumber}})},
+                                                               {"stack", object({{"faces", array(object({}, {{"uri", nonEmptyString}, {"fallbackLabel", str}, {"color", nonEmptyString}}), 1)}},
+                                                                                {{"overflowLabel", str}, {"selected", boolean}})},
+                                                               {"z", number}}))}})},
+        {"removeWorldAvatars", object({{"layerId", id}})},
+        {"setStaticBuildingLayer", object({{"layerId", id},
+                                            {"buildings", array(object({{"id", id}, {"coordinate", lngLat}, {"model", modelSource},
+                                                                         {"rotationDeg", number}, {"scale", positiveNumber},
+                                                                         {"footprintMeters", object({{"width", positiveNumber}, {"depth", positiveNumber}})}},
+                                                                        {{"heightMeters", positiveNumber}}))}})},
     };
     engineCommand = discriminated("type", std::move(commands));
 

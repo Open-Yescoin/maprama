@@ -1,5 +1,6 @@
 import { decodeTile, type MtilTile } from '@maprama/protocol';
 import { describe, expect, it } from 'vitest';
+import { BoxGeometry, Mesh, MeshStandardMaterial } from 'three';
 import { encodeTile } from '../../../protocol/src/__fixtures__/tile.js';
 import { assembleTileWorld } from '../tiles/assemble.js';
 import { TileFrame, tileOf } from '../tiles/mercator.js';
@@ -167,3 +168,157 @@ function countMeshes(o: { traverse(cb: (child: unknown) => void): void }): numbe
   o.traverse(() => { n++; });
   return n;
 }
+
+describe('building shadow motion', () => {
+  it('keeps captured glow animated without redrawing depth, but tracks bounce and height changes', () => {
+    const r = new BuildingRenderer();
+    r.build(context(world(['a'])));
+    const id = r.ids()[0]!;
+    r.setStyle(id, { state: 'captured' });
+    for (let i = 0; i < 30; i++) r.step(1 / 60, i / 60, 1, false);
+    expect(r.animating).toBe(true);
+    expect(r.shadowAnimating).toBe(false);
+    r.bounce(id);
+    r.step(1 / 60, 1, 1, false);
+    expect(r.shadowAnimating).toBe(true);
+    for (let i = 0; i < 30; i++) r.step(1 / 60, 1 + i / 60, 1, false);
+    expect(r.shadowAnimating).toBe(false);
+    r.step(0, 2, 0.6, false);
+    expect(r.shadowAnimating).toBe(true);
+    r.step(0, 2, 0.6, false);
+    expect(r.shadowAnimating).toBe(false);
+    r.dispose();
+  });
+
+  it('still marks a rotating landmark as a moving shadow caster', () => {
+    const w = world(['a']);
+    w.buildings[0]!.landmark = true;
+    const r = new BuildingRenderer();
+    r.build(context(w));
+    r.step(1 / 60, 1, 1, false);
+    expect(r.animating).toBe(true);
+    expect(r.shadowAnimating).toBe(true);
+    r.step(1 / 60, 2, 1, true);
+    expect(r.shadowAnimating).toBe(false);
+    r.dispose();
+  });
+});
+
+describe('custom model distance', () => {
+  it('omits the native-lot black contact decal for imported models', async () => {
+    const w = world(['a']);
+    const renderer = new BuildingRenderer();
+    renderer.build(context(w));
+    const group = renderer.group.children.find(child => child.userData.buildingId === 'a')!;
+    expect(group.children.some(child => child.renderOrder === 1)).toBe(true);
+    renderer.loadModel = async () => new Mesh(new BoxGeometry(1, 2, 1), new MeshStandardMaterial());
+    renderer.setStyle('a', { replaceModel: { uri: 'https://example.com/building.glb' } });
+    expect(group.children.some(child => child.renderOrder === 1)).toBe(false);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(group.children.some(child => child.renderOrder === 1)).toBe(false);
+    renderer.dispose();
+  });
+
+  it('fits imported models to independent width, depth and height targets', async () => {
+    const w = world(['a']);
+    const renderer = new BuildingRenderer();
+    renderer.build(context(w));
+    renderer.loadModel = async () => new Mesh(new BoxGeometry(1, 2, 1), new MeshStandardMaterial());
+    renderer.setStyle('a', { replaceModel: { uri: 'https://example.com/building.glb', widthMeters: 12, depthMeters: 8, heightMeters: 18, scale: 2 } });
+    await new Promise(resolve => setTimeout(resolve, 0));
+    const group = renderer.group.children.find(child => child.userData.buildingId === 'a')!;
+    const model = group.children.at(-2)!;
+    expect(model.scale.x).toBeCloseTo(2);
+    expect(model.scale.z).toBeCloseTo(2);
+    expect(model.scale.y).toBeCloseTo(18 / w.unitMeters);
+    renderer.dispose();
+  });
+
+  it('keeps a loaded GLB visible while editing rotation, height and static footprint', async () => {
+    const w = world(['a']);
+    const ctx = context(w);
+    const renderer = new BuildingRenderer();
+    renderer.build(ctx);
+    let loads = 0;
+    renderer.loadModel = async () => { loads++; return new Mesh(new BoxGeometry(1, 2, 1), new MeshStandardMaterial()); };
+    const uri = 'https://example.com/building.glb';
+    renderer.setStyle('a', { replaceModel: { uri, heightMeters: 12 } });
+    await new Promise(resolve => setTimeout(resolve, 0));
+    const firstGroup = renderer.group.children.find(child => child.userData.buildingId === 'a')!;
+    const model = firstGroup.children.at(-2)! as Mesh;
+    let geometryDisposed = false;
+    model.geometry.addEventListener('dispose', () => { geometryDisposed = true; });
+    renderer.setStyle('a', { replaceModel: { uri, rotationDeg: 90, heightMeters: 24 } });
+    expect(firstGroup.children.at(-2)).toBe(model);
+    expect(model.rotation.y).toBeCloseTo(Math.PI / 2);
+    expect(model.scale.y).toBeCloseTo(24 / w.unitMeters / 2);
+    expect((firstGroup.children.at(-1) as Mesh).rotation.y).toBeCloseTo(Math.PI / 2);
+    expect(geometryDisposed).toBe(false);
+    const changedWorld = { ...w, buildings: [{ ...w.buildings[0]!, h: w.buildings[0]!.h * 1.5, rect: w.buildings[0]!.rect ? { ...w.buildings[0]!.rect, w: w.buildings[0]!.rect!.w * 1.2 } : null }] };
+    renderer.build({ ...ctx, world: changedWorld }, true);
+    const rebuilt = renderer.group.children.find(child => child.userData.buildingId === 'a')!;
+    expect(rebuilt.children.at(-2)).toBe(model);
+    expect(renderer.info('a')?.modelLoadState).toBe('loaded');
+    expect(loads).toBe(1);
+    expect(geometryDisposed).toBe(false);
+    renderer.dispose();
+  });
+
+  it('keeps the distance proxy visible when a far model is resized', async () => {
+    const w = world(['a']);
+    const renderer = new BuildingRenderer();
+    renderer.build(context(w));
+    renderer.loadModel = async () => new Mesh(new BoxGeometry(1, 2, 1), new MeshStandardMaterial());
+    const uri = 'https://example.com/building.glb';
+    renderer.setStyle('a', { replaceModel: { uri, heightMeters: 12 } });
+    await new Promise(resolve => setTimeout(resolve, 0));
+    renderer.step(0, 0, 1, false, 5_000);
+    renderer.setStyle('a', { replaceModel: { uri, heightMeters: 24, rotationDeg: 90 } });
+    const group = renderer.group.children.find(child => child.userData.buildingId === 'a')!;
+    expect(group.children.at(-2)!.visible).toBe(false);
+    expect(group.children.at(-1)!.visible).toBe(true);
+    renderer.dispose();
+  });
+
+  it('changes native visual width, depth, height and yaw without changing source geometry', () => {
+    const w = world(['a']);
+    const renderer = new BuildingRenderer();
+    renderer.build(context(w));
+    const group = renderer.group.children.find(child => child.userData.buildingId === 'a')!;
+    renderer.setStyle('a', { widthScale: 1.8, depthScale: 0.7, heightScale: 1.5, rotationDeg: 90 });
+    renderer.step(0, 0, 1, true, 150);
+    expect(group.scale.x).toBeCloseTo(1.8);
+    expect(group.scale.z).toBeCloseTo(0.7);
+    expect(group.scale.y).toBeCloseTo(1.5);
+    expect(group.rotation.y).toBeCloseTo(w.buildings[0]!.yaw + Math.PI / 2);
+    expect(w.buildings[0]!.footprint).toHaveLength(4);
+    renderer.setStyle('a', null);
+    expect(group.scale.x).toBe(1);
+    expect(group.scale.z).toBe(1);
+    renderer.dispose();
+  });
+
+  it('keeps the GLB at city overview distance and reserves the proxy for extreme distance', async () => {
+    const w = world(['a']);
+    const renderer = new BuildingRenderer();
+    renderer.build(context(w));
+    renderer.loadModel = async () => new Mesh(new BoxGeometry(1, 2, 1), new MeshStandardMaterial());
+    expect(renderer.setStyle('a', { replaceModel: { uri: 'https://example.com/building.glb' } })).toBe(true);
+    await new Promise(resolve => setTimeout(resolve, 0));
+    expect(renderer.info('a')?.modelLoadState).toBe('loaded');
+    const group = renderer.group.children.find(child => child.userData.buildingId === 'a')!;
+    const model = group.children.at(-2)!;
+    const proxy = group.children.at(-1)!;
+    renderer.step(0, 0, 1, false, 900);
+    expect(model.visible).toBe(true);
+    expect(proxy.visible).toBe(false);
+    renderer.step(0, 0, 1, false, 5_000);
+    expect(model.visible).toBe(false);
+    expect(proxy.visible).toBe(true);
+    expect(renderer.shadowAnimating).toBe(true);
+    renderer.step(0, 0, 1, false, 150);
+    expect(model.visible).toBe(true);
+    expect(proxy.visible).toBe(false);
+    renderer.dispose();
+  });
+});

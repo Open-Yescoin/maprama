@@ -30,14 +30,16 @@ import type {
   SetMarkerLayerCommand,
   SubscriptionTopic,
   TravelMode,
+  WorldAvatarSpec,
   LngLat,
 } from '@maprama/protocol';
 import { Group } from 'three';
 import { EngineError } from '../bridge/dispatcher.js';
 import { OverlayTracker, ThrottledTopic, type TrackedPosition } from '../bridge/subscriptions.js';
 import type { CameraController } from '../core/camera.js';
+import { WorldAvatars } from '../game/avatars.js';
 import { CharacterManager, headingFromYaw, realSpeedMps, type Character } from '../game/characters.js';
-import { DropCollector, DropVisuals } from '../game/drops.js';
+import { DropCollector, DropVisuals, type Collector } from '../game/drops.js';
 import { groundYFor } from '../game/follower.js';
 import { GeofenceTracker, GeofenceVisuals } from '../game/geofences.js';
 import { locationTrip, LocationService, type SmoothedFix } from '../game/location.js';
@@ -76,6 +78,8 @@ export class Features {
   readonly labels: LabelController;
   readonly markers: MarkerLayers;
   readonly infoCards: InfoCards;
+  /** Avatars drawn as 3D objects in the world model (see `setWorldAvatars`). */
+  readonly avatars: WorldAvatars;
   readonly puck = new LocationPuck();
   readonly positionTopic = new ThrottledTopic();
   readonly progressTopic = new ThrottledTopic();
@@ -86,6 +90,12 @@ export class Features {
   private readonly anchorPoints: { id: string; x: number; z: number }[] = [];
   /** Reused scratch batch for the overlay projection (see {@link projectOverlays}). */
   private readonly overlayBatch: TrackedPosition[] = [];
+  /** Reused scratch for the frame hook: the character list and its collector projection (see {@link frame}). */
+  private readonly frameChars: Character[] = [];
+  private readonly framePositions: Collector[] = [];
+  /** Reused scratch for the per-frame exclusion-box concatenations (see {@link project}). */
+  private readonly markerExclusions: Box[] = [];
+  private readonly labelReserved: Box[] = [];
   private content: Record<string, LabelContent> = {};
   private dropLayers = new Map<string, SetDropLayerCommand>();
   private markerBoxes: Box[] = [];
@@ -136,6 +146,9 @@ export class Features {
     );
     this.routes.name = 'routes';
     scene.groups.dynamic.add(this.traffic.group, this.fenceVisuals.group, this.routes, this.chars.group, this.dropVisuals.group, this.puck.group);
+    // Avatars resolve their anchor through the engine's shared lookup, so a
+    // roof-anchored avatar lands on the same building top a marker would.
+    this.avatars = new WorldAvatars(scene, () => this.anchorContext());
 
     this.offs.push(
       scene.onWorldLoad((w, rebase) => (rebase === undefined ? this.worldLoaded(w) : this.worldUpdated(w, rebase))),
@@ -166,6 +179,21 @@ export class Features {
   // ---------------------------------------------------------------------------
   // Commands
   // ---------------------------------------------------------------------------
+
+  /**
+   * Replaces one world-avatar layer. A portrait that fails to load is reported
+   * as a non-fatal `model_load_failed` error, matching how character and drop
+   * models fail.
+   */
+  setWorldAvatars(layerId: string, avatars: WorldAvatarSpec[]): Promise<void> {
+    return this.avatars.setLayer(layerId, avatars).catch((err) => {
+      this.scene.emit({ type: 'error', code: 'model_load_failed', message: `world avatars ${layerId}: ${errMessage(err)}`, fatal: false });
+    });
+  }
+
+  removeWorldAvatars(layerId: string): void {
+    this.avatars.removeLayer(layerId);
+  }
 
   labelsChanged(): void {
     const changed = this.labels.indexIfChanged();
@@ -360,6 +388,7 @@ export class Features {
     this.traffic.clear();
     this.markers.dispose();
     this.infoCards.dispose();
+    this.avatars.dispose();
     this.labels.dispose();
     this.puck.dispose();
     if (this.ui) {
@@ -407,6 +436,7 @@ export class Features {
     for (const cmd of this.dropLayers.values()) this.applyDropLayer(cmd, world);
     this.markers.reproject(newProj, this.anchorContext());
     this.infoCards.reproject();
+    this.avatars.refresh();
     this.applyGeofences(world);
     this.traffic.build(world, this.scene.materials, this.scene.textures().glow);
     this.lastPosition.clear();
@@ -436,6 +466,7 @@ export class Features {
     for (const cmd of this.dropLayers.values()) this.applyDropLayer(cmd, world);
     this.markers.reproject(newProj, this.anchorContext());
     this.infoCards.reproject();
+    this.avatars.refresh();
     this.applyGeofences(world);
     // The cars hold edge indices into the road graph. While the graph has the
     // same shape (a re-base re-assembles the identical tiles), pointing them at
@@ -536,8 +567,22 @@ export class Features {
     const proj = this.scene.projection();
     this.location.step(dt);
     this.chars.step(dt, t, world.unitMeters);
-    const list = [...this.chars.chars.values()];
-    const positions = list.map((c) => ({ id: c.id, x: c.x, z: c.z, isPlayer: !!c.spec.isPlayer }));
+    // Rebuilt in place every frame: `check` and `update` only read these within the call
+    // (neither retains the array or an entry), and the list is consumed below in this frame.
+    const chars = this.frameChars, positions = this.framePositions;
+    let n = 0;
+    for (const c of this.chars.chars.values()) {
+      chars[n] = c;
+      let p = positions[n];
+      if (!p) positions[n] = p = { id: '', x: 0, z: 0, isPlayer: false };
+      p.id = c.id;
+      p.x = c.x;
+      p.z = c.z;
+      p.isPlayer = !!c.spec.isPlayer;
+      n++;
+    }
+    chars.length = n;
+    positions.length = n;
     for (const { event, drop } of this.collector.check(positions, (p) => proj.toLngLat(p))) {
       this.dropVisuals.collect(drop);
       this.scene.emit(event);
@@ -557,7 +602,7 @@ export class Features {
 
     const now = performance.now();
     if (this.positionTopic.active) {
-      for (const c of list) {
+      for (const c of chars) {
         if (!this.positionTopic.wants(c.id)) continue;
         const heading = headingFromYaw(c.yaw), speed = realSpeedMps(c.speed, world.unitMeters);
         const key = `${c.x.toFixed(3)}|${c.z.toFixed(3)}|${heading.toFixed(1)}|${speed.toFixed(2)}`;
@@ -591,9 +636,26 @@ export class Features {
     // Info cards win every collision: they are placed first, never dropped, and their boxes
     // become exclusions for the markers and then for the labels.
     this.infoCardBoxes = this.infoCards.update(cam, this.scene.projection(), now, this.scene.anchorHeightScale());
-    const beforeMarkers = this.infoCardBoxes.length ? [...exclusions, ...this.infoCardBoxes] : exclusions;
+    // The concatenations are read synchronously by `markers.update` (which copies them into its
+    // own placement list) and by `labels.update` (which copies them into its own exclusions), so
+    // the scratch arrays can be reused; the no-info-card fast path stays a plain reference.
+    const box = this.markerExclusions;
+    let beforeMarkers: readonly Box[] = exclusions;
+    if (this.infoCardBoxes.length) {
+      box.length = 0;
+      for (const b of exclusions) box.push(b);
+      for (const b of this.infoCardBoxes) box.push(b);
+      beforeMarkers = box;
+    }
     this.markerBoxes = this.markers.update(cam, beforeMarkers, this.groundY(), (id) => this.scene.building(id)?.top.y ?? null);
-    const reserved = this.infoCardBoxes.length ? [...this.infoCardBoxes, ...this.markerBoxes] : this.markerBoxes;
+    const scratch = this.labelReserved;
+    let reserved: readonly Box[] = this.markerBoxes;
+    if (this.infoCardBoxes.length) {
+      scratch.length = 0;
+      for (const b of this.infoCardBoxes) scratch.push(b);
+      for (const b of this.markerBoxes) scratch.push(b);
+      reserved = scratch;
+    }
     this.labels.update(this.content, ui, this.groundY(), now, reserved);
     if (this.chars.chars.size) this.chars.updateTags(cam, this.scene.zoomOutFactor(), this.labels.domLayer(), exclusions);
     if (this.puck.group.visible) {

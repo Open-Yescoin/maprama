@@ -234,11 +234,16 @@ export function stepVehicles(set: VehicleSet, mode: TravelMode, speed: number, d
       if (v.p === 0 && v.dir < 0) { v.group.visible = false; v.dir = 0; }
       if (v.p === 1) v.dir = 0;
     }
-    v.group.scale.setScalar(Math.max(0.001, easeOutBack(v.p) * v.base));
+    // A settled vehicle (`dir === 0`) renders the same scale every frame; once
+    // the applied value already matches, the write is a no-op. A hidden settled
+    // vehicle is exactly that state: its pop-out set `visible` false and left
+    // `p` at 0, so it is skipped as well.
+    const target = Math.max(0.001, easeOutBack(v.p) * v.base);
+    if (v.dir !== 0 || v.group.scale.x !== target) v.group.scale.setScalar(target);
     if (mode === k) for (const w of v.wheels) w.rotation.x += (speed * dt) / v.wheelR;
   }
   if (set.plane.group.visible && set.plane.prop) set.plane.prop.rotation.z += dt * 35;
-  set.plane.group.rotation.x = planePitch;
+  if (set.plane.group.rotation.x !== planePitch) set.plane.group.rotation.x = planePitch;
   // Engine bob: full once the car moves at about real-world city speed on screen (≈1 unit/s at 8 m per unit).
   if (mode === 'car' && set.car.body) set.car.body.position.y = Math.sin(t * 18) * 0.012 * Math.min(1, speed / CAR_BOB_FULL_SPEED);
 }

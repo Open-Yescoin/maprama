@@ -1,5 +1,7 @@
 # Maprama
 
+This repository is maintained by [Open-Yescoin](https://github.com/Open-Yescoin/maprama) as an independent fork of [the original Maprama project](https://github.com/CraftsManShip001/maprama). The original project retains credit for its prior work.
+
 Maprama is a React Native library for 2.5D game-style maps: stylised city
 dioramas built from OpenStreetMap and public building data, with characters,
 multi-mode travel, collectible drops, holographic labels, geofences and

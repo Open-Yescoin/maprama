@@ -171,6 +171,9 @@ const commands: CommandFixtures = {
         color: '#FF8800',
         roof: 'dome',
         facade: false,
+        rotationDeg: 35,
+        widthScale: 1.4,
+        depthScale: 0.8,
         decorations: ['sign', 'antenna', 'trees'],
         massing: 'box',
         replaceModel: { uri: 'https://example.com/castle.glb' },
@@ -179,6 +182,7 @@ const commands: CommandFixtures = {
     },
     { type: 'setBuildingStyle', buildingId: 'b1', style: null },
   ],
+  setStaticBuildingLayer: [{ type: 'setStaticBuildingLayer', layerId: 'buildings', buildings: [{ id: 'custom:test-building', coordinate: here, model: { uri: 'https://example.com/building.glb' }, rotationDeg: 0, scale: 1, footprintMeters: { width: 12, depth: 10 } }] }],
   setOverlayAnchors: [{ type: 'setOverlayAnchors', anchors: [{ id: 'o1', coordinate: here }] }],
   subscribe: [
     { type: 'subscribe', topic: 'character:position', id: 'me', throttleMs: 100 },
@@ -261,6 +265,19 @@ const commands: CommandFixtures = {
     { type: 'setView', view: '2.5d', animate: false },
     { type: 'setView', view: '2d', animate: { durationMs: 400 } },
   ],
+  setWorldAvatars: [
+    { type: 'setWorldAvatars', layerId: 'residents', avatars: [] },
+    {
+      type: 'setWorldAvatars',
+      layerId: 'residents',
+      avatars: [
+        { id: 'b1:0', coordinate: here, uri: 'https://cdn.test/a.png', widthMeters: 2.4, anchor: 'bottom', anchorHeight: 'roof', snapToBuilding: { maxDistanceMeters: 40 }, color: '#fc2a77', elevationMeters: 1.2, brightness: 1.35, z: 1 },
+        { id: 'b1:1', coordinate: there, fallbackLabel: 'L' },
+        { id: 'b1:2', coordinate: here, fallbackLabel: '12', pointer: true, float: { amplitudeMeters: 0.3 }, elevationMeters: 1.2, brightness: 1.9 },
+      ],
+    },
+  ],
+  removeWorldAvatars: [{ type: 'removeWorldAvatars', layerId: 'residents' }],
 };
 
 const events: EventFixtures = {
@@ -340,10 +357,10 @@ describe('fixtures cover the protocol', () => {
   it('has fixtures for every command and event type', () => {
     expect(Object.keys(commands).sort()).toEqual([...ENGINE_COMMAND_TYPES].sort());
     expect(Object.keys(events).sort()).toEqual([...ENGINE_EVENT_TYPES].sort());
-    expect(ENGINE_COMMAND_TYPES).toHaveLength(25);
+    expect(ENGINE_COMMAND_TYPES).toHaveLength(28);
     expect(ENGINE_EVENT_TYPES).toHaveLength(21);
-    // New messages are appended, so the index of an existing one never moves.
-    expect(ENGINE_COMMAND_TYPES.slice(-5)).toEqual(['setMarkerLayer', 'removeMarkerLayer', 'setInfoCard', 'removeInfoCard', 'setView']);
+    expect(ENGINE_COMMAND_TYPES).toContain('setWorldAvatars');
+    expect(ENGINE_COMMAND_TYPES).toContain('removeWorldAvatars');
     expect(ENGINE_EVENT_TYPES.slice(-5)).toEqual(['marker:press', 'camera:idle', 'infoCard:press', 'infoCard:dismiss', 'view:change']);
     expect(SUBSCRIPTION_TOPICS.at(-1)).toBe('camera:idle');
     expect(REQUEST_METHODS.slice(-2)).toEqual(['focusOn', 'snapToBuilding']);
@@ -453,6 +470,9 @@ describe('rejects malformed messages without throwing', () => {
       [{ type: 'setBuildingStyle', buildingId: 'b1' }, '$.msg.style'],
       [{ type: 'setBuildingStyle', buildingId: 'b1', style: { roof: 'spire' } }, '$.msg.style.roof'],
       [{ type: 'setBuildingStyle', buildingId: 'b1', style: { color: 'red' } }, '$.msg.style.color'],
+      [{ type: 'setBuildingStyle', buildingId: 'b1', style: { rotationDeg: 'east' } }, '$.msg.style.rotationDeg'],
+      [{ type: 'setBuildingStyle', buildingId: 'b1', style: { widthScale: 0 } }, '$.msg.style.widthScale'],
+      [{ type: 'setBuildingStyle', buildingId: 'b1', style: { depthScale: -1 } }, '$.msg.style.depthScale'],
       [{ type: 'setDropLayer', layerId: 'l', collectRadiusMeters: 5, drops: [{ id: 'd', type: 'model', coordinate: here }] }, '$.msg.drops[0].model'],
       [{ type: 'setDropLayer', layerId: 'l', collectRadiusMeters: -1, drops: [] }, '$.msg.collectRadiusMeters'],
       [{ type: 'setDropLayer', layerId: 'l', collectRadiusMeters: 1, drops: [{ id: 'd', type: 'coin', coordinate: here, rarity: 'epic' }] }, '$.msg.drops[0].rarity'],

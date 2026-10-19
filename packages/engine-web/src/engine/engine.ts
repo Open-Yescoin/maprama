@@ -26,6 +26,7 @@ import {
   type LocationSourceKind,
   type MapUiSpec,
   type Projection,
+  type StaticBuildingSpec,
   type SubscriptionTopic,
   type ThemeSpec,
   type TileWorldSource,
@@ -53,7 +54,7 @@ import { renderParamsFor, type RenderParams } from '../theme/params.js';
 import { createTextures, type TextureSet } from '../theme/textures.js';
 import { DEG } from '../util/math.js';
 import { route as graphRoute, snap } from '../world/graph.js';
-import { resolveWorldSource, WorldLoadError } from '../world/data.js';
+import { convertBuilding, hashId, resolveWorldSource, WorldLoadError } from '../world/data.js';
 import { TileArchiveError } from '../tiles/archive.js';
 import { TileWorld } from '../tiles/world.js';
 import type { WorldModel } from '../world/model.js';
@@ -76,6 +77,17 @@ export interface EngineHandle {
   on(type: '*', cb: (event: EngineEvent) => void): () => void;
   /** Stops rendering and releases GPU / DOM resources. */
   destroy(): void;
+  /**
+   * Re-measures the container and resizes the drawing buffer.
+   *
+   * The engine already watches the container with a `ResizeObserver`, which only
+   * fires on a *size* change. A host that is re-parented into a box of the same
+   * size (the app moves the engine between its boot layer and the world view)
+   * therefore has to ask for the measurement explicitly.
+   */
+  resize(): void;
+  /** Pauses/resumes rendering and simulation while retaining the world and GPU resources. */
+  setRenderingActive(active: boolean): void;
   /** Internal scene API for part-2 modules and tooling (`null` when WebGL is unavailable). Unstable. */
   readonly scene: SceneApi | null;
 }
@@ -128,6 +140,31 @@ export const VIEW_PITCH_LOCKED = 'view_pitch_locked';
  */
 export const TILE_LOAD_FAILED = 'tile_load_failed';
 
+/**
+ * Commands that cannot change what casts a shadow, so the shadow map must not be
+ * redrawn for them. Every other command rebuilds or moves content (a world, a
+ * character, an avatar, a building's shape) and keeps the default redraw.
+ *
+ * `setCamera` and `setUi` only move the camera: the sun target and the zoom-out
+ * extent they produce are compared directly by `ShadowUpdatePolicy`, which is
+ * what `RenderCore.requestShadowUpdate`'s contract already promises ("camera
+ * movement needs no call"). `setLabels` only toggles DOM overlays. Measured on a
+ * 114-frame bearing drag, redrawing for these was 79% of its frames, all of them
+ * wasteful (`docs/perf/map-frame-budget-baseline.md`).
+ *
+ * `setView` is deliberately **not** here: the flat view rescales every building
+ * while the shadow camera stays put, so it invalidates the map itself.
+ */
+const SHADOW_INERT_COMMANDS: ReadonlySet<string> = new Set(['setCamera', 'setLabels', 'setUi']);
+
+/**
+ * Whether dispatching `type` must also invalidate the shadow map. Exported for
+ * the unit test that pins the camera-only exceptions.
+ */
+export function commandNeedsShadowUpdate(type: string): boolean {
+  return !SHADOW_INERT_COMMANDS.has(type);
+}
+
 /** Normalises `FitBoundsParams.padding` (dp) to four sides. */
 function fitPadding(padding: FitBoundsParams['padding']): FitPadding {
   if (typeof padding === 'number') return { top: padding, right: padding, bottom: padding, left: padding };
@@ -148,10 +185,10 @@ export class Engine implements EngineHandle {
   private tex: TextureSet | null = null;
   private params: RenderParams = renderParamsFor({});
   private worldModel: WorldModel | null = null;
+  private readonly staticBuildingLayers = new Map<string, StaticBuildingSpec[]>();
+  private readonly staticBuildingIds = new Set<string>();
   /** The streamed tile world, when `init.world.kind` was `tiles`. */
   private tileWorld: TileWorld | null = null;
-  /** Set by the tile streamer when a tile arrives outside a frame; consumed by {@link frame}. */
-  private tilesDirty = false;
   private proj: Projection = projectionFor(null);
   private readonly staticR = new StaticWorldRenderer();
   private readonly buildingsR = new BuildingRenderer();
@@ -183,15 +220,23 @@ export class Engine implements EngineHandle {
   private warnedLimits = '';
   /** Active render sources currently held, by tag (see {@link hold}). */
   private readonly holds = new Map<string, () => void>();
+  private gestures: GestureController | null = null;
   private readonly reduceMotion: boolean;
+  /**
+   * The constructor's one-shot container measurement, kept so {@link resize} can
+   * repeat it after the host element is re-parented into a same-sized box (the
+   * `ResizeObserver` sees no size change and stays quiet).
+   */
+  private resizeNow: () => void = () => {};
 
   constructor(private readonly container: HTMLElement, private readonly options: EngineOptions) {
     // Almost every command changes what is on screen, and the render loop is idle when nothing
     // animates: ask for exactly one frame after each of them. A command can also add, remove or
-    // move something that casts a shadow, so the shadow map is invalidated with it.
-    this.dispatcher = new Dispatcher((e) => this.emit(e), () => {
+    // move something that casts a shadow, so the shadow map is invalidated with it — except for
+    // the camera/label-only ones, whose shadow effect the policy compares by itself.
+    this.dispatcher = new Dispatcher((e) => this.emit(e), (cmd) => {
       this.core?.requestRender();
-      this.core?.requestShadowUpdate();
+      if (commandNeedsShadowUpdate(cmd.type)) this.core?.requestShadowUpdate();
     });
     this.cleanups.push(options.transport.onMessage((raw) => { void this.dispatcher.receive(raw); }));
     const win = container.ownerDocument.defaultView;
@@ -224,6 +269,7 @@ export class Engine implements EngineHandle {
       const r = container.getBoundingClientRect();
       core.resize(r.width, r.height);
     };
+    this.resizeNow = resize;
     resize();
     if (typeof ResizeObserver !== 'undefined') {
       const ro = new ResizeObserver(resize);
@@ -235,6 +281,7 @@ export class Engine implements EngineHandle {
     }
 
     const gestures = new GestureController(canvas, this.cam, { onTap: (x, y) => this.tap(x, y) });
+    this.gestures = gestures;
     this.cleanups.push(() => gestures.dispose());
 
     this.cam.set(DEFAULT_ORBIT);
@@ -264,6 +311,19 @@ export class Engine implements EngineHandle {
   on(type: '*', cb: (event: EngineEvent) => void): () => void;
   on(type: string, cb: (e: never) => void): () => void {
     return (this.emitter.on as (t: string, c: (e: never) => void) => () => void)(type, cb);
+  }
+
+  resize(): void {
+    if (this.destroyed) return;
+    this.resizeNow();
+  }
+
+  setRenderingActive(active: boolean): void {
+    if (this.destroyed || !this.core) return;
+    if (active) {
+      this.core.requestRender();
+      this.core.start();
+    } else this.core.stop();
   }
 
   destroy(): void {
@@ -304,6 +364,8 @@ export class Engine implements EngineHandle {
   private registerHandlers(): void {
     const d = this.dispatcher;
     d.register('init', async (cmd) => {
+      this.staticBuildingLayers.clear();
+      this.staticBuildingIds.clear();
       this.setUi(cmd.ui);
       this.labels = { ...cmd.labels };
       this.locationSource = cmd.locationSource;
@@ -339,6 +401,9 @@ export class Engine implements EngineHandle {
     d.register('removeInfoCard', (cmd) => f().removeInfoCard(cmd.id));
     d.register('setGeofences', (cmd) => f().setGeofences(cmd.geofences));
     d.register('setOverlayAnchors', (cmd) => f().setOverlayAnchors(cmd.anchors));
+    // Avatars drawn in the world model instead of as DOM in the overlay layer.
+    d.register('setWorldAvatars', (cmd) => f().setWorldAvatars(cmd.layerId, cmd.avatars));
+    d.register('removeWorldAvatars', (cmd) => f().removeWorldAvatars(cmd.layerId));
     for (const topic of ['character:position', 'travel:progress'] as const) {
       this.topics.set(topic, {
         subscribe: (id, throttleMs) => f().topic(topic).subscribe(id, throttleMs),
@@ -351,6 +416,7 @@ export class Engine implements EngineHandle {
       if (!this.worldModel) throw new EngineError('not_ready', 'no world loaded (send init first)');
       if (!this.buildingsR.setStyle(cmd.buildingId, cmd.style)) throw new EngineError('unknown_building', `unknown building "${cmd.buildingId}"`);
     });
+    d.register('setStaticBuildingLayer', (cmd) => this.setStaticBuildingLayer(cmd.layerId, cmd.buildings));
     this.topics.set('camera:change', {
       subscribe: (_id, throttleMs) => { this.cameraSub = { throttleMs, last: -Infinity, pending: true }; },
       unsubscribe: () => { this.cameraSub = null; },
@@ -419,6 +485,37 @@ export class Engine implements EngineHandle {
     for (const h of [...this.worldHooks]) h(world);
   }
 
+  /** Authored buildings share the ordinary building renderer, picking, shadows and flat-distance path. */
+  private setStaticBuildingLayer(layerId: string, buildings: StaticBuildingSpec[]): void {
+    if (!this.worldModel) throw new EngineError('not_ready', 'no world loaded (send init first)');
+    if (buildings.length > 100 || buildings.some(b => !b.id.startsWith('custom:') || b.scale > 10 || b.footprintMeters.width > 200 || b.footprintMeters.depth > 200 || (b.heightMeters ?? 1) > 200))
+      throw new EngineError('invalid_command', 'static building limits exceeded');
+    const next = new Map(this.staticBuildingLayers);
+    next.set(layerId, buildings);
+    const ids = new Set<string>();
+    for (const items of next.values()) for (const item of items) {
+      if (ids.has(item.id) || (this.worldModel.buildings.some(b => b.id === item.id) && !this.staticBuildingIds.has(item.id)))
+        throw new EngineError('invalid_command', `duplicate building ${item.id}`);
+      ids.add(item.id);
+    }
+    this.worldModel.buildings = this.worldModel.buildings.filter(b => !this.staticBuildingIds.has(b.id));
+    this.staticBuildingIds.clear();
+    this.staticBuildingLayers.set(layerId, buildings);
+    const unit = this.proj.metersToUnits(1);
+    for (const item of ids.size ? [...next.values()].flat() : []) {
+      const center = this.proj.toWorld(item.coordinate);
+      const w = item.footprintMeters.width * item.scale * unit, d = item.footprintMeters.depth * item.scale * unit;
+      const yaw = item.rotationDeg * Math.PI / 180, c = Math.cos(yaw), s = Math.sin(yaw);
+      const footprint = [[-w / 2, -d / 2], [w / 2, -d / 2], [w / 2, d / 2], [-w / 2, d / 2]].map(([x, z]) => [center.x + x! * c - z! * s, center.z + x! * s + z! * c] as [number, number]);
+      const building = convertBuilding({ id: item.id, footprint, height: item.heightMeters ? this.proj.metersToUnits(item.heightMeters * item.scale) : Math.max(2, Math.min(w, d)) * 1.2, kind: 'brick' }, hashId(item.id));
+      if (building) { this.worldModel.buildings.push(building); this.staticBuildingIds.add(item.id); }
+    }
+    this.rebuildWorldGeometry();
+    for (const item of [...next.values()].flat()) this.buildingsR.setStyle(item.id, { replaceModel: { ...item.model, ...(item.heightMeters ? { heightMeters: item.heightMeters * item.scale } : {}) } });
+    this.core?.requestRender();
+    this.core?.requestShadowUpdate();
+  }
+
   /**
    * Opens a streamed tile world. The archive's header and metadata are read
    * here (one range request); no tile is fetched until the first frame knows
@@ -433,7 +530,6 @@ export class Engine implements EngineHandle {
       // network (see `frame`), which is what keeps a static tile map at 0 idle
       // frames like every other world.
       onChange: () => {
-        this.tilesDirty = true;
         this.core?.requestRender();
       },
       onWarning: (message) => this.emit({ type: 'error', code: TILE_LOAD_FAILED, message, fatal: false }),
@@ -467,7 +563,6 @@ export class Engine implements EngineHandle {
     const tiles = this.tileWorld;
     const core = this.core;
     if (!tiles || !core) return false;
-    this.tilesDirty = false;
     const o = this.cam.orbit;
     const corners = this.cam.groundCorners(CAMERA_IDLE_HORIZON_FACTOR * o.distance);
     const step = tiles.step({ x: o.x, z: o.z }, corners);
@@ -922,7 +1017,7 @@ export class Engine implements EngineHandle {
     // Hidden first, then stepped: `step` skips its animations while hidden, so the frame that
     // leaves the flat view must show the group before it is stepped back to its real height.
     this.buildingsR.setHidden(this.view.flat);
-    this.buildingsR.step(dt, t, this.zoomOut.scaleY * (1 - vt), this.reduceMotion);
+    this.buildingsR.step(dt, t, this.zoomOut.scaleY * (1 - vt), this.reduceMotion, this.proj.unitsToMeters(this.cam.orbit.distance));
     // The overview's merged blocks are buildings too: they take the same height
     // factor, so `mapColors` squashes them with the rest and the 2D view drops
     // them where the flat layer takes over.
@@ -963,6 +1058,7 @@ export class Engine implements EngineHandle {
     this.hold('view', this.view.animating);
     this.hold('zoomOut', this.zoomOut.animating);
     this.hold('buildings', this.buildingsR.animating);
+    this.hold('building:shadow', this.buildingsR.shadowAnimating);
     // Only while a world is loaded: without one the emit above never runs and `pending` would
     // stay true forever, keeping the loop awake for nothing.
     this.hold('camera:change', !!sub?.pending && !!this.worldModel);
@@ -1024,6 +1120,11 @@ export class Engine implements EngineHandle {
       container: this.container,
       reduceMotion: this.reduceMotion,
       frames: () => core.frames,
+      frameBudget: () => core.frameBudget(),
+      resetFrameBudget: () => core.resetFrameBudget(),
+      startFrameCapture: (limit?: number) => core.startFrameCapture(limit),
+      stopFrameCapture: () => core.stopFrameCapture(),
+      capturedFrames: () => core.capturedFrames(),
       params: () => self.params,
       world: () => self.worldModel,
       tileWorld: () => self.tileWorld,
@@ -1042,6 +1143,7 @@ export class Engine implements EngineHandle {
       // shadow map. Camera movement does not go through here (see `cam.onActivity` above): the
       // shadow policy compares the shadow camera itself.
       requestRender: () => { core.requestRender(); core.requestShadowUpdate(); },
+      setPointerInputEnabled: (enabled) => self.gestures?.setEnabled(enabled),
       addActiveSource: (tag) => core.addActiveSource(tag),
       activeSources: () => core.activeSources(),
       onThemeChange: (hook) => {

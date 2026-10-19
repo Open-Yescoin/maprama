@@ -1,6 +1,6 @@
 {
   "name": "@maprama/engine-web",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Maprama web render engine (three.js) implementing the @maprama/protocol message contract.",
   "keywords": [
     "maprama",
@@ -12,13 +12,13 @@
     "webview",
     "openstreetmap"
   ],
-  "homepage": "https://github.com/CraftsManShip001/maprama/tree/main/packages/engine-web#readme",
+  "homepage": "https://github.com/Open-Yescoin/maprama/tree/main/packages/engine-web#readme",
   "bugs": {
-    "url": "https://github.com/CraftsManShip001/maprama/issues"
+    "url": "https://github.com/Open-Yescoin/maprama/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/CraftsManShip001/maprama.git",
+    "url": "git+https://github.com/Open-Yescoin/maprama.git",
     "directory": "packages/engine-web"
   },
   "license": "Apache-2.0",
@@ -61,7 +61,8 @@
     "fixtures": "node scripts/make-glb-fixture.mjs"
   },
   "dependencies": {
-    "@maprama/protocol": "^0.2.0",
+    "@maprama/protocol": "^0.2.1",
+    "gsap": "^3.15.0",
     "pmtiles": "4.5.0",
     "three": "0.186.0"
   },

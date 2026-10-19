@@ -45,7 +45,7 @@ import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { MeshoptDecoder } from 'three/examples/jsm/libs/meshopt_decoder.module.js';
 import { clone as cloneSkinned } from 'three/examples/jsm/utils/SkeletonUtils.js';
-import type { CameraController } from '../core/camera.js';
+import type { CameraController, ScreenProjection } from '../core/camera.js';
 import { ensureLabelStyles } from '../labels/dom-styles.js';
 import { overlaps, type Box } from '../labels/index.js';
 import { noRaycast, outlineScale } from '../render/parts.js';
@@ -83,6 +83,24 @@ const RUN_CADENCE = 1.6;
 const IDLE_SPEED = 1e-3;
 /** Yaw distance (radians, ≈0.06°) below which the turn easing snaps onto its target and stops. */
 const YAW_SNAP = 1e-3;
+
+/** Per-frame scratch for {@link CharacterManager.updateTags}; the `out` overload allocates nothing. */
+const tagScreen: ScreenProjection = { x: 0, y: 0, visible: false };
+/** Per-frame scratch for the name-tag distance (avoids one `Vector3` per tag per frame). */
+const tagWorld = new Vector3();
+
+/**
+ * Fallback chain per wanted animation: the first name that resolved to a clip
+ * wins. Hoisted out of {@link chooseAnimation}, which runs once per model
+ * character per frame, because the table is constant.
+ */
+const ANIMATION_CHAINS: Record<AnimationName, readonly AnimationName[]> = {
+  ride: ['ride', 'idle'],
+  run: ['run', 'walk', 'idle'],
+  walk: ['walk', 'run', 'idle'],
+  idle: ['idle'],
+  wave: ['wave', 'idle'],
+};
 
 /** Shortest signed angle (radians) for `a` wrapped to −π…π. */
 const wrapRad = (a: number): number => Math.atan2(Math.sin(a), Math.cos(a));
@@ -122,8 +140,7 @@ export function chooseAnimation(mode: TravelMode, speed: number, unitMeters: num
   else if (mode === 'plane' || mode === 'subway') want = 'idle';
   else if (speed < IDLE_SPEED) want = 'idle';
   else want = walkCadence(speed, unitMeters, scale) > RUN_CADENCE ? 'run' : 'walk';
-  const chains: Record<AnimationName, AnimationName[]> = { ride: ['ride', 'idle'], run: ['run', 'walk', 'idle'], walk: ['walk', 'run', 'idle'], idle: ['idle'], wave: ['wave', 'idle'] };
-  return chains[want].find((n) => available[n] !== undefined) ?? null;
+  return ANIMATION_CHAINS[want].find((n) => available[n] !== undefined) ?? null;
 }
 
 /** Heading in degrees clockwise from north for a yaw (`atan2(dx, dz)`, +z south). */
@@ -328,6 +345,8 @@ interface ProceduralRig {
   knees: Group[];
   shoulders: Group[];
   elbows: Group[];
+  /** Silhouette meshes this rig registered, released when the rig is rebuilt. */
+  silhouettes: Object3D[];
 }
 
 interface ModelState {
@@ -338,6 +357,8 @@ interface ModelState {
   clips: Partial<Record<AnimationName, string>>;
   actions: Partial<Record<AnimationName, AnimationAction>>;
   current: AnimationName | null;
+  /** Silhouette proxy registered with the scene; released when the model is dropped. */
+  sil?: Mesh;
 }
 
 /** A live character. Implements the follower body (positions in world units). */
@@ -361,6 +382,12 @@ export class Character implements FollowerBody {
   tagSize = { w: 0, h: 0, text: '' };
   /** Materials this character owns (disposed on removal). */
   readonly owned: Material[] = [];
+  /**
+   * Silhouette meshes of its vehicles (registered through `partFn`). The
+   * procedural body keeps its own list on the rig and the glTF proxy on
+   * {@link model}, so every path can be released when it is replaced.
+   */
+  readonly vehicleSilhouettes: Object3D[] = [];
   /** Model uri currently shown or loading. */
   modelUri: string | null = null;
   private loadToken = 0;
@@ -419,11 +446,11 @@ export class Character implements FollowerBody {
     const wrap = normalizeModel(instantiateModel(gltf), CHARACTER_HEIGHT);
     const mixer = new AnimationMixer(wrap);
     const clips = resolveClips(gltf.animations.map((c) => c.name), this.spec.animations);
-    this.model = { wrap, mixer, all: gltf.animations, clips, actions: clipActions(mixer, gltf.animations, clips), current: null };
-    this.root.add(wrap);
     const sil = new Mesh(geos().silProxy!, this.mgr.silhouetteMaterial(this));
     sil.name = 'silhouette-proxy';
     wrap.add(sil);
+    this.model = { wrap, mixer, all: gltf.animations, clips, actions: clipActions(mixer, gltf.animations, clips), current: null, sil };
+    this.root.add(wrap);
     this.mgr.scene.silhouette.addSilhouette(sil);
     if (this.procedural) this.procedural.rig.visible = false;
   }
@@ -446,6 +473,9 @@ export class Character implements FollowerBody {
   private dropModel(): void {
     if (!this.model) return;
     this.model.mixer.stopAllAction();
+    // The proxy leaves the scene with the model: release its silhouette so the extra passes can
+    // switch off once the last character is gone.
+    if (this.model.sil) this.mgr.scene.silhouette.removeSilhouette(this.model.sil);
     this.root.remove(this.model.wrap);
     this.model = null;
     if (this.procedural) this.procedural.rig.visible = true;
@@ -721,8 +751,9 @@ export class CharacterManager {
       }
       const riding = ch.vehicles && ch.mode !== 'walk' ? ch.vehicles[ch.mode] : null;
       const a = nameTagAnchor(ch.mode, ch.yaw, ch.spec.scale ?? 1, riding?.group.visible ? riding.p : 0);
-      const s = cam.worldToScreen(ch.x + a.dx, ch.y + a.dy, ch.z + a.dz);
-      const d = cam.camera.position.distanceTo(new Vector3(ch.x, ch.y, ch.z));
+      // Reused scratch (safe: every read of `s` happens in this iteration).
+      const s = cam.worldToScreen(ch.x + a.dx, ch.y + a.dy, ch.z + a.dz, tagScreen);
+      const d = cam.camera.position.distanceTo(tagWorld.set(ch.x, ch.y, ch.z));
       let vis = s.visible && d < 95 && zoomOut < 0.6;
       if (vis && exclusions.length) {
         const text = ch.tag.textContent ?? '';
@@ -770,11 +801,18 @@ export class CharacterManager {
 
   buildVehiclesFor(ch: Character): VehicleSet {
     const vm = this.vehicleMaterials();
-    return buildVehicles(ch.root, this.partFn(ch), this.scene.materials, { skin: this.skinMat(), ...vm }, ch.owned);
+    return buildVehicles(ch.root, this.partFn(ch, ch.vehicleSilhouettes), this.scene.materials, { skin: this.skinMat(), ...vm }, ch.owned);
+  }
+
+  /** Releases every silhouette a `partFn` list registered and empties it. Idempotent per object. */
+  private releaseSilhouettes(list: Object3D[]): void {
+    for (const o of list) this.scene.silhouette.removeSilhouette(o);
+    list.length = 0;
   }
 
   private rebuildProcedural(ch: Character): void {
     if (!ch.procedural) return;
+    this.releaseSilhouettes(ch.procedural.silhouettes);
     ch.root.remove(ch.procedural.rig);
     disposeTree(ch.procedural.rig);
     ch.procedural = null;
@@ -794,7 +832,7 @@ export class CharacterManager {
     });
   }
 
-  private partFn(ch: Character): PartFn {
+  private partFn(ch: Character, out: Object3D[]): PartFn {
     const silMat = this.silhouetteMaterial(ch);
     const outline = this.scene.params().outline;
     const ink = this.scene.materials.ink;
@@ -820,6 +858,7 @@ export class CharacterManager {
         s.raycast = noRaycast;
         g.add(s);
         sil.addSilhouette(s);
+        out.push(s);
       }
       return g;
     };
@@ -831,7 +870,8 @@ export class CharacterManager {
     const rig = new Group();
     rig.name = 'procedural';
     ch.root.add(rig);
-    const P = this.partFn(ch);
+    const silhouettes: Object3D[] = [];
+    const P = this.partFn(ch, silhouettes);
     const color = ch.color, isPlayer = !!ch.spec.isPlayer;
     const shirt = M.make(color, { roughness: 0.85 }), pants = M.make(0x2c3342, { roughness: 0.9 });
     const hairM = M.make(0x2a211c, { roughness: 0.7 }), shoes = M.make(0xe6e2da, { roughness: 0.8 });
@@ -875,11 +915,18 @@ export class CharacterManager {
       shoulders.push(sh);
       elbows.push(el);
     }
-    return { rig, hips, knees, shoulders, elbows };
+    return { rig, hips, knees, shoulders, elbows, silhouettes };
   }
 
   private disposeCharacter(ch: Character): void {
+    // `setModel(null)` drops a loaded model and releases its proxy; the explicit
+    // release also covers a model that was attached without a uri.
+    if (ch.model?.sil) this.scene.silhouette.removeSilhouette(ch.model.sil);
     ch.setModel(null);
+    // After `setModel`: it may have rebuilt the procedural body, which registers
+    // fresh silhouettes, so release whatever the character ends up with.
+    if (ch.procedural) this.releaseSilhouettes(ch.procedural.silhouettes);
+    this.releaseSilhouettes(ch.vehicleSilhouettes);
     this.group.remove(ch.root);
     disposeTree(ch.root);
     for (const m of ch.owned) m.dispose();

@@ -33,7 +33,7 @@ import {
   type Raycaster,
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import type { BuildingKind, BuildingStyle, Massing, Vec2 } from '@maprama/protocol';
+import type { BuildingKind, BuildingStyle, Massing, ModelSource, Vec2 } from '@maprama/protocol';
 import { cssHexToNumber, mixHex, mulberry32, offsetHslHex } from '../util/math.js';
 import type { BuildingModel, MassShape, RoofKind } from '../world/model.js';
 import { bbox, centroid, normalizeRing, offsetRing, pointInPolygon, scaleRing } from '../world/polygon.js';
@@ -42,6 +42,7 @@ import { ACCENT, type MaterialFactory } from '../theme/materials.js';
 import { mergeBoxes, mergeFlat, type BoxSpec } from './geometry.js';
 import { insideRadius, prismGeometry, ringBandGeometry, softMassGeometry, wallsGeometry } from './footprint.js';
 import { addPart, clearGroup, noRaycast, tree, type RenderContext } from './parts.js';
+import { batchStaticMeshes } from './static-batch.js';
 
 const MODERN_MAP: Record<BuildingKind, string> = { glass: 'glass', office: 'band', apartment: 'resi', brick: 'terracotta' };
 const URBAN_MAP: Record<BuildingKind, string> = { glass: 'glass', office: 'panel', apartment: 'grid', brick: 'concrete' };
@@ -64,6 +65,11 @@ export interface BuildingOverride {
   massing?: Massing;
   state?: string;
   modelUri?: string;
+  modelSource?: ModelSource;
+  heightScale?: number;
+  widthScale?: number;
+  depthScale?: number;
+  rotationDeg?: number;
 }
 
 export function overrideFromStyle(style: BuildingStyle): BuildingOverride {
@@ -76,7 +82,11 @@ export function overrideFromStyle(style: BuildingStyle): BuildingOverride {
   }
   if (style.massing) o.massing = style.massing;
   if (style.state !== undefined) o.state = style.state;
-  if (style.replaceModel) o.modelUri = style.replaceModel.uri;
+  if (style.replaceModel) { o.modelUri = style.replaceModel.uri; o.modelSource = style.replaceModel; }
+  if (style.heightScale !== undefined) o.heightScale = style.heightScale;
+  if (style.widthScale !== undefined) o.widthScale = style.widthScale;
+  if (style.depthScale !== undefined) o.depthScale = style.depthScale;
+  if (style.rotationDeg !== undefined) o.rotationDeg = style.rotationDeg;
   return o;
 }
 
@@ -97,6 +107,13 @@ interface Entry {
   b: BuildingModel;
   group: Group;
   glow: MeshStandardMaterial[];
+  /**
+   * Last emissive intensity written to `glow`. `-1` means "nothing applied
+   * yet", so a fresh/re-created entry always gets its first write; every
+   * later frame skips the write while the value is unchanged (which is every
+   * frame under reduced motion).
+   */
+  glowIntensity: number;
   spin: Object3D | null;
   top: number;
   topX: number;
@@ -105,6 +122,8 @@ interface Entry {
   style: BuildingOverride;
   model: Object3D | null;
   modelUri: string | null;
+  modelLoadState: 'default' | 'loading' | 'loaded' | 'failed';
+  lodProxy: Mesh | null;
 }
 
 export interface BuildingInfo {
@@ -112,6 +131,7 @@ export interface BuildingInfo {
   /** World position of the roof top center. */
   top: { x: number; y: number; z: number };
   model: BuildingModel;
+  modelLoadState: 'default' | 'loading' | 'loaded' | 'failed';
 }
 
 /** Local rectangle ring (axis aligned) around (x, z). */
@@ -249,6 +269,7 @@ export class BuildingRenderer {
   private ctx: RenderContext | null = null;
   private modelCache = new Map<string, Promise<Object3D>>();
   private _animating = false;
+  private _shadowAnimating = false;
   /** Called when a replacement model fails to load. */
   onModelError: ((id: string, uri: string, error: unknown) => void) | null = null;
   /** Called after a replacement model arrived and the building was rebuilt (on-demand rendering needs a frame). */
@@ -322,18 +343,24 @@ export class BuildingRenderer {
       }
       if (kept) {
         old.delete(b.id);
+        // A static building can change footprint or height on every editor input.
+        // Keep its loaded GLB across that geometry rebuild; the model cache and
+        // clones share geometries, so disposing the old child would break them.
+        if (kept.model) kept.group.remove(kept.model);
         this.disposeEntry(kept);
       }
       const group = new Group();
       group.userData.buildingId = b.id;
       this.group.add(group);
-      const e: Entry = { b, group, glow: [], spin: null, top: 0, topX: 0, topZ: 0, bounce: 0, style: oldStyles.get(b.id) ?? {}, model: null, modelUri: null };
+      const retainedModel = kept?.model ?? null;
+      const e: Entry = { b, group, glow: [], glowIntensity: -1, spin: null, top: 0, topX: 0, topZ: 0, bounce: 0, style: oldStyles.get(b.id) ?? {}, model: retainedModel, modelUri: retainedModel ? kept!.modelUri : null, modelLoadState: retainedModel ? 'loaded' : 'default', lodProxy: null };
       next.set(b.id, e);
       this.buildOne(e);
     }
     for (const e of old.values()) this.disposeEntry(e);
     old.clear();
     this.entries = next;
+    for (const entry of next.values()) if (entry.style.modelUri && entry.modelUri !== entry.style.modelUri) this.loadReplacement(entry, entry.style.modelUri);
   }
 
   /** Removes one building's group from the scene and releases its geometries. */
@@ -357,7 +384,7 @@ export class BuildingRenderer {
     e.style = style ? overrideFromStyle(style) : {};
     if (style) this.styleMap.set(id, e.style);
     else this.styleMap.delete(id);
-    if (!e.style.modelUri) { e.model = null; e.modelUri = null; }
+    if (!e.style.modelUri) { e.model = null; e.modelUri = null; e.modelLoadState = 'default'; }
     this.buildOne(e);
     e.bounce = 0.3;
     if (e.style.modelUri && e.modelUri !== e.style.modelUri) this.loadReplacement(e, e.style.modelUri);
@@ -391,7 +418,7 @@ export class BuildingRenderer {
     const v = new Vector3(e.topX, e.top, e.topZ);
     e.group.updateMatrixWorld();
     v.applyMatrix4(e.group.matrixWorld);
-    return { id, top: { x: v.x, y: v.y, z: v.z }, model: e.b };
+    return { id, top: { x: v.x, y: v.y, z: v.z }, model: e.b, modelLoadState: e.modelLoadState };
   }
 
   /**
@@ -441,37 +468,56 @@ export class BuildingRenderer {
     return this._animating;
   }
 
+  /** Glow changes colour only; bounce, spin and height changes move shadow casters. */
+  get shadowAnimating(): boolean {
+    return this._shadowAnimating;
+  }
+
   /** Per-frame animation: bounce, zoom-out height scale, landmark spin, captured glow. */
-  step(dt: number, t: number, scaleY: number, reduceMotion: boolean): void {
+  step(dt: number, t: number, scaleY: number, reduceMotion: boolean, cameraDistanceMeters = 0): void {
     // Nothing here is visible in the flat view, and a spinning landmark or a pulsing captured glow
     // that nobody can see must not keep the on-demand render loop awake.
     if (this.hidden) {
       this._animating = false;
+      this._shadowAnimating = false;
       return;
     }
     const k = 0.28 + (reduceMotion ? 0 : Math.sin(t * 3) * 0.14);
     let animating = false;
+    let shadowAnimating = false;
     for (const e of this.entries.values()) {
+      const previousScale = e.group.scale.y;
       if (e.bounce > 0 && !reduceMotion) {
         e.bounce = Math.max(0, e.bounce - dt);
-        e.group.scale.y = scaleY * (1 + Math.sin((1 - e.bounce / 0.35) * Math.PI) * 0.09);
+        e.group.scale.y = scaleY * (e.model ? 1 : e.style.heightScale ?? 1) * (1 + Math.sin((1 - e.bounce / 0.35) * Math.PI) * 0.09);
         animating = true;
       } else {
         e.bounce = 0;
-        e.group.scale.y = scaleY;
+        e.group.scale.y = scaleY * (e.model ? 1 : e.style.heightScale ?? 1);
       }
       if (e.spin && !reduceMotion) {
         e.spin.rotation.y += dt * 1.8;
         animating = true;
+        if (dt !== 0) shadowAnimating = true;
       }
-      for (const m of e.glow) {
-        m.emissive.setHex(GLOW_COLOR);
-        m.emissiveIntensity = k;
+      if (e.group.scale.y !== previousScale) shadowAnimating = true;
+      // Keep authored GLBs recognizable throughout the supported city camera range (up to 3.2 km).
+      if (e.model && e.lodProxy) { const far = cameraDistanceMeters > 4_000; if (e.model.visible === far) { e.model.visible = !far; e.lodProxy.visible = far; shadowAnimating = true; } }
+      // The captured glow is the same constant under reduced motion, and the
+      // intensity only changes with the cosine above, so an unchanged value
+      // writes nothing at all (the frame loop can then go idle).
+      if (e.glow.length && e.glowIntensity !== k) {
+        e.glowIntensity = k;
+        for (const m of e.glow) {
+          m.emissive.setHex(GLOW_COLOR);
+          m.emissiveIntensity = k;
+        }
       }
       // With reduced motion the glow is a constant, so it only needs the frame that applied it.
       if (e.glow.length && !reduceMotion) animating = true;
     }
     this._animating = animating;
+    this._shadowAnimating = shadowAnimating;
   }
 
   dispose(): void {
@@ -483,6 +529,7 @@ export class BuildingRenderer {
   // -------------------------------------------------------------------------
 
   private loadReplacement(e: Entry, uri: string): void {
+    e.modelLoadState = 'loading';
     let p = this.modelCache.get(uri);
     if (!p) {
       p = this.loadModel(uri);
@@ -493,10 +540,11 @@ export class BuildingRenderer {
       if (e.style.modelUri !== uri || this.entries.get(e.b.id) !== e) return;
       e.model = scene.clone(true);
       e.modelUri = uri;
+      e.modelLoadState = 'loaded';
       this.buildOne(e);
       this.onModelLoaded?.(e.b.id);
     }).catch((err) => {
-      if (e.style.modelUri === uri) this.onModelError?.(e.b.id, uri, err);
+      if (e.style.modelUri === uri) { e.modelLoadState = 'failed'; this.onModelError?.(e.b.id, uri, err); }
     });
   }
 
@@ -513,11 +561,18 @@ export class BuildingRenderer {
     const ctx = this.ctx!;
     const { params: P, mats, tex } = ctx;
     const b = e.b, st = e.style, g = e.group;
+    if (e.model?.parent === g) g.remove(e.model);
     clearGroup(g);
+    e.lodProxy = null;
     e.glow = [];
+    // The glow materials are rebuilt here (style change, model load, theme
+    // change), so the applied-value guard has to be invalidated with them.
+    e.glowIntensity = -1;
     e.spin = null;
     g.position.set(b.x, ctx.world.buildingBaseY, b.z);
-    g.rotation.y = b.yaw;
+    g.scale.x = st.modelUri ? 1 : st.widthScale ?? 1;
+    g.scale.z = st.modelUri ? 1 : st.depthScale ?? 1;
+    g.rotation.y = b.yaw + (st.modelUri ? 0 : (st.rotationDeg ?? 0) * Math.PI / 180);
     const br = mulberry32(b.idx * 977 + 13);
     const cap = st.state === 'captured';
     const fstyle = P.facadeSet;
@@ -531,15 +586,17 @@ export class BuildingRenderer {
     const ring = this.localRing(b);
     const bb = bbox(ring);
 
-    // contact shadow decal
-    const aoMat = mats.cached('ao', () => mats.basic({ color: 0x000000, map: tex.ao, transparent: true, opacity: P.shading === 'toon' ? 0.2 : 0.55, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
     const fw = b.landmark ? Math.min(bb.maxX - bb.minX, bb.maxZ - bb.minZ) * 0.95 : bb.maxX - bb.minX;
     const fd = b.landmark ? fw : bb.maxZ - bb.minZ;
-    const ao = new Mesh(new PlaneGeometry(fw * 1.78, fd * 1.78).rotateX(-Math.PI / 2), aoMat);
-    ao.position.set((bb.minX + bb.maxX) / 2, 0.006, (bb.minZ + bb.maxZ) / 2);
-    ao.renderOrder = 1;
-    ao.raycast = noRaycast;
-    g.add(ao);
+    // The native-lot AO plane is much larger than some fitted GLBs and looks like a black slab.
+    if (!st.modelUri) {
+      const aoMat = mats.cached('ao', () => mats.basic({ color: 0x000000, map: tex.ao, transparent: true, opacity: P.shading === 'toon' ? 0.2 : 0.55, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 }));
+      const ao = new Mesh(new PlaneGeometry(fw * 1.78, fd * 1.78).rotateX(-Math.PI / 2), aoMat);
+      ao.position.set((bb.minX + bb.maxX) / 2, 0.006, (bb.minZ + bb.maxZ) / 2);
+      ao.renderOrder = 1;
+      ao.raycast = noRaycast;
+      g.add(ao);
+    }
 
     let top = 0, tx = 0, tz = 0;
     let topMass: Mass | null = null;
@@ -553,15 +610,31 @@ export class BuildingRenderer {
       model.scale.setScalar(1);
       model.rotation.set(0, 0, 0);
       const box = new Box3().setFromObject(model), size = box.getSize(new Vector3());
-      const s = Math.min((bb.maxX - bb.minX) / Math.max(1e-3, size.x), (bb.maxZ - bb.minZ) / Math.max(1e-3, size.z));
-      model.scale.setScalar(s);
+      const source = st.modelSource;
+      const targetW = source?.widthMeters ? source.widthMeters / ctx.world.unitMeters : bb.maxX - bb.minX;
+      const targetD = source?.depthMeters ? source.depthMeters / ctx.world.unitMeters : bb.maxZ - bb.minZ;
+      const modelScaleXZ = Math.min(targetW / Math.max(1e-3, size.x), targetD / Math.max(1e-3, size.z)) * (source?.scale ?? 1);
+      const modelScaleY = source?.heightMeters ? source.heightMeters / ctx.world.unitMeters / Math.max(1e-3, size.y) * (source.scale ?? 1) : modelScaleXZ;
+      model.scale.set(modelScaleXZ, modelScaleY, modelScaleXZ);
+      const yaw = (source?.rotationDeg ?? 0) * Math.PI / 180;
+      model.rotation.y = yaw;
       const c = box.getCenter(new Vector3());
-      model.position.set((bb.minX + bb.maxX) / 2 - c.x * s, -box.min.y * s, (bb.minZ + bb.maxZ) / 2 - c.z * s);
+      const targetX = (bb.minX + bb.maxX) / 2 + (source?.offsetMeters?.x ?? 0) / ctx.world.unitMeters;
+      const targetZ = (bb.minZ + bb.maxZ) / 2 + (source?.offsetMeters?.z ?? 0) / ctx.world.unitMeters;
+      model.position.set(targetX - (c.x * Math.cos(yaw) + c.z * Math.sin(yaw)) * modelScaleXZ, -box.min.y * modelScaleY, targetZ - (-c.x * Math.sin(yaw) + c.z * Math.cos(yaw)) * modelScaleXZ);
       model.traverse((o) => { const m = o as Mesh; if (m.isMesh) { m.castShadow = true; m.receiveShadow = true; } });
       g.add(model);
-      top = size.y * s;
-      tx = (bb.minX + bb.maxX) / 2;
-      tz = (bb.minZ + bb.maxZ) / 2;
+      top = size.y * modelScaleY;
+      const proxy = new Mesh(new BoxGeometry(size.x * modelScaleXZ, Math.max(0.2, top), size.z * modelScaleXZ), mats.cached('custom-building-lod', () => mats.make(0x9dabb8, { roughness: 0.85 })));
+      proxy.position.set(targetX, Math.max(0.2, top) / 2, targetZ);
+      proxy.rotation.y = yaw;
+      proxy.castShadow = true;
+      proxy.receiveShadow = true;
+      proxy.visible = !model.visible;
+      g.add(proxy);
+      e.lodProxy = proxy;
+      tx = targetX;
+      tz = targetZ;
     } else if (b.landmark) {
       const L = P.preset.landmark, r = fw * 0.46 / 0.95;
       const mk = (c: number, ex: Parameters<MaterialFactory['make']>[1]): Material => glowable(mats.make(c, ex));
@@ -726,6 +799,7 @@ export class BuildingRenderer {
       addPart(ctx, g, new CylinderGeometry(0.05, 0.05, 2.4, 6).translate(tx, top + 1.2, tz), pole, { outline: 0.03 });
       addPart(ctx, g, new BoxGeometry(1.25, 0.72, 0.05).translate(tx + 0.66, top + 1.98, tz), flag, { outline: 0.05 });
     }
+    batchStaticMeshes(g, new Set([e.spin, e.model].filter((node): node is Object3D => node !== null)));
   }
 
   private flatRoof(ctx: RenderContext, g: Group, m: Mass, top: number, br: () => number, col: number, olw: number, garden: boolean, kind: BuildingKind, hvac: Material): number {

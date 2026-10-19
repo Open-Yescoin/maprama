@@ -29,6 +29,9 @@ export type GeofenceEvent = GeofenceEnterEvent | GeofenceExitEvent;
 export class GeofenceTracker {
   private fences: WorldFence[] = [];
   private inside = new Map<string, Set<string>>();
+  /** Reused per-frame scratch for {@link update}: the character ids and the ids to purge. */
+  private readonly present = new Set<string>();
+  private readonly leaving: string[] = [];
 
   set(fences: WorldFence[]): void {
     this.fences = fences.map((f) => ({ ...f }));
@@ -44,10 +47,17 @@ export class GeofenceTracker {
   /** Evaluates positions; returns transitions in fence order, then character order. */
   update(characters: readonly { id: string; x: number; z: number }[]): GeofenceEvent[] {
     const events: GeofenceEvent[] = [];
-    const present = new Set(characters.map((c) => c.id));
+    const present = this.present;
+    present.clear();
+    for (const c of characters) present.add(c.id);
+    const leaving = this.leaving;
     for (const f of this.fences) {
       const set = this.inside.get(f.id)!;
-      for (const id of [...set]) if (!present.has(id)) set.delete(id);
+      // An id with no character is forgotten silently; purge through the scratch array so the
+      // set is never mutated while it is being iterated.
+      leaving.length = 0;
+      for (const id of set) if (!present.has(id)) leaving.push(id);
+      for (const id of leaving) set.delete(id);
       for (const c of characters) {
         const now = Math.hypot(c.x - f.x, c.z - f.z) < f.r;
         if (now === set.has(c.id)) continue;

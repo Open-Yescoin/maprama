@@ -1,7 +1,9 @@
 import type { DropSpec } from '@maprama/protocol';
 import { validateEngineEvent } from '@maprama/protocol';
+import { MeshStandardMaterial } from 'three';
 import { describe, expect, it } from 'vitest';
-import { DropCollector, MAX_ISSUED_COLLECT_IDS, randomCollectId, type Collector } from './drops.js';
+import type { SceneApi } from '../scene-api.js';
+import { DropCollector, DropVisuals, MAX_ISSUED_COLLECT_IDS, randomCollectId, type Collector, type DropState } from './drops.js';
 
 const ll = (p: { x: number; z: number }) => ({ lng: 127 + p.x * 1e-4, lat: 37.5 - p.z * 1e-4 });
 const drop = (id: string, type: DropSpec['type'] = 'coin'): DropSpec => ({ id, type, coordinate: { lng: 0, lat: 0 } });
@@ -130,5 +132,58 @@ describe('DropCollector', () => {
     expect(d.removed.map((s) => s.spec.id).sort()).toEqual(['gone', 'swap']);
     expect(c.removeLayer('l').map((s) => s.spec.id).sort()).toEqual(['keep', 'new', 'swap']);
     expect(c.check([me], ll)).toHaveLength(0);
+  });
+});
+
+/**
+ * `DropVisuals.step` runs against a stub scene: the assertions are about which
+ * items survive a frame, not about pixels.
+ */
+function stubVisualScene(): SceneApi {
+  const doc = { getElementById: () => ({}) } as unknown as Document;
+  return {
+    container: { addEventListener: () => {}, removeEventListener: () => {}, ownerDocument: doc },
+    overlayLayer: { ownerDocument: doc },
+    materials: { make: () => new MeshStandardMaterial(), ink: new MeshStandardMaterial() },
+    params: () => ({ outline: false }),
+    reduceMotion: false,
+    anchorHeightScale: () => 1,
+    camera: { worldToScreen: () => ({ x: 0, y: 0, visible: false }) },
+  } as unknown as SceneApi;
+}
+
+const item = (id: string, x: number): DropState => ({ layerId: 'l', spec: drop(id), x, z: 0, collected: false });
+
+describe('DropVisuals.step', () => {
+  it('removes every item that finished its pop in one frame and keeps the rest', () => {
+    const visuals = new DropVisuals(stubVisualScene(), { onModelError: () => {} });
+    visuals.add(item('a', 1), 0);
+    visuals.add(item('b', 2), 0);
+    visuals.add(item('c', 3), 0);
+    visuals.collect(item('a', 1));
+    visuals.collect(item('b', 2));
+    // One frame longer than the 0.45 s pop removes a and b; c, stepped after both, must survive.
+    visuals.step(1, 0);
+    expect(visuals.count).toBe(1);
+    expect(visuals.group.children).toHaveLength(1);
+    expect(visuals.group.children[0]!.position.x).toBe(3);
+    visuals.dispose();
+  });
+
+  it('steps the items after a popped one before removing it', () => {
+    const visuals = new DropVisuals(stubVisualScene(), { onModelError: () => {} });
+    visuals.add(item('pop', 1), 0);
+    visuals.add(item('live', 2), 0);
+    const live = visuals.group.children[1]!;
+    visuals.collect(item('pop', 1));
+    // The pop is not finished: nothing is removed and `live` still spins this frame.
+    visuals.step(0.1, 0);
+    expect(visuals.count).toBe(2);
+    expect(live.children[0]!.rotation.y).toBeCloseTo(0.22, 5);
+    // The next frame finishes the pop: only that item goes, and the survivor stays put.
+    visuals.step(1, 0);
+    expect(visuals.count).toBe(1);
+    expect(visuals.group.children[0]).toBe(live);
+    visuals.dispose();
   });
 });

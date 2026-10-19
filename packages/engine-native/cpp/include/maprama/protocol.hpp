@@ -24,13 +24,13 @@ inline constexpr int kWorldDataVersion = 1;
 inline constexpr std::uint64_t kMaxSafeInteger = 9007199254740991ULL;
 
 /// `ENGINE_COMMAND_TYPES`, in declaration order (new commands are appended, so indices are stable).
-inline constexpr std::array<std::string_view, 25> kEngineCommandTypes{
+inline constexpr std::array<std::string_view, 28> kEngineCommandTypes{
     "init",         "setTheme",         "setLabels",         "setLabelContent", "setUi",
     "setCamera",    "upsertCharacters", "removeCharacters",  "setLocationSource", "pushLocation",
     "travel",       "cancelTravel",     "setDropLayer",      "removeDropLayer", "setGeofences",
     "setBuildingStyle", "setOverlayAnchors", "subscribe",    "unsubscribe",     "request",
     "setMarkerLayer", "removeMarkerLayer", "setInfoCard", "removeInfoCard",
-    "setView",
+    "setView", "setWorldAvatars", "removeWorldAvatars", "setStaticBuildingLayer",
 };
 
 /// `ENGINE_EVENT_TYPES`, in declaration order (new events are appended, so indices are stable).

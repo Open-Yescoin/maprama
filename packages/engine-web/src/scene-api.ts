@@ -20,7 +20,9 @@
  * - **Camera**: `camera.follow(() => ({ x, z }), id)` to follow a character;
  *   `registerFollowResolver` lets `setCamera { follow: id }` find targets.
  * - **Silhouettes**: `silhouette.addSilhouette(mesh)` with
- *   `silhouette.createMaterial(color)` draws characters through buildings.
+ *   `silhouette.createMaterial(color)` draws characters through buildings;
+ *   `silhouette.removeSilhouette(mesh)` releases one, and the extra passes stop
+ *   once the last registered silhouette is gone.
  * - **World**: `world()` (graph, POIs, stations, districts…), `snapToRoad`,
  *   `route`, `toWorld` / `toLngLat`, `groundAt`, `pickBuilding`.
  * - **DOM**: `overlayLayer` is a full-size layer above the canvas for labels
@@ -49,7 +51,7 @@ import type { Group, PerspectiveCamera, Scene, Vector3, WebGLRenderer } from 'th
 import type { CommandHandler, RequestHandler } from './bridge/dispatcher.js';
 import type { EventListener } from './bridge/emitter.js';
 import type { CameraController, FollowTarget } from './core/camera.js';
-import type { FrameHook, SilhouetteService } from './core/renderer.js';
+import type { CapturedFrame, FrameBudget, FrameHook, SilhouetteService } from './core/renderer.js';
 import type { BuildingInfo } from './render/buildings.js';
 import type { MaterialFactory } from './theme/materials.js';
 import type { RenderParams } from './theme/params.js';
@@ -96,6 +98,25 @@ export interface SceneApi {
   readonly reduceMotion: boolean;
   /** Frames rendered so far. */
   frames(): number;
+  /**
+   * Frame-budget counters for diagnostics: rendered frames, shadow-map
+   * redraws, passes per frame, draw calls and the held source tags. Allocates a
+   * snapshot, so call it from tooling rather than from a frame hook.
+   */
+  frameBudget(): FrameBudget;
+  /** Zeroes every {@link SceneApi.frameBudget} counter so a measurement window starts here. */
+  resetFrameBudget(): void;
+  /**
+   * Records the next `limit` rendered frames for offline attribution (plan item
+   * M1). Off by default, so the frame path allocates nothing until tooling asks
+   * for it; the returned frames are those of the previous, still-unread capture.
+   * Feed the result to `pnpm analyze:map-trace`.
+   */
+  startFrameCapture(limit?: number): CapturedFrame[];
+  /** Stops recording; frames captured so far stay readable via {@link SceneApi.capturedFrames}. */
+  stopFrameCapture(): void;
+  /** Copies the captured frames, oldest first. Allocates. */
+  capturedFrames(): CapturedFrame[];
 
   params(): RenderParams;
   world(): WorldModel | null;
@@ -137,6 +158,8 @@ export interface SceneApi {
    * only to rotate the camera or to move DOM labels skips the depth pass.)
    */
   requestRender(): void;
+  /** Temporarily suspend map pan/pick gestures while an editor gizmo is dragged. */
+  setPointerInputEnabled(enabled: boolean): void;
   /**
    * Keeps frames (and therefore the simulation) running until the returned
    * release function is called. `tag` is informational; holders are reference
@@ -144,9 +167,15 @@ export interface SceneApi {
    * no-op. Anything that animates over time must hold a source.
    *
    * A held tag also keeps the shadow map refreshing, unless the tag is known
-   * not to touch the 3D scene (`labels`, `camera:change`). Unknown tags count
-   * as scene motion, so an extension that animates a mesh is correct by
-   * default.
+   * not to touch the 3D scene (`labels`, `infoCards`, `camera:change`,
+   * `camera:idle`, and the `camera` / `zoomOut` viewer transitions, whose
+   * effect on the shadow camera is compared directly). Unknown tags count as
+   * scene motion, so an extension that animates a mesh is correct by default.
+   *
+   * The exempt names are **reserved by the engine**: never reuse `camera`,
+   * `zoomOut`, `labels`, `infoCards`, `camera:change` or `camera:idle` for a
+   * source that moves a shadow caster, or that motion would skip redraws. Use
+   * your own tag — an unknown tag is always treated as motion.
    */
   addActiveSource(tag: string): () => void;
   /** Tags currently holding the loop awake (diagnostics: "why does this map never go idle?"). */

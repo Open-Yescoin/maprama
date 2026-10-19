@@ -30,6 +30,7 @@ import { ACCENT } from '../theme/materials.js';
 import { discsGeo, mergeFlat, polyGeo, quadsGeo, ribbonGeo, type Disc, type Quad } from './geometry.js';
 import { prismGeometry } from './footprint.js';
 import { addPart, CAR_COLORS, clearGroup, noRaycast, sharedGeometries, tree, type RenderContext } from './parts.js';
+import { batchStaticMeshes } from './static-batch.js';
 
 const ROAD_Y: Record<RoadClass, number> = { alley: 0.07, local: 0.075, arterial: 0.08 };
 const MARK_Y = 0.09;
@@ -397,5 +398,8 @@ export class StaticWorldRenderer {
         s.traverse((o) => { (o as Mesh).raycast = noRaycast; });
       }
     }
+    // Clutter has its own visibility; overview blocks have animated height.
+    batchStaticMeshes(this.clutter);
+    batchStaticMeshes(this.group, new Set([this.clutter, ...(this.blocks ? [this.blocks] : [])]));
   }
 }

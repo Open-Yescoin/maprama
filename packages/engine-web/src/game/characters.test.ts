@@ -4,6 +4,7 @@ import type { CharacterSpec, LngLat, Projection } from '@maprama/protocol';
 import { AnimationClip, AnimationMixer, Box3, Group, Mesh, MeshBasicMaterial, Vector3, type Object3D } from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { describe, expect, it } from 'vitest';
+import { SilhouetteRegistry } from '../core/silhouette-registry.js';
 import type { SceneApi } from '../scene-api.js';
 import type { MaterialFactory } from '../theme/materials.js';
 import type { WorldModel } from '../world/model.js';
@@ -57,7 +58,7 @@ describe('clearing spec fields (null = back to the default)', () => {
 describe('CharacterManager.upsert with cleared fields (no WebGL)', () => {
   const scene = {
     materials: { make: (color: number) => new MeshBasicMaterial({ color }), ink: new MeshBasicMaterial() },
-    silhouette: { createMaterial: (color: number) => new MeshBasicMaterial({ color }), addSilhouette: () => {} },
+    silhouette: { createMaterial: (color: number) => new MeshBasicMaterial({ color }), addSilhouette: () => {}, removeSilhouette: () => {} },
     params: () => ({ outline: false }),
   } as unknown as SceneApi;
   const world = { kind: 'procedural' } as unknown as WorldModel;
@@ -138,6 +139,57 @@ describe('CharacterManager.upsert with cleared fields (no WebGL)', () => {
 
     mgr.upsert([{ id: 'me', animations: { idle: 'Strut' } }], world, proj);
     expect(me.model.clips.idle).toBe('Strut');
+  });
+});
+
+describe('silhouette lifecycle (no WebGL)', () => {
+  const at = { lng: 1, lat: 2 };
+  const world = { kind: 'procedural' } as unknown as WorldModel;
+  const proj = { toWorld: (ll: LngLat) => ({ x: ll.lng, z: ll.lat }) } as unknown as Projection;
+  const makeScene = () => {
+    const registry = new SilhouetteRegistry();
+    const api = {
+      materials: { make: (color: number) => new MeshBasicMaterial({ color }), ink: new MeshBasicMaterial() },
+      silhouette: {
+        createMaterial: (color: number) => new MeshBasicMaterial({ color }),
+        addSilhouette: (o: Object3D) => { registry.add(o); },
+        removeSilhouette: (o: Object3D) => { registry.remove(o); },
+      },
+      params: () => ({ outline: false }),
+    } as unknown as SceneApi;
+    return { api, registry };
+  };
+
+  it('releases every procedural silhouette of a removed character', () => {
+    const { api, registry } = makeScene();
+    const mgr = new CharacterManager(api, { onModelError: () => {} });
+    mgr.upsert([{ id: 'npc', position: at }], world, proj);
+    expect(registry.active).toBe(true);
+    expect(registry.size).toBeGreaterThan(0);
+    mgr.remove(['npc']);
+    expect(registry.active).toBe(false);
+    expect(registry.size).toBe(0);
+  });
+
+  it('releases the glTF silhouette proxy when the model is dropped, and keeps the procedural ones', () => {
+    const { api, registry } = makeScene();
+    const mgr = new CharacterManager(api, { onModelError: () => {} });
+    const me = mgr.upsert([{ id: 'me', position: at }], world, proj)[0]!;
+    const procedural = registry.size;
+    expect(procedural).toBeGreaterThan(0);
+
+    // A hand-built model state: the real GLB fixture is missing in this checkout.
+    const sil = new Mesh();
+    const wrap = new Group();
+    wrap.add(sil);
+    me.model = { wrap, mixer: new AnimationMixer(new Group()), all: [], clips: {}, actions: {}, current: null, sil };
+    me.modelUri = 'x.glb';
+    registry.add(sil);
+    expect(registry.size).toBe(procedural + 1);
+
+    me.setModel(null); // the model is dropped, the procedural body takes over
+    expect(registry.size).toBe(procedural);
+    expect(registry.active).toBe(true);
   });
 });
 

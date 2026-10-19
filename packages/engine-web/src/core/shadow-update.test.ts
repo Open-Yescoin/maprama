@@ -77,22 +77,43 @@ describe('ShadowUpdatePolicy', () => {
 });
 
 describe('active sources that matter for shadows', () => {
-  it('treats DOM-only and event-only tags as inert and everything else as scene motion', () => {
+  it('treats DOM-only, event-only and viewer-only tags as inert', () => {
     const s = new FrameScheduler();
     expect(s.hasSourceExcept(SHADOW_INERT_SOURCES)).toBe(false);
-    const labels = s.addSource('labels');
-    const cameraEvent = s.addSource('camera:change');
+    // `camera` / `zoomOut` are inert because the shadow camera itself is
+    // compared by `same()`; `camera:idle` and `infoCards` never touch the 3D
+    // scene at all.
+    for (const tag of ['labels', 'infoCards', 'camera:change', 'camera:idle', 'camera', 'zoomOut', 'avatars', 'buildings']) {
+      expect(SHADOW_INERT_SOURCES.has(tag)).toBe(true);
+      const release = s.addSource(tag);
+      expect(s.hasSourceExcept(SHADOW_INERT_SOURCES)).toBe(false);
+      release();
+    }
     expect(s.hasSourceExcept(SHADOW_INERT_SOURCES)).toBe(false);
+  });
+
+  it('keeps counting a view transition as motion: it squashes the building shadow casters', () => {
+    // `engine.ts` scales every building by `1 - view.t` during a 2D / 2.5D
+    // transition without touching the shadow camera, so the depth map must be
+    // allowed to refresh while `view` is held.
+    expect(SHADOW_INERT_SOURCES.has('view')).toBe(false);
+    const s = new FrameScheduler();
+    const release = s.addSource('view');
+    expect(s.hasSourceExcept(SHADOW_INERT_SOURCES)).toBe(true);
+    release();
+  });
+
+  it('counts anything else as scene motion, including an unknown tag', () => {
+    const s = new FrameScheduler();
+    expect(SHADOW_INERT_SOURCES.has('building:shadow')).toBe(false);
+    expect(SHADOW_INERT_SOURCES.has('traffic')).toBe(false);
     const chars = s.addSource('chars');
     expect(s.hasSourceExcept(SHADOW_INERT_SOURCES)).toBe(true);
     chars();
-    expect(s.hasSourceExcept(SHADOW_INERT_SOURCES)).toBe(false);
     // an unknown tag (a third-party addActiveSource) counts as motion
     const other = s.addSource('my-extension');
     expect(s.hasSourceExcept(SHADOW_INERT_SOURCES)).toBe(true);
     other();
-    labels();
-    cameraEvent();
     expect(s.hasSourceExcept(SHADOW_INERT_SOURCES)).toBe(false);
   });
 });

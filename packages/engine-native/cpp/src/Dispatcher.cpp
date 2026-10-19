@@ -247,6 +247,9 @@ void Dispatcher::route(const protocol::CommandEnvelope& envelope) {
       ignoreNotImplemented(envelope);
       return;
     case 24:  // setView -> 2D / 2.5D view mode (engine-web v1; the native flat mode is a follow-up)
+    case 25:  // setWorldAvatars -> web-engine world sprites (native support is a follow-up)
+    case 26:  // removeWorldAvatars
+    case 27:  // setStaticBuildingLayer -> authored buildings (native support is a follow-up)
       ignoreNotImplemented(envelope);
       return;
     default:  // unreachable: decodeCommand rejects unknown types

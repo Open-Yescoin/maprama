@@ -11,7 +11,7 @@ import {
 import { describe, expect, it } from 'vitest';
 import { NOT_IMPLEMENTED, UNSUPPORTED } from '../bridge/dispatcher.js';
 import { createDirectTransport } from '../bridge/transport.js';
-import { Engine } from './engine.js';
+import { commandNeedsShadowUpdate, Engine } from './engine.js';
 
 /** Just enough DOM for the engine shell to construct in node (WebGL creation then fails gracefully). */
 function fakeDom(): HTMLElement {
@@ -87,7 +87,20 @@ const samples: Record<Exclude<EngineCommandType, 'request'>, EngineCommand[]> = 
   setView: [{ type: 'setView', view: '2d', animate: false }, { type: 'setView', view: '2.5d' }],
   setGeofences: [{ type: 'setGeofences', geofences: [{ id: 'g', center: c, radiusMeters: 50 }] }],
   setBuildingStyle: [{ type: 'setBuildingStyle', buildingId: 'b', style: null }],
+  setStaticBuildingLayer: [{ type: 'setStaticBuildingLayer', layerId: 'buildings', buildings: [] }],
   setOverlayAnchors: [{ type: 'setOverlayAnchors', anchors: [{ id: 'a', coordinate: c }] }],
+  setWorldAvatars: [
+    {
+      type: 'setWorldAvatars',
+      layerId: 'residents',
+      avatars: [
+        { id: 'b1:0', coordinate: c, uri: 'https://cdn.test/a.png', widthMeters: 2.4, anchor: 'bottom', anchorHeight: 'roof', snapToBuilding: { maxDistanceMeters: 40 }, color: '#fc2a77', elevationMeters: 1.2, brightness: 1.35, z: 1 },
+        { id: 'b1:1', coordinate: c, fallbackLabel: 'L', color: '#18ddd9' },
+        { id: 'b1:2', coordinate: c, fallbackLabel: '12', pointer: true, float: { amplitudeMeters: 0.3, periodMs: 3200 }, brightness: 1.9 },
+      ],
+    },
+  ],
+  removeWorldAvatars: [{ type: 'removeWorldAvatars', layerId: 'residents' }],
   subscribe: SUBSCRIPTION_TOPICS.map((topic) => ({ type: 'subscribe', topic, throttleMs: 100 }) as EngineCommand),
   unsubscribe: SUBSCRIPTION_TOPICS.map((topic) => ({ type: 'unsubscribe', topic }) as EngineCommand),
 };
@@ -152,5 +165,34 @@ describe('setCamera follow', () => {
     expect(errors[0]!.message).toContain('ghost');
     expect(errors.map((e) => e.code)).not.toContain(UNSUPPORTED);
     engine.destroy();
+  });
+});
+
+describe('shadow invalidation per command', () => {
+  it('keeps the shadow map for camera- and DOM-only commands', () => {
+    // Not drawing the shadow map for these is only safe because the policy compares the shadow
+    // camera (the sun target and the zoom-out extent) itself: see `requestShadowUpdate`.
+    expect(commandNeedsShadowUpdate('setCamera')).toBe(false);
+    expect(commandNeedsShadowUpdate('setUi')).toBe(false);
+    expect(commandNeedsShadowUpdate('setLabels')).toBe(false);
+  });
+
+  it('redraws for anything that can rebuild or move a caster', () => {
+    // `setView` is the interesting one: the flat view rescales every building while the shadow
+    // camera stays put, so the comparison cannot see it and the invalidation must stay.
+    for (const type of ['init', 'setTheme', 'setView', 'upsertCharacters', 'setWorldAvatars', 'setBuildingStyle'] as const) {
+      expect(commandNeedsShadowUpdate(type)).toBe(true);
+    }
+  });
+
+  it('redraws for every content command in the protocol', () => {
+    // The risk this pins down is a *content* command being added to the inert set: it would keep a
+    // stale depth map (missed or ghost shadows) with no other symptom, so every command that can
+    // rebuild or move content is listed rather than sampled.
+    const content = ENGINE_COMMAND_TYPES.filter(
+      (t) => t !== 'request' && t !== 'setCamera' && t !== 'setUi' && t !== 'setLabels',
+    );
+    const missing = content.filter((t) => !commandNeedsShadowUpdate(t));
+    expect(missing).toEqual([]);
   });
 });

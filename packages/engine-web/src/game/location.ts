@@ -197,7 +197,9 @@ export class SimulatedWalker {
       this.seg = (this.seg + 1) % L;
     }
     const a2 = this.loop[this.seg]!, b2 = this.loop[(this.seg + 1) % L]!;
-    this.truth = { x: a2.x + (b2.x - a2.x) * this.t, z: a2.z + (b2.z - a2.z) * this.t };
+    // Written in place: every read goes through the fields, nothing holds the identity.
+    this.truth.x = a2.x + (b2.x - a2.x) * this.t;
+    this.truth.z = a2.z + (b2.z - a2.z) * this.t;
     this.timer -= dt;
     if (this.timer > 0) return null;
     this.timer = 1;
