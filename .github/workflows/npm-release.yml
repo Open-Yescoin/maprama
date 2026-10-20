@@ -1,25 +1,95 @@
 name: npm release
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/protocol/**'
+      - 'packages/engine-web/**'
   workflow_dispatch:
+    inputs:
+      expected_sha:
+        description: 'Optional main commit SHA prepared for publishing'
+        required: false
+        type: string
 
 permissions:
   contents: read
-  id-token: write
+
+concurrency:
+  group: npm-release-main
+  cancel-in-progress: false
 
 jobs:
-  publish:
-    if: github.ref == 'refs/heads/main'
+  prepare:
+    if: github.event_name == 'push'
     runs-on: ubuntu-latest
-    environment: npm-release
+    permissions:
+      contents: write
+      actions: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
           node-version: 24
           registry-url: https://registry.npmjs.org
           cache: npm
+      - name: Plan release and synchronize package versions
+        id: release
+        run: node scripts/prepare-npm-release.mjs prepare
+      - name: Synchronize npm lockfile
+        if: steps.release.outputs.bump == 'true'
+        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+      - name: Verify frozen install
+        if: steps.release.outputs.release == 'true'
+        run: npm ci --no-audit --no-fund
+      - name: Commit release version
+        if: steps.release.outputs.bump == 'true'
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git add -u -- packages tools services package-lock.json
+          git commit -m "chore(release): v${RELEASE_VERSION}"
+          git push origin HEAD:main
+      - name: Start trusted npm publishing
+        if: steps.release.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run npm-release.yml --repo "$GITHUB_REPOSITORY" --ref main -f expected_sha="$(git rev-parse HEAD)"
+
+  publish:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: npm-release
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+          cache: npm
+      - name: Check prepared commit
+        env:
+          EXPECTED_SHA: ${{ inputs.expected_sha }}
+        run: |
+          if [[ -n "$EXPECTED_SHA" && "$EXPECTED_SHA" != "$GITHUB_SHA" ]]; then
+            echo "Expected $EXPECTED_SHA, workflow started at $GITHUB_SHA" >&2
+            exit 1
+          fi
+      - name: Check published versions
+        id: release
+        run: node scripts/prepare-npm-release.mjs publish
       - name: C++ toolchain
+        if: steps.release.outputs.release == 'true'
         run: |
           if ! command -v clang++ >/dev/null 2>&1; then
             sudo apt-get update
@@ -27,10 +97,27 @@ jobs:
           fi
           sudo sysctl -w vm.mmap_rnd_bits=28
       - run: npm ci --no-audit --no-fund
+        if: steps.release.outputs.release == 'true'
       - run: npm run build
+        if: steps.release.outputs.release == 'true'
       - run: npm run typecheck
+        if: steps.release.outputs.release == 'true'
       - run: npm test
+        if: steps.release.outputs.release == 'true'
         env:
           CI: '1'
-      - run: npm publish -w @open-yescoin/maprama-protocol --access public --provenance
-      - run: npm publish -w @open-yescoin/maprama-engine-web --access public --provenance
+      - name: Publish protocol
+        if: steps.release.outputs.publish_protocol == 'true'
+        run: npm publish -w @open-yescoin/maprama-protocol --access public --provenance
+      - name: Publish engine-web
+        if: steps.release.outputs.publish_engine == 'true'
+        run: npm publish -w @open-yescoin/maprama-engine-web --access public --provenance
+      - name: Tag completed release
+        if: steps.release.outputs.release == 'true'
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          git config user.name github-actions[bot]
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git tag -a "v${RELEASE_VERSION}" -m "Open-Yescoin Maprama npm packages ${RELEASE_VERSION}"
+          git push origin "v${RELEASE_VERSION}"

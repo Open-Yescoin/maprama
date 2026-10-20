@@ -126,8 +126,8 @@ Use `world={{ kind: 'data', world }}` with a `WorldData` JSON built by
 | `docs`                   | `@open-yescoin/maprama-docs`: VitePress documentation site with a live playground (not a workspace)       | private                                                   | `npm run docs:dev` · `npm run docs:build`                                                                       |
 | `reference/preview`      | Browser prototype of the whole product (read-only reference)                                | read-only                                                 | open `reference/preview/preview.html` in a browser                                                              |
 
-"Published" means the package is prepared for npm (`0.1.0`); nothing has been
-published yet.
+`@open-yescoin/maprama-protocol` and `@open-yescoin/maprama-engine-web` are
+published on npm. Other workspaces are not part of the automated npm release.
 
 ## Development
 
@@ -145,6 +145,21 @@ npm run docs:build   # installs docs dependencies on first use
 engine-web and docs screenshot scripts need Google Chrome (`CHROME_PATH` to
 override). See [CONTRIBUTING.md](./CONTRIBUTING.md) and
 [SECURITY.md](./SECURITY.md).
+
+## npm releases
+
+Changes to `packages/protocol` or `packages/engine-web` merged into `main`
+automatically start the npm release workflow. It advances both package patch
+versions together, updates internal workspace dependencies and the root lockfile,
+then starts a second run from the release commit. That run builds, typechecks,
+tests, publishes the missing packages through npm Trusted Publishing, and tags
+the completed release. Changes outside those two package directories do not
+start an npm release. Consumers still choose when to update their pinned versions.
+
+If publishing is interrupted, rerun **Actions → npm release → Run workflow** on
+`main`. The workflow checks npm and publishes only the package versions still
+missing. A successful release is recorded by its `vX.Y.Z` Git tag. Do not edit
+that tag or republish an existing npm version.
 
 ## License
 
