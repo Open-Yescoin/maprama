@@ -29,7 +29,7 @@
   },
   "dependencies": {
     "@open-yescoin/maprama-osm": "^0.2.0",
-    "@open-yescoin/maprama-protocol": "^0.3.1",
+    "@open-yescoin/maprama-protocol": "^0.3.2",
     "pmtiles": "4.5.0"
   },
   "devDependencies": {
