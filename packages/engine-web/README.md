@@ -2,9 +2,8 @@
 
 The Maprama v1 render engine: a three.js 2.5D diorama map that implements the
 [`@open-yescoin/maprama-protocol`](https://www.npmjs.com/package/@open-yescoin/maprama-protocol) message
-contract. [`@open-yescoin/maprama-react-native`](https://www.npmjs.com/package/@open-yescoin/maprama-react-native)
-runs it inside a WebView, so React Native apps do not need to install or call
-it themselves.
+contract. WebView hosts can load the bundled engine HTML; browser hosts can
+import the ESM library directly.
 
 ```sh
 npm i @open-yescoin/maprama-engine-web
@@ -42,8 +41,8 @@ not bundled.
 
 ## Links
 
-- [Repository and documentation](https://github.com/CraftsManShip001/maprama)
-- [Changelog](https://github.com/CraftsManShip001/maprama/blob/main/CHANGELOG.md)
+- [Repository and documentation](https://github.com/Open-Yescoin/maprama)
+- [Changelog](https://github.com/Open-Yescoin/maprama/blob/main/CHANGELOG.md)
 
 ## License
 

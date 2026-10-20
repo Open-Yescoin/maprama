@@ -4,10 +4,9 @@ The shared contract between Maprama engines and hosts: TypeScript types for
 worlds, themes, characters, drops and labels, the command/event message codec
 with runtime validation, geo projection and the theme presets.
 
-Apps normally get this package through
-[`@open-yescoin/maprama-react-native`](https://www.npmjs.com/package/@open-yescoin/maprama-react-native).
-Install it directly to build world data, write an engine or host, or use the
-types and presets on a server.
+Install this package directly to build world data, write an engine or host, or
+use the types and presets on a server. Browser hosts can use it alongside
+`@open-yescoin/maprama-engine-web`.
 
 ```sh
 npm i @open-yescoin/maprama-protocol
@@ -50,8 +49,8 @@ The package is ESM only, has no runtime dependencies and no side effects.
 
 ## Links
 
-- [Repository and documentation](https://github.com/CraftsManShip001/maprama)
-- [Changelog](https://github.com/CraftsManShip001/maprama/blob/main/CHANGELOG.md)
+- [Repository and documentation](https://github.com/Open-Yescoin/maprama)
+- [Changelog](https://github.com/Open-Yescoin/maprama/blob/main/CHANGELOG.md)
 
 ## License
 
