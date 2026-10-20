@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Character, Geofence, type MapramaViewRef } from '@maprama/react-native';
-import { ROOF_SHAPES, type BuildingStyle, type LngLat, type LocationSourceKind, type Massing, type RoofShape } from '@maprama/protocol';
+import { Character, Geofence, type MapramaViewRef } from '@open-yescoin/maprama-react-native';
+import { ROOF_SHAPES, type BuildingStyle, type LngLat, type LocationSourceKind, type Massing, type RoofShape } from '@open-yescoin/maprama-protocol';
 import { DemoMap } from '../src/components/DemoMap';
 import { Button, ButtonRow, Chips, EventLog, Readout, ScreenLayout, Section, Toggle, useEventLog } from '../src/components/ui';
 import { SAMPLE_BUILDING, SEONGSU_WORLD, STATION, offsetMeters } from '../src/data/seongsu';

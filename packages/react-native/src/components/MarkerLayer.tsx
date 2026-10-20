@@ -4,7 +4,7 @@
 
 import { useEffect, useRef } from 'react';
 import { Image } from 'react-native';
-import { MARKER_SHAPES, type MarkerIcon, type MarkerSpec } from '@maprama/protocol';
+import { MARKER_SHAPES, type MarkerIcon, type MarkerSpec } from '@open-yescoin/maprama-protocol';
 import type { MarkerLayerState } from '../batching';
 import { useMapContext } from '../context';
 import type { MarkerIconInput, MarkerLayerProps, MarkerPressInfo } from '../types';

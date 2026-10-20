@@ -30,7 +30,7 @@
  * @module
  */
 
-import { BUILDING_KINDS, POI_CATEGORIES, ROAD_CLASSES } from '@maprama/protocol';
+import { BUILDING_KINDS, POI_CATEGORIES, ROAD_CLASSES } from '@open-yescoin/maprama-protocol';
 import type { Pt } from './geometry.js';
 import { LAYER_BY_ID, LAYER_ID, LAYER_NAMES, emptyLayers, type LayerName, type TileLayers } from './types.js';
 

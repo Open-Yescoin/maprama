@@ -98,7 +98,7 @@ and are available at the URLs below.
 
 three.js (three) - MIT License
   Copyright (c) 2010-2026 three.js authors. https://github.com/mrdoob/three.js
-  Bundled into @maprama/engine-web (including the GLTFLoader, DRACOLoader and
+  Bundled into @open-yescoin/maprama-engine-web (including the GLTFLoader, DRACOLoader and
   meshopt decoder example modules).
 
 glTF Transform (@gltf-transform/core, /extensions, /functions) - MIT License
@@ -111,7 +111,7 @@ meshoptimizer (meshoptimizer) - MIT License
 
 Draco (draco3dgltf) - Apache License 2.0
   https://github.com/google/draco
-  Used by tools/assets. @maprama/engine-web loads the Draco decoder at runtime
+  Used by tools/assets. @open-yescoin/maprama-engine-web loads the Draco decoder at runtime
   from gstatic.com only for Draco-compressed models; it is not bundled.
 
 osm-pbf-parser-node (osm-pbf-parser-node) - MIT License
@@ -128,7 +128,7 @@ pbf (pbf) - BSD 3-Clause License
 
 PMTiles (pmtiles) - BSD 3-Clause License
   https://github.com/protomaps/PMTiles
-  Used by services/api, and bundled into @maprama/engine-web, which reads a
+  Used by services/api, and bundled into @open-yescoin/maprama-engine-web, which reads a
   streamed tile world's archive (`WorldSource { kind: 'tiles' }`) with HTTP
   range requests. It depends on fflate (MIT, https://github.com/101arrowz/fflate)
   for gzip where DecompressionStream is unavailable; fflate is bundled with it.

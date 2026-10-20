@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Text } from 'react-native';
-import type { WorldSource } from '@maprama/protocol';
+import type { WorldSource } from '@open-yescoin/maprama-protocol';
 import { DemoMap } from '../src/components/DemoMap';
 import { Chips, EventLog, Readout, ScreenLayout, Section, styles, useEventLog } from '../src/components/ui';
 import { WORLD_URL } from '../src/config';

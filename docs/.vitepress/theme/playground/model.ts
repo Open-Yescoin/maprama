@@ -15,7 +15,7 @@ import {
   TIMES_OF_DAY,
   TRAVEL_MODES,
   ZOOM_OUT_BEHAVIORS,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 import type {
   DropType,
   HoloIconTile,
@@ -31,12 +31,12 @@ import type {
   WorldSource,
   ZoomOutBehavior,
   LabelStyle,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 
 export const BRAND = {
   name: 'Maprama',
-  rnPackage: '@maprama/react-native',
-  protocolPackage: '@maprama/protocol',
+  rnPackage: '@open-yescoin/maprama-react-native',
+  protocolPackage: '@open-yescoin/maprama-protocol',
 } as const;
 
 export const OPTIONS = {

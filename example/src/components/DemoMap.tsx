@@ -1,6 +1,6 @@
 import { useState, type ReactNode, type RefObject } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { MapramaView, type MapramaErrorEvent, type MapramaViewProps, type MapramaViewRef } from '@maprama/react-native';
+import { MapramaView, type MapramaErrorEvent, type MapramaViewProps, type MapramaViewRef } from '@open-yescoin/maprama-react-native';
 
 export interface DemoMapProps extends Omit<MapramaViewProps, 'style' | 'testID' | 'children'> {
   mapRef?: RefObject<MapramaViewRef | null>;

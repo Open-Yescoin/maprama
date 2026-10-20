@@ -7,7 +7,7 @@
  * @module
  */
 
-import type { LabelContent, LabelContentMode } from '@maprama/protocol';
+import type { LabelContent, LabelContentMode } from '@open-yescoin/maprama-protocol';
 import {
   BoxGeometry,
   CanvasTexture,

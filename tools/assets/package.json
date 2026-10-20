@@ -1,5 +1,5 @@
 {
-  "name": "@maprama/assets",
+  "name": "@open-yescoin/maprama-assets",
   "version": "0.2.0",
   "description": "maprama CLI: inspect, validate and optimize glTF/GLB models for Maprama engines.",
   "keywords": [
@@ -57,7 +57,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@maprama/protocol": "^0.2.0",
+    "@open-yescoin/maprama-protocol": "^0.3.0",
     "@gltf-transform/core": "4.5.0",
     "@gltf-transform/extensions": "4.5.0",
     "@gltf-transform/functions": "4.5.0",

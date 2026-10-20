@@ -1,6 +1,6 @@
 /**
  * Web-Mercator slippy-tile maths (EPSG:3857 / XYZ) and the inverse of the
- * equirectangular local-tangent-plane projection `@maprama/protocol` uses.
+ * equirectangular local-tangent-plane projection `@open-yescoin/maprama-protocol` uses.
  *
  * Every function here is pure and deterministic: the same lng/lat always maps to
  * the same tile and the same tile-local integer. That is what lets the pipeline
@@ -9,9 +9,9 @@
  * @module
  */
 
-/** Metres per degree of longitude at the equator, as `@maprama/protocol` uses it. */
+/** Metres per degree of longitude at the equator, as `@open-yescoin/maprama-protocol` uses it. */
 export const METERS_PER_DEGREE_LNG = 111320;
-/** Metres per degree of latitude, as `@maprama/protocol` uses it. */
+/** Metres per degree of latitude, as `@open-yescoin/maprama-protocol` uses it. */
 export const METERS_PER_DEGREE_LAT = 110540;
 /** Web Mercator equatorial circumference, metres. */
 export const EARTH_CIRCUMFERENCE = 40075016.685578488;
@@ -26,7 +26,7 @@ export interface TileXYZ {
   y: number;
 }
 
-/** A geographic box. Same field names as `@maprama/osm`'s `BBox`. */
+/** A geographic box. Same field names as `@open-yescoin/maprama-osm`'s `BBox`. */
 export interface GeoBounds {
   west: number;
   south: number;

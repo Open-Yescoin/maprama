@@ -1,9 +1,9 @@
 /**
- * `@maprama/api`: the hosted Maprama service as a library.
+ * `@open-yescoin/maprama-api`: the hosted Maprama service as a library.
  *
  * - {@link createApp}: Hono app factory over injected dependencies.
  * - Adapters: in-memory (`createMemoryDeps`), Cloudflare D1 (`createD1Repos`) and R2 (`R2BlobStore`).
- * - Verification helpers for app servers: also available as `@maprama/api/verify`.
+ * - Verification helpers for app servers: also available as `@open-yescoin/maprama-api/verify`.
  *
  * @packageDocumentation
  */

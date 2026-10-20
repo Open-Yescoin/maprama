@@ -1,5 +1,5 @@
 /**
- * `@maprama/api/verify`: helpers for app servers that receive data from the
+ * `@open-yescoin/maprama-api/verify`: helpers for app servers that receive data from the
  * Maprama service.
  *
  * - {@link verifyWebhookSignature}: checks the `Maprama-Signature` header of a
@@ -12,7 +12,7 @@
  * Node.js 20+, Deno, Bun, Cloudflare Workers and browsers.
  *
  * ```ts
- * import { verifyWebhookSignature, verifyReceipt } from '@maprama/api/verify';
+ * import { verifyWebhookSignature, verifyReceipt } from '@open-yescoin/maprama-api/verify';
  *
  * const raw = await request.text(); // the exact bytes, before JSON.parse
  * const sig = await verifyWebhookSignature(raw, request.headers.get('Maprama-Signature'), process.env.MAPRAMA_WEBHOOK_SECRET!);
@@ -25,7 +25,7 @@
  * @packageDocumentation
  */
 
-/** JSON value (structurally identical to `JsonValue` in `@maprama/protocol`; kept local so this module has zero imports). */
+/** JSON value (structurally identical to `JsonValue` in `@open-yescoin/maprama-protocol`; kept local so this module has zero imports). */
 type Json = null | boolean | number | string | Json[] | { [key: string]: Json };
 
 /** Name of the HTTP header carrying the webhook signature. */

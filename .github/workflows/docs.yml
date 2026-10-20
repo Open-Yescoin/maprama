@@ -37,7 +37,7 @@ jobs:
             package-lock.json
             docs/package-lock.json
       - run: npm ci --no-audit --no-fund
-      - run: npm run build -w @maprama/protocol && npm run build -w @maprama/engine-web
+      - run: npm run build -w @open-yescoin/maprama-protocol && npm run build -w @open-yescoin/maprama-engine-web
       - name: Build docs for the /maprama/ project site
         run: npm run docs:build
         env:

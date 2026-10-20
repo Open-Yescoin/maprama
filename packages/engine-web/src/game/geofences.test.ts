@@ -1,4 +1,4 @@
-import { validateEngineEvent } from '@maprama/protocol';
+import { validateEngineEvent } from '@open-yescoin/maprama-protocol';
 import { describe, expect, it } from 'vitest';
 import { GeofenceTracker } from './geofences.js';
 

@@ -7,7 +7,7 @@
 
 import { stat } from 'node:fs/promises';
 import { Primitive, getBounds, type Document, type Scene, type vec3 } from '@gltf-transform/core';
-import { ANIMATION_NAMES, type AnimationName } from '@maprama/protocol';
+import { ANIMATION_NAMES, type AnimationName } from '@open-yescoin/maprama-protocol';
 import { getIO } from './io.js';
 
 /** Axis label. `±` means the sign could not be inferred. */

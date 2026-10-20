@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import type { WorldData } from '@maprama/protocol';
+import type { WorldData } from '@open-yescoin/maprama-protocol';
 import { buildWorldWithStats, type BuildWorldOptions } from '../src/build.js';
 import { buildOverpassQuery } from '../src/overpass.js';
 import { extractFromPbf, extractOneFromPbf, selectsPbfElement, surveyPbfNodes } from '../src/pbf.js';

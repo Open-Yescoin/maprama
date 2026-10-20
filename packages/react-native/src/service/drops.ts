@@ -5,7 +5,7 @@
  * @module
  */
 
-import { validateEngineCommand, type DropSpec } from '@maprama/protocol';
+import { validateEngineCommand, type DropSpec } from '@open-yescoin/maprama-protocol';
 
 /** Connection settings for the drops service. */
 export interface DropsServiceConfig {

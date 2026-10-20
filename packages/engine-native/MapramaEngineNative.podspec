@@ -2,7 +2,7 @@ require "json"
 
 package = JSON.parse(File.read(File.join(__dir__, "package.json")))
 
-# @maprama/engine-native (M1): the shared C++ core (cpp/src) + the Obj-C++ Fabric view / TurboModule (ios/)
+# @open-yescoin/maprama-engine-native (M1): the shared C++ core (cpp/src) + the Obj-C++ Fabric view / TurboModule (ios/)
 # on top of the official prebuilt MapLibre Native iOS SDK (DESIGN.md §1, §9). New Architecture only.
 Pod::Spec.new do |s|
   s.name         = "MapramaEngineNative"

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Builds every npm workspace that has a `build` script, dependencies first.
 //
-// The order is a topological sort over the workspaces' `@maprama/*` dependencies (dependencies,
+// The order is a topological sort over the workspaces' `@open-yescoin/maprama-*` dependencies (dependencies,
 // peerDependencies and devDependencies), so a package is only built after the packages whose build
 // output (JS and type declarations) it imports. `npm run build --workspaces` would use alphabetical
 // order instead, which breaks on a clean checkout (e.g. engine-native before react-native).

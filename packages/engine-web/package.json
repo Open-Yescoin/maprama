@@ -1,7 +1,7 @@
 {
-  "name": "@maprama/engine-web",
-  "version": "0.2.1",
-  "description": "Maprama web render engine (three.js) implementing the @maprama/protocol message contract.",
+  "name": "@open-yescoin/maprama-engine-web",
+  "version": "0.3.0",
+  "description": "Maprama web render engine (three.js) implementing the @open-yescoin/maprama-protocol message contract.",
   "keywords": [
     "maprama",
     "map",
@@ -61,7 +61,7 @@
     "fixtures": "node scripts/make-glb-fixture.mjs"
   },
   "dependencies": {
-    "@maprama/protocol": "^0.2.1",
+    "@open-yescoin/maprama-protocol": "^0.3.0",
     "gsap": "^3.15.0",
     "pmtiles": "4.5.0",
     "three": "0.186.0"

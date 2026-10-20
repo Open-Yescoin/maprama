@@ -30,7 +30,7 @@ import type {
   TravelLeg,
   TravelMode,
   ViewMode,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 import { throttle } from './batching';
 import { MapramaError, normalizeErrorCode, type MapramaErrorCode } from './errors';
 import type { EngineHost } from './host/EngineHost';

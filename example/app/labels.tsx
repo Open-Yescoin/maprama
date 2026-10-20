@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { type MapramaViewRef, type LabelContentFunction } from '@maprama/react-native';
-import { HOLO_ICON_TILES, LABEL_CONTENT_MODES, LABEL_STYLES, type HoloIconTile, type LabelContentMode, type LabelStyle } from '@maprama/protocol';
+import { type MapramaViewRef, type LabelContentFunction } from '@open-yescoin/maprama-react-native';
+import { HOLO_ICON_TILES, LABEL_CONTENT_MODES, LABEL_STYLES, type HoloIconTile, type LabelContentMode, type LabelStyle } from '@open-yescoin/maprama-protocol';
 import { DemoMap } from '../src/components/DemoMap';
 import { Button, ButtonRow, Chips, Readout, ScreenLayout, Section, Toggle } from '../src/components/ui';
 import { SEONGSU_WORLD, STATION } from '../src/data/seongsu';

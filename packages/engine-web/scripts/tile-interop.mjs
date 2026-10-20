@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 /**
  * Interoperability check: an archive written by the **production pipeline**
- * (`@maprama/tiles`) read by the **engine**.
+ * (`@open-yescoin/maprama-tiles`) read by the **engine**.
  *
- *   npm run build -w @maprama/protocol && npm run build -w @maprama/osm \
- *     && npm run build -w @maprama/tiles
+ *   npm run build -w @open-yescoin/maprama-protocol && npm run build -w @open-yescoin/maprama-osm \
+ *     && npm run build -w @open-yescoin/maprama-tiles
  *   node --import tsx scripts/tile-interop.mjs
  *
  * Everything else in this repository tests the two halves separately: the
@@ -29,8 +29,8 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const repo = join(root, '..', '..');
 
-const tiles = await import('@maprama/tiles').catch((e) => {
-  throw new Error(`tile-interop: cannot import @maprama/tiles (run \`npm run build -w @maprama/tiles\`): ${e.message}`);
+const tiles = await import('@open-yescoin/maprama-tiles').catch((e) => {
+  throw new Error(`tile-interop: cannot import @open-yescoin/maprama-tiles (run \`npm run build -w @open-yescoin/maprama-tiles\`): ${e.message}`);
 });
 const {
   ArchiveWriter,
@@ -99,7 +99,7 @@ await writer.finish(archivePath, {
   tileCompression: Compression.Gzip,
 });
 const buffer = readFileSync(archivePath);
-console.log(`tile-interop: @maprama/tiles wrote ${built.length} tiles into ${(buffer.length / 1024).toFixed(1)} KiB`);
+console.log(`tile-interop: @open-yescoin/maprama-tiles wrote ${built.length} tiles into ${(buffer.length / 1024).toFixed(1)} KiB`);
 
 let requests = 0;
 const server = createServer((req, res) => {

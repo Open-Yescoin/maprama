@@ -1,6 +1,6 @@
 # 월드 데이터와 타일
 
-엔진은 **WorldData**라는 작은 벡터 지도를 받아 건물과 도로, 물, 공원, 라벨을 만듭니다. 형식은 `@maprama/protocol`의 [`WorldData`](/api/reference/protocol/interfaces/WorldData)가 정의하고, 두 엔진이 똑같이 읽습니다.
+엔진은 **WorldData**라는 작은 벡터 지도를 받아 건물과 도로, 물, 공원, 라벨을 만듭니다. 형식은 `@open-yescoin/maprama-protocol`의 [`WorldData`](/api/reference/protocol/interfaces/WorldData)가 정의하고, 두 엔진이 똑같이 읽습니다.
 
 ## 월드를 넘기는 세 가지 방법
 
@@ -25,7 +25,7 @@ type WorldSource =
 - 앱 API는 모두 `{ lng, lat }` 경위도를 씁니다. 엔진이 `createProjection`으로 변환합니다.
 
 ```ts
-import { createProjection } from '@maprama/protocol';
+import { createProjection } from '@open-yescoin/maprama-protocol';
 
 const proj = createProjection({ origin: { lng: 127.0565, lat: 37.5445 }, unitMeters: 8 });
 const p = proj.toWorld({ lng: 127.0571, lat: 37.5449 }); // { x, z }

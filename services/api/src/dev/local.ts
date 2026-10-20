@@ -7,7 +7,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { serve } from '@hono/node-server';
-import { validateWorldData, type WorldData } from '@maprama/protocol';
+import { validateWorldData, type WorldData } from '@open-yescoin/maprama-protocol';
 import { createApp } from '../app.js';
 import { createMemoryDeps } from '../adapters/memory/index.js';
 import { BLOB_KEYS, PLAN_DEFAULT_QUOTA } from '../config.js';

@@ -20,7 +20,7 @@ import {
   type Station,
   type Vec2,
   type WorldData,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 import {
   classifyKind,
   classifyPoi,

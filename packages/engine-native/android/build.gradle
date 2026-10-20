@@ -1,4 +1,4 @@
-// @maprama/engine-native (M1): Kotlin Fabric view manager + TurboModule, the shared C++ core compiled with
+// @open-yescoin/maprama-engine-native (M1): Kotlin Fabric view manager + TurboModule, the shared C++ core compiled with
 // CMake into libmaprama_engine.so (JNI only, no React Native C++ dependency), and the official prebuilt
 // MapLibre Native Android SDK (DESIGN.md §1, §9). New Architecture only.
 apply plugin: "com.android.library"

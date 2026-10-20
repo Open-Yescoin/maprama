@@ -1,4 +1,4 @@
-// Built-in theme data embedded from @maprama/protocol (generated ThemeData.cpp, scripts/generate-theme-data.mjs).
+// Built-in theme data embedded from @open-yescoin/maprama-protocol (generated ThemeData.cpp, scripts/generate-theme-data.mjs).
 #pragma once
 
 namespace maprama::theme_data {

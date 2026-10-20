@@ -3,7 +3,7 @@
  */
 
 import { useEffect, useReducer, useRef, useState, useSyncExternalStore } from 'react';
-import { haversineMeters, type DropSpec, type JsonValue, type LngLat } from '@maprama/protocol';
+import { haversineMeters, type DropSpec, type JsonValue, type LngLat } from '@open-yescoin/maprama-protocol';
 import { useMapContext } from '../context';
 import { useCharacterPosition } from '../hooks/useCharacterPosition';
 import { resolveModel } from '../model';

@@ -1,4 +1,4 @@
-# @maprama/tile-spike
+# @open-yescoin/maprama-tile-spike
 
 **실험용입니다. 제품 코드가 아닙니다.**
 [`design/tile-format.md`](../../design/tile-format.md)의 숫자를 낸 스파이크이고, 그 숫자를 누구든
@@ -15,8 +15,8 @@
 
 ```sh
 npm install                              # 저장소 루트에서 (npm workspaces)
-npm run build -w @maprama/protocol
-npm run build -w @maprama/osm            # 지역 샘플을 새로 받을 때만 필요
+npm run build -w @open-yescoin/maprama-protocol
+npm run build -w @open-yescoin/maprama-osm            # 지역 샘플을 새로 받을 때만 필요
 ```
 
 ## 명령

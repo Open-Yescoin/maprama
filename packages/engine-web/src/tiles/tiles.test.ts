@@ -1,4 +1,4 @@
-import { decodeTile, type MtilTile } from '@maprama/protocol';
+import { decodeTile, type MtilTile } from '@open-yescoin/maprama-protocol';
 import { describe, expect, it, vi } from 'vitest';
 import { encodeTile } from '../../../protocol/src/__fixtures__/tile.js';
 import { assembleTileWorld } from './assemble.js';

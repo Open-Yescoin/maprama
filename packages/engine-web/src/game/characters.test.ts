@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import type { CharacterSpec, LngLat, Projection } from '@maprama/protocol';
+import type { CharacterSpec, LngLat, Projection } from '@open-yescoin/maprama-protocol';
 import { AnimationClip, AnimationMixer, Box3, Group, Mesh, MeshBasicMaterial, Vector3, type Object3D } from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { describe, expect, it } from 'vitest';

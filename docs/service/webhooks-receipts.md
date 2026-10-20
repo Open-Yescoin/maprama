@@ -8,7 +8,7 @@
 둘 다 앱 서버에서 검증한 뒤에 보상을 지급하세요.
 
 ```
-기기 ── drop:collect ──▶ @maprama/react-native ── POST /v1/drops/collect ──▶ 서비스
+기기 ── drop:collect ──▶ @open-yescoin/maprama-react-native ── POST /v1/drops/collect ──▶ 서비스
   ▲                                                                        │
   │ onCollectVerified { receipt }                                          │ 검증 성공
   │                                                                        ▼
@@ -67,11 +67,11 @@ Maprama-Delivery: evt_...
 
 ## Node 앱 서버에서 검증
 
-`@maprama/api/verify`는 의존성 없는 Web Crypto 함수만 담고 있어서 Node, Workers, Deno 어디서나 씁니다.
+`@open-yescoin/maprama-api/verify`는 의존성 없는 Web Crypto 함수만 담고 있어서 Node, Workers, Deno 어디서나 씁니다.
 
 ```ts
 import express from 'express';
-import { verifyWebhookSignature, verifyReceipt } from '@maprama/api/verify';
+import { verifyWebhookSignature, verifyReceipt } from '@open-yescoin/maprama-api/verify';
 
 const app = express();
 

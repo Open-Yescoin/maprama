@@ -3,7 +3,7 @@
  */
 
 import { useEffect, useState } from 'react';
-import type { CameraState } from '@maprama/protocol';
+import type { CameraState } from '@open-yescoin/maprama-protocol';
 import { DEFAULT_THROTTLE_MS } from '../ref';
 import type { MapramaViewRef, MapramaViewRefLike } from '../types';
 import { useMapApi } from './useMapramaView';

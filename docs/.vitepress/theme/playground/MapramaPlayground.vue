@@ -1,8 +1,8 @@
 <script setup lang="ts">
 /**
- * Interactive playground: runs the real `@maprama/engine-web` in the page via
+ * Interactive playground: runs the real `@open-yescoin/maprama-engine-web` in the page via
  * `createEngine` + the in-page direct transport, drives it with protocol
- * commands, and mirrors the state as `@maprama/react-native` JSX and theme JSON.
+ * commands, and mirrors the state as `@open-yescoin/maprama-react-native` JSX and theme JSON.
  *
  * The engine implements labels, characters/travel and drops. If an engine build
  * answers a command with `unsupported` (or the legacy `NOT_IMPLEMENTED`), the
@@ -14,8 +14,8 @@
  */
 import { computed, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue';
 import { withBase } from 'vitepress';
-import type { DirectTransport, EngineHandle } from '@maprama/engine-web';
-import type { DropSpec, EngineCommand, EngineEvent, LabelInfo, LngLat, TravelMode } from '@maprama/protocol';
+import type { DirectTransport, EngineHandle } from '@open-yescoin/maprama-engine-web';
+import type { DropSpec, EngineCommand, EngineEvent, LabelInfo, LngLat, TravelMode } from '@open-yescoin/maprama-protocol';
 import {
   OPTIONS,
   WORLDS,
@@ -342,7 +342,7 @@ async function copy(kind: 'jsx' | 'theme'): Promise<void> {
 
 onMounted(async () => {
   try {
-    const mod = await import('@maprama/engine-web');
+    const mod = await import('@open-yescoin/maprama-engine-web');
     if (unmounted || !mapEl.value) return;
     transport = mod.createDirectTransport();
     transport.onEvent((event) => onEvent(event));

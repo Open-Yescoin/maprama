@@ -10,7 +10,7 @@
     "customConditions": ["react-native"],
     "baseUrl": ".",
     "paths": {
-      "@maprama/protocol": ["../packages/protocol/src/index.ts"]
+      "@open-yescoin/maprama-protocol": ["../packages/protocol/src/index.ts"]
     }
   },
   "include": ["../packages/protocol/src/**/*.ts", "../packages/react-native/src/**/*.ts", "../packages/react-native/src/**/*.tsx"],

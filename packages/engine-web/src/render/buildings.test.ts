@@ -1,4 +1,4 @@
-import { decodeTile, type MtilTile } from '@maprama/protocol';
+import { decodeTile, type MtilTile } from '@open-yescoin/maprama-protocol';
 import { describe, expect, it } from 'vitest';
 import { BoxGeometry, Mesh, MeshStandardMaterial } from 'three';
 import { encodeTile } from '../../../protocol/src/__fixtures__/tile.js';

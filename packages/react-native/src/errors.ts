@@ -4,7 +4,7 @@
  * @module
  */
 
-import type { EngineErrorCode } from '@maprama/protocol';
+import type { EngineErrorCode } from '@open-yescoin/maprama-protocol';
 
 /**
  * Error codes produced by the React Native host itself (engine codes such as

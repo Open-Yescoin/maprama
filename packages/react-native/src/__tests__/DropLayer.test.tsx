@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { act, render } from '@testing-library/react-native';
-import type { DropSpec, EngineEvent, LngLat } from '@maprama/protocol';
+import type { DropSpec, EngineEvent, LngLat } from '@open-yescoin/maprama-protocol';
 import { Character, MapramaView, DropLayer, shouldRestoreRejectedDrop, type MapramaViewProps, type ServiceDropLayerProps } from '../index';
 import { MAX_RETRY_AFTER_MS, MIN_RETRY_AFTER_MS, NearbyDropsTracker, isRetryableFetchError } from '../components/DropLayer';
 import { DropsServiceError, fetchNearbyDrops, parseRetryAfterMs, verifyDropCollect } from '../service/drops';

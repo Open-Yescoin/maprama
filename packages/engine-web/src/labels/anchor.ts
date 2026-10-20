@@ -25,7 +25,7 @@
  * @module
  */
 
-import type { Vec2 } from '@maprama/protocol';
+import type { Vec2 } from '@open-yescoin/maprama-protocol';
 import { pointInPolygon } from '../world/polygon.js';
 
 /** The minimum a building footprint must be for a snap to target it, in world units. */

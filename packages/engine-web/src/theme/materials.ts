@@ -26,8 +26,8 @@ import {
   type Side,
   type Texture,
 } from 'three';
-import type { ShadingModel, ThemePreset } from '@maprama/protocol';
-import { INK } from '@maprama/protocol';
+import type { ShadingModel, ThemePreset } from '@open-yescoin/maprama-protocol';
+import { INK } from '@open-yescoin/maprama-protocol';
 
 /** Extra material options (prototype `extra`). */
 export interface MatExtra {

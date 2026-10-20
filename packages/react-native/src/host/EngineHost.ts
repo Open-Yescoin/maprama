@@ -1,6 +1,6 @@
 /**
  * The engine host abstraction. A host owns a render surface (a WebView today,
- * a native view later) and moves `@maprama/protocol` messages between the
+ * a native view later) and moves `@open-yescoin/maprama-protocol` messages between the
  * JavaScript map controller and the engine. App code never talks to a host
  * directly, so hosts can be swapped without changing app code.
  *
@@ -15,7 +15,7 @@ import {
   type EngineCommand,
   type EngineEvent,
   type EngineInfo,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 
 /** A live connection to one engine instance. */
 export interface EngineHost {

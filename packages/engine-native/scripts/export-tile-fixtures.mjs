@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * MTIL v1 tile conformance fixtures, generated from `@maprama/protocol`'s own
+ * MTIL v1 tile conformance fixtures, generated from `@open-yescoin/maprama-protocol`'s own
  * reader and its test-only writer (`src/__fixtures__/tile.ts`, which is not in
  * the published `dist`), so `export-fixtures.mjs` runs this through tsx:
  *
@@ -17,7 +17,7 @@
 
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { decodeTile } from '@maprama/protocol';
+import { decodeTile } from '@open-yescoin/maprama-protocol';
 
 const outDir = process.argv[2] ?? fileURLToPath(new URL('../cpp/tests/fixtures/', import.meta.url));
 const fixtures = new URL('../../protocol/src/__fixtures__/tile.ts', import.meta.url).href;

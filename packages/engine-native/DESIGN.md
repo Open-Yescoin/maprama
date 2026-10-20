@@ -1,4 +1,4 @@
-# `@maprama/engine-native` — native engine v2 design
+# `@open-yescoin/maprama-engine-native` — native engine v2 design
 
 Status: **M2b labels (native label views and character name tags)** and **M4 (zoom-out game view, performance and parity)** on top of M3b (3D characters and drop models in the custom layer), M3a (game
 systems), M2c (diorama look, part 2: custom building layer), procedural worlds (M2b), M2a (diorama look,
@@ -19,9 +19,9 @@ part 1) and M1 (map on screen). This package contains:
   custom layer (`android/`), all on the official prebuilt MapLibre Native SDKs (no fork, §6.1);
 - the MapLibre Native patch-queue tooling (kept for the fork fallback, §10).
 
-v1 ships `@maprama/engine-web`. The native engine speaks exactly the same `@maprama/protocol` messages, so
+v1 ships `@open-yescoin/maprama-engine-web`. The native engine speaks exactly the same `@open-yescoin/maprama-protocol` messages, so
 the React Native package switches engines with a prop (`engine="web" | "native"`, after
-`import '@maprama/engine-native'`) without API changes.
+`import '@open-yescoin/maprama-engine-native'`) without API changes.
 
 Evidence labels used below: **[V]** verified in this repository (a command or file is named),
 **[E]** an estimate or target to be validated, **[U]** an unverified assumption about third-party code,
@@ -37,7 +37,7 @@ to be confirmed in milestone M1.
 | Renderer base (M1) | **Official prebuilt MapLibre Native SDKs** (user decision, M1): iOS `MapLibre` pod (`~> 6.30`: ios-v6.31.0 is on GitHub/SPM only, CocoaPods trunk tops out at 6.30.0) and Android `org.maplibre.gl:android-sdk:13.6.1`. maplibre-native is **not** cloned or built from source for M1 (~5 GB). These SDKs expose Obj-C / Java APIs, not the `mbgl` C++ headers, so the core drives the map through the platform-implemented `MapAdapter` (§2.1). |
 | Renderer base (M2) | **Still the official SDKs** (decided after M1). M2 ships in three steps on them: **M2a** style layers (fill-extrusion buildings, themes + time of day, building styles, presses, map UI, overlay anchors), **M2b** labels (a native view pool + `labelsIndex`) and `procedural` worlds, **M2c** a custom render layer for roofs / facades / outlines / the captured look on iOS `MLNCustomStyleLayer` (Metal) and Android `CustomLayerHost` (GL ES 3 on the `android-sdk-opengl` artifact), done without a fork (§6.1). Forking **MapLibre Native** (BSD-2-Clause) as a **patch queue** (`patches/*.patch`, §10) with an `mbgl::Map`-backed `MapAdapter` stays a fallback only (for example if a later milestone needs ID-buffer picking or a style-spec layer type). |
 | Code sharing | One **C++ shared core** (protocol, simulation, maprama layer). Obj-C++ (iOS) and Kotlin/JNI (Android) wrappers stay thin (`ios/README.md`, `android/README.md`). |
-| Contract | `@maprama/protocol` is the single source of truth. The core decodes envelopes **identically** to `decodeCommand`, and the conformance tests prove it against fixtures exported from the TS package on every `npm test` [V: `scripts/export-fixtures.mjs`, `cpp/tests/decode_tests.cpp`]. |
+| Contract | `@open-yescoin/maprama-protocol` is the single source of truth. The core decodes envelopes **identically** to `decodeCommand`, and the conformance tests prove it against fixtures exported from the TS package on every `npm test` [V: `scripts/export-fixtures.mjs`, `cpp/tests/decode_tests.cpp`]. |
 | Engine selection | The RN prop `engine="web" \| "native"`. Parity is tracked in §11. |
 | C++ standard | C++17 for the core (it compiles inside RN's C++20 toolchains). Floating-point `std::to_chars` is avoided because it is unavailable on iOS < 16.3 [E]. The core uses `snprintf`/`strtod` shortest round-trip instead (`cpp/src/json.cpp`). |
 | JSON | A small self-written parser with JavaScript semantics (`cpp/include/maprama/json.hpp`). §6.4 explains why this beat vendoring nlohmann/json. |
@@ -46,7 +46,7 @@ to be confirmed in milestone M1.
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│ TS API  (@maprama/react-native: <MapramaView engine="native" …/>, hooks)      │  JS thread
+│ TS API  (@open-yescoin/maprama-react-native: <MapramaView engine="native" …/>, hooks)      │  JS thread
 │   EngineBridge interface: send(envelopeText) / onMessage(envelopeText)       │
 │   ├─ WebEngineBridge   → WebView postMessage (engine-web, v1)                │
 │   └─ NativeEngineBridge → MapramaEngineModule (JSI)                          │
@@ -329,8 +329,8 @@ pure C++ JSI module above [V: `src/specs/NativeMapramaEngineModule.ts`]:
 
 The host side is `NativeEngineHost` (`src/NativeEngineHost.tsx`): it renders `MapramaNativeView` with a
 fresh `engineId` and wraps the transport in `createMessageChannelHost('native', …)` from
-`@maprama/react-native`, so encoding, decoding and validation are byte-identical to the WebView host.
-`import '@maprama/engine-native'` calls `registerEngineHost('native', NativeEngineHost)`.
+`@open-yescoin/maprama-react-native`, so encoding, decoding and validation are byte-identical to the WebView host.
+`import '@open-yescoin/maprama-engine-native'` calls `registerEngineHost('native', NativeEngineHost)`.
 
 The `jsi::Object` → `json::Value` walk must reproduce what `JSON.parse(JSON.stringify(obj))` would yield:
 - drop `undefined` and function properties;
@@ -820,10 +820,10 @@ drawing: `MarkerSystem` (`cpp/src/MarkerSystem.cpp`) is a port of engine-web's `
 - **Two roles.**
   1. The base map (flat, beyond the diorama).
   2. WorldData carried as vector tiles for large areas, so `init` does not ship multi-megabyte JSON.
-     **`WorldSource { kind: "tiles", url, center, … }` now exists** in `@maprama/protocol` and is
+     **`WorldSource { kind: "tiles", url, center, … }` now exists** in `@open-yescoin/maprama-protocol` and is
      implemented by engine-web (`design/tile-format.md`, MTIL v1). The C++ core validates the command
      with the same schema and **decodes the payload** (`maprama/TileFormat.hpp`, conformance-tested
-     against `@maprama/protocol`'s reader in `cpp/tests/tile_tests.cpp`), but nothing streams or draws
+     against `@open-yescoin/maprama-protocol`'s reader in `cpp/tests/tile_tests.cpp`), but nothing streams or draws
      tiles here yet: `init` with `kind: "tiles"` emits `error{unsupported, fatal: true}` naming
      `engine="web"`. The MVT schema below is the **superseded** earlier sketch; the shipped format is
      MTIL over PMTiles, not MVT.
@@ -1010,7 +1010,7 @@ window during the runs. No device numbers (M4).
 - **M3b:** cgltf v1.15 is vendored in `cpp/vendor/cgltf` (MIT, root `NOTICE`) and compiled once by
   `cpp/src/GltfLoader.cpp` (warnings of the third-party header suppressed); the podspec adds `ImageIO`; no new
   Android dependency (BitmapFactory, GL ES 3 instancing and uniform blocks).
-- Tests: `npm test -w @maprama/engine-native` runs these steps:
+- Tests: `npm test -w @open-yescoin/maprama-engine-native` runs these steps:
   1. export fixtures from the built protocol package (including `resolveTheme` cases);
   2. check DESIGN.md coverage;
   3. check that `cpp/src/ThemeData.cpp` matches the protocol's theme data and `cpp/src/LabelIcons.cpp`
@@ -1139,7 +1139,7 @@ simulator and the Android emulator:
   conformance tests, patch-queue tooling.
 - **M1 — map on screen (done), on the official prebuilt MapLibre SDKs (§1).**
   - `MapramaNativeView` + `MapramaEngineModule` on both platforms (codegen Fabric component + Obj-C/Java
-    TurboModule, §4.1), the `native` engine host (`import '@maprama/engine-native'`).
+    TurboModule, §4.1), the `native` engine host (`import '@open-yescoin/maprama-engine-native'`).
   - `MapAdapter` (§2.1) implemented with `MLNMapView` (iOS) and `MapView`/`MapLibreMap` (Android).
   - `init` with `data` / `url` worlds rendering the flat map (style JSON with GeoJSON sources).
   - Camera + gestures (pitch 0–60°, engine-web distance limits), `setCamera` merge, `project`/`unproject`,

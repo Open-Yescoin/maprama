@@ -1,11 +1,11 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { validateWorldData, type BuildingFootprint, type WorldData } from '@maprama/protocol';
+import { validateWorldData, type BuildingFootprint, type WorldData } from '@open-yescoin/maprama-protocol';
 import { KR_ATTRIBUTION, KR_ID_PREFIX, OSM_ATTRIBUTION, buildWorld, buildWorldWithStats } from '../src/build.js';
 import { signedArea } from '../src/geometry.js';
 import { OsmFootprintIndex, krFeatureKey } from '../src/kr.js';
 import type { OverpassResponse } from '../src/types.js';
-import type { Vec2 } from '@maprama/protocol';
+import type { Vec2 } from '@open-yescoin/maprama-protocol';
 
 const fixture = (name: string): unknown =>
   JSON.parse(readFileSync(new URL(`./fixtures/${name}`, import.meta.url), 'utf8')) as unknown;

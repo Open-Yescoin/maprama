@@ -10,7 +10,7 @@ All packages in this repository share one version number.
 ## [0.2.0] — Unreleased
 
 Everything below landed after the 0.1.0 tag. The v2 native engine
-(`@maprama/engine-native`) is still in development and not part of this release;
+(`@open-yescoin/maprama-engine-native`) is still in development and not part of this release;
 where a feature is web-engine-only that is stated on the entry.
 
 **Nothing here breaks the 0.1.0 API.** Every protocol addition is an optional
@@ -23,7 +23,7 @@ field or a new message, `PROTOCOL_VERSION` is unchanged, and a `world` of
   map the size of a country, served as **one PMTiles archive** on a CDN, of
   which the engine reads only the tiles the camera is looking at over HTTP
   range requests. The payload format is **MTIL v1** (`design/tile-format.md`);
-  `@maprama/protocol` ships its reader (`decodeTile`) and the archive metadata
+  `@open-yescoin/maprama-protocol` ships its reader (`decodeTile`) and the archive metadata
   contract, and the C++ core decodes the same bytes (conformance-tested against
   the TypeScript reader) even though it does not render tile worlds yet — a
   tile world on `engine="native"` is refused with `unsupported` rather than
@@ -207,23 +207,23 @@ field or a new message, `PROTOCOL_VERSION` is unchanged, and a `world` of
   matched by id, so an update that only changes colours or the selection
   neither reloads an icon nor recreates a view. Protocol: the optional
   `setMarkerLayer` / `removeMarkerLayer` commands and the `marker:press` event
-  (`PROTOCOL_VERSION` unchanged). Implemented by `@maprama/engine-web`; the
+  (`PROTOCOL_VERSION` unchanged). Implemented by `@open-yescoin/maprama-engine-web`; the
   native engine validates and ignores the commands for now.
-- `@maprama/react-native`: `<MapramaView>` with `Character`, `CharacterLayer`,
+- `@open-yescoin/maprama-react-native`: `<MapramaView>` with `Character`, `CharacterLayer`,
   `DropLayer` (app data or the hosted service), `MarkerLayer`, `Geofence` and `MapOverlay`,
   the `ref` API (`travel`, `setCamera`, `project`, `route`, `subscribe`, …),
   `useCharacterPosition` / `useCameraState` hooks, the WebView engine host and
   an Expo config plugin.
-- `@maprama/engine-web`: three.js engine implementing the whole protocol
+- `@open-yescoin/maprama-engine-web`: three.js engine implementing the whole protocol
   (worlds, themes, buildings, labels, characters, travel, drops, geofences,
   map UI), shipped as an ESM library, an IIFE bundle and a single-file HTML
   document for WebView hosts.
-- `@maprama/protocol`: shared types, the message codec with validation, geo
+- `@open-yescoin/maprama-protocol`: shared types, the message codec with validation, geo
   projection and theme presets (also as JSON under `themes/*.json`).
-- `@maprama/osm`: `maprama-osm` CLI and `buildWorld()` to build `WorldData`
+- `@open-yescoin/maprama-osm`: `maprama-osm` CLI and `buildWorld()` to build `WorldData`
   from OpenStreetMap (Overpass), with optional Korean building heights and the
   Seongsu-dong sample world (ODbL).
-- `@maprama/assets`: `maprama` CLI to inspect and optimise glTF/GLB models.
+- `@open-yescoin/maprama-assets`: `maprama` CLI to inspect and optimise glTF/GLB models.
 - Travel time scale: travel runs at real speed by default; `timeScale` on the
   `travel` command, `TravelOptions.timeScale` and the `travelTimeScale` prop of
   `MapramaView` select a speed multiplier.
@@ -231,7 +231,7 @@ field or a new message, `PROTOCOL_VERSION` is unchanged, and a `world` of
 - Documentation site on GitHub Pages: <https://craftsmanship001.github.io/maprama/>.
 - Example app updates: a feature catalog screen per feature, including a ×20
   travel playback demo, verified on iOS and Android with Maestro.
-- `@maprama/osm`: `--kr-fill-missing` (and the `krFillMissing` option of
+- `@open-yescoin/maprama-osm`: `--kr-fill-missing` (and the `krFillMissing` option of
   `buildWorld`) uses the Korean national building dataset passed with
   `--kr-buildings` as a footprint source, not only as a height source. Where OSM
   has no building, the dataset polygon is emitted as a building with that
@@ -242,7 +242,7 @@ field or a new message, `PROTOCOL_VERSION` is unchanged, and a `world` of
   source geometry, so they are stable and cannot collide with OSM ids. The build
   stats gained `buildingsFromOsm`, `buildingsFilled` and `krFillSkipped`. Off by
   default: existing pipelines are unchanged.
-- `@maprama/osm`: **OSM PBF input.** `maprama-osm build --pbf area.osm.pbf
+- `@open-yescoin/maprama-osm`: **OSM PBF input.** `maprama-osm build --pbf area.osm.pbf
   --bbox s,w,n,e` builds a world straight from an `.osm.pbf` extract (Geofabrik
   and friends), so bulk and repeated generation no longer goes through the
   Overpass API, whose usage policy asks for exactly the opposite. `buildWorld`
@@ -285,7 +285,7 @@ field or a new message, `PROTOCOL_VERSION` is unchanged, and a `world` of
 ### Changed
 
 - The project was renamed from Diorama to **Maprama**; every package now lives
-  under the `@maprama/` scope.
+  under the `@open-yescoin/maprama-` scope.
 - engine-web renders **on demand**. The `requestAnimationFrame` loop keeps
   ticking, but a frame is only drawn (and the simulation only advances) while
   something asked for one: a command, a gesture, an async asset, or a
@@ -329,7 +329,7 @@ field or a new message, `PROTOCOL_VERSION` is unchanged, and a `world` of
   `buildings[]`, or place their own overlay, model or character at the plaza
   coordinates. The procedural `town` and `grid` layouts are untouched and keep
   their landmark — those worlds are generated, not real-world data.
-- `@maprama/osm`: `build` now warns on stderr when the `plaza` it emits is more
+- `@open-yescoin/maprama-osm`: `build` now warns on stderr when the `plaza` it emits is more
   than 15 m from every building footprint (and inside none), reporting the
   distance to the nearest one. The output is unchanged — a square in open space
   is correct data — but anything anchored at `world.plaza` will have nothing
@@ -346,7 +346,7 @@ field or a new message, `PROTOCOL_VERSION` is unchanged, and a `world` of
   ground of a natural walk, so the `run` clip is chosen and plays at the
   maximum rate (2.2×) instead of reading as a very fast walk. No
   public API changed — the cadence helpers are internal to the engine and are
-  not exported from `@maprama/engine-web`.
+  not exported from `@open-yescoin/maprama-engine-web`.
 - Optional character fields can be reset to their defaults by sending `null`.
 - Characters created without a model get the default body again.
 - engine-web: the location puck no longer overlaps the HUD, labels are no
@@ -357,5 +357,5 @@ field or a new message, `PROTOCOL_VERSION` is unchanged, and a `world` of
 
 ## [0.1.0] — 2026-09-15
 
-First public release of `@maprama/protocol`, `@maprama/engine-web`,
-`@maprama/react-native`, `@maprama/osm` and `@maprama/assets`.
+First public release of `@open-yescoin/maprama-protocol`, `@open-yescoin/maprama-engine-web`,
+`@open-yescoin/maprama-react-native`, `@open-yescoin/maprama-osm` and `@open-yescoin/maprama-assets`.

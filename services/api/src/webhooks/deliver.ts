@@ -1,4 +1,4 @@
-import type { JsonValue } from '@maprama/protocol';
+import type { JsonValue } from '@open-yescoin/maprama-protocol';
 import { WEBHOOK_DEFAULTS } from '../config.js';
 import type { DeliveryAttempt, ServiceDeps, WebhookEndpoint } from '../deps.js';
 import { randomHex } from '../util/crypto.js';

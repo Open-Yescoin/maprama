@@ -6,7 +6,7 @@
  * @module
  */
 
-import type { BuildingKind, PoiCategory, RoadClass } from '@maprama/protocol';
+import type { BuildingKind, PoiCategory, RoadClass } from '@open-yescoin/maprama-protocol';
 import type { Pt } from './geometry.js';
 import type { LngLat } from './mercator.js';
 

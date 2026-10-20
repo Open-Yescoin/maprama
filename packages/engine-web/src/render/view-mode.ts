@@ -13,7 +13,7 @@
  * @module
  */
 
-import { DEFAULT_VIEW_MODE, VIEW_TRANSITION_MS, type ViewMode } from '@maprama/protocol';
+import { DEFAULT_VIEW_MODE, VIEW_TRANSITION_MS, type ViewMode } from '@open-yescoin/maprama-protocol';
 
 /**
  * Distance from the target below which `t` snaps onto it and the transition is

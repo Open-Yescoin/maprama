@@ -10,7 +10,7 @@
  * @module
  */
 
-import type { GeofenceEnterEvent, GeofenceExitEvent } from '@maprama/protocol';
+import type { GeofenceEnterEvent, GeofenceExitEvent } from '@open-yescoin/maprama-protocol';
 import { CircleGeometry, Group, Mesh, MeshBasicMaterial, RingGeometry } from 'three';
 import { ACCENT } from '../theme/materials.js';
 

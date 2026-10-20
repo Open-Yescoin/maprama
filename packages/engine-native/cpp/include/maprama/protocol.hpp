@@ -1,6 +1,6 @@
 // Maprama native core — message protocol codec (port of messages.ts).
 //
-// `decodeCommand` reproduces `@maprama/protocol`'s `decodeCommand` exactly:
+// `decodeCommand` reproduces `@open-yescoin/maprama-protocol`'s `decodeCommand` exactly:
 // same acceptance and the same error strings, except that the text after
 // "$: invalid JSON: " (V8's JSON.parse message) is implementation-specific.
 // Verified by cpp/tests/fixtures/decode-command.json (exported from the TS

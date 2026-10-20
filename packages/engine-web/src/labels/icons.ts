@@ -7,7 +7,7 @@
  * @module
  */
 
-import type { LabelIcon, PoiCategory } from '@maprama/protocol';
+import type { LabelIcon, PoiCategory } from '@open-yescoin/maprama-protocol';
 
 /** Holo icon SVG markup per label icon (prototype `HI`). */
 export const HOLO_ICONS: Readonly<Record<LabelIcon, string>> = Object.freeze({

@@ -4,7 +4,7 @@
 
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { DEFAULT_VIEW_MODE, type CameraSpec, type InitCommand, type LabelContent, type LabelInfo, type LabelsSpec, type ViewMode } from '@maprama/protocol';
+import { DEFAULT_VIEW_MODE, type CameraSpec, type InitCommand, type LabelContent, type LabelInfo, type LabelsSpec, type ViewMode } from '@open-yescoin/maprama-protocol';
 import { CommandBatcher } from './batching';
 import { MapContext, notifyMapMountChange, type MapContextValue } from './context';
 import type { EngineHost, EngineHostError } from './host/EngineHost';
@@ -66,7 +66,7 @@ interface Internals extends MapContextValue {
 }
 
 /**
- * The 2.5D game map. Hosts the engine (a WebView running `@maprama/engine-web`
+ * The 2.5D game map. Hosts the engine (a WebView running `@open-yescoin/maprama-engine-web`
  * by default), sends `init` once the engine is ready and turns prop changes and
  * children into minimal protocol commands.
  *

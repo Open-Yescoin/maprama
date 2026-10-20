@@ -4,7 +4,7 @@
  *
  * ## Why a tile world does not use `createProjection`
  *
- * `@maprama/protocol`'s {@link createProjection} is an **equirectangular local
+ * `@open-yescoin/maprama-protocol`'s {@link createProjection} is an **equirectangular local
  * tangent plane**: `x = Δlng · cos(lat₀) · 111320 / unitMeters`. It uses the
  * cosine of the *origin* latitude everywhere, which is exact at the origin and
  * wrong in proportion to how far north or south you go. Over a city (a few km)
@@ -51,7 +51,7 @@
  * @module
  */
 
-import type { LngLat } from '@maprama/protocol';
+import type { LngLat } from '@open-yescoin/maprama-protocol';
 
 /** Web Mercator equatorial circumference, metres. */
 export const EARTH_CIRCUMFERENCE = 40075016.685578488;

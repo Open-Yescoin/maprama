@@ -7,7 +7,7 @@
 import { mkdir, readFile, stat, writeFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-import { validateWorldData, type LngLat } from '@maprama/protocol';
+import { validateWorldData, type LngLat } from '@open-yescoin/maprama-protocol';
 import { buildWorldWithStats, stringifyWorld, type BuildWorldOptions } from './build.js';
 import { fetchOverpass, parseBBox } from './overpass.js';
 import { extractOneFromPbf } from './pbf.js';

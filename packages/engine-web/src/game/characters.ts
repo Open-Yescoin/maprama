@@ -19,7 +19,7 @@ import {
   type Projection,
   type TravelMode,
   type WorldPoint,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 import {
   AnimationMixer,
   Box3,

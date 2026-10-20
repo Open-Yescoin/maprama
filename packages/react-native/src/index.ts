@@ -1,5 +1,5 @@
 /**
- * `@maprama/react-native`: a 2.5D game map for React Native.
+ * `@open-yescoin/maprama-react-native`: a 2.5D game map for React Native.
  *
  * - {@link MapramaView} with {@link Character}, {@link CharacterLayer}, {@link DropLayer},
  *   {@link MarkerLayer}, {@link InfoCard}, {@link Geofence} and {@link MapOverlay} children.
@@ -127,7 +127,7 @@ export {
   DEFAULT_VIEW_MODE,
   VIEW_MODES,
   VIEW_TRANSITION_MS,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 export type {
   BuildingStyle,
   CameraIdleEvent,
@@ -171,4 +171,4 @@ export type {
   ViewChangeEvent,
   ViewMode,
   WorldSource,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';

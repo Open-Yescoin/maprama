@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { createRef, useCallback, useEffect, type ComponentProps, type Ref } from 'react';
 import { Image, Linking, StyleSheet } from 'react-native';
 import { act, fireEvent, render } from '@testing-library/react-native';
-import { encodeEvent, type EngineEvent, type LabelInfo, type WorldSource } from '@maprama/protocol';
+import { encodeEvent, type EngineEvent, type LabelInfo, type WorldSource } from '@open-yescoin/maprama-protocol';
 import {
   Character,
   CharacterLayer,
@@ -15,7 +15,7 @@ import {
   type MapramaViewRef,
   type EngineHostComponentProps,
 } from '../index';
-import { ENGINE_HTML } from '@maprama/engine-web/engine-html';
+import { ENGINE_HTML } from '@open-yescoin/maprama-engine-web/engine-html';
 import {
   READY,
   clearPosted,

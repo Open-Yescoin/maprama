@@ -1,4 +1,4 @@
-// Maprama native core — value types mirroring `@maprama/protocol`
+// Maprama native core — value types mirroring `@open-yescoin/maprama-protocol`
 // (geo.ts, entities.ts, labels.ts, messages.ts). Field names and units match
 // the TypeScript contract; `std::optional` marks optional TS fields.
 //

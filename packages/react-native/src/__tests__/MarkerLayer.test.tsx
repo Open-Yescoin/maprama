@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { render } from '@testing-library/react-native';
-import type { LngLat } from '@maprama/protocol';
+import type { LngLat } from '@open-yescoin/maprama-protocol';
 import { MapramaView, MarkerLayer, resolveMarkerIcon } from '../index';
 import { READY, clearPosted, commands, commandTypes, commandsOf, emit, nextFrame, pendingFrames, webViewInstances } from './helpers';
 

@@ -1,5 +1,5 @@
 /**
- * Public prop and API types. They wrap `@maprama/protocol` types; protocol
+ * Public prop and API types. They wrap `@open-yescoin/maprama-protocol` types; protocol
  * types are re-exported from the package entry and never redefined here.
  *
  * @module
@@ -55,7 +55,7 @@ import type {
   TravelMode,
   ViewMode,
   WorldSource,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 import type { MapramaErrorCode } from './errors';
 
 // ---------------------------------------------------------------------------

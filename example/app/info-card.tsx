@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
-import { InfoCard, MarkerLayer, type InfoCardAnchor, type InfoCardContent, type MapramaViewRef, type MarkerPressInfo } from '@maprama/react-native';
-import type { LngLat } from '@maprama/protocol';
+import { InfoCard, MarkerLayer, type InfoCardAnchor, type InfoCardContent, type MapramaViewRef, type MarkerPressInfo } from '@open-yescoin/maprama-react-native';
+import type { LngLat } from '@open-yescoin/maprama-protocol';
 import { DemoMap } from '../src/components/DemoMap';
 import { Button, ButtonRow, Chips, EventLog, Readout, ScreenLayout, Section, Toggle, useEventLog } from '../src/components/ui';
 import { NAMED_POIS, SEONGSU_WORLD, STATION, offsetMeters } from '../src/data/seongsu';

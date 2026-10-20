@@ -9,7 +9,7 @@
 ## bare React Native
 
 ```sh
-npm i @maprama/react-native react-native-webview
+npm i @open-yescoin/maprama-react-native react-native-webview
 cd ios && pod install
 ```
 
@@ -23,7 +23,7 @@ cd ios && pod install
 development build 또는 prebuild가 필요합니다. Expo Go에서는 동작하지 않아요.
 
 ```sh
-npx expo install @maprama/react-native react-native-webview
+npx expo install @open-yescoin/maprama-react-native react-native-webview
 # 기기 위치에 권장 (선택)
 npx expo install expo-location
 ```
@@ -35,7 +35,7 @@ npx expo install expo-location
   "expo": {
     "plugins": [
       [
-        "@maprama/react-native",
+        "@open-yescoin/maprama-react-native",
         { "features": ["characters", "drops", "labels", "travel"], "locationPermissionText": "지도에 내 위치를 보여 줄게요" }
       ]
     ]
@@ -53,7 +53,7 @@ npx expo install expo-location
 
 ```tsx
 import { useRef } from 'react';
-import { MapramaView, Character, type MapramaViewRef } from '@maprama/react-native';
+import { MapramaView, Character, type MapramaViewRef } from '@open-yescoin/maprama-react-native';
 
 export function FirstMap() {
   const map = useRef<MapramaViewRef>(null);

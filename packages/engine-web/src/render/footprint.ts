@@ -10,7 +10,7 @@
  */
 
 import { BufferAttribute, BufferGeometry, ExtrudeGeometry, Shape, ShapeUtils, Vector2 } from 'three';
-import type { Vec2 } from '@maprama/protocol';
+import type { Vec2 } from '@open-yescoin/maprama-protocol';
 import { signedArea } from '../world/polygon.js';
 
 export interface WallUv {

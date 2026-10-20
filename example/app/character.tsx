@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
-import { Character, useCharacterPosition, type MapramaViewRef } from '@maprama/react-native';
-import type { LngLat, LocationSourceKind } from '@maprama/protocol';
+import { Character, useCharacterPosition, type MapramaViewRef } from '@open-yescoin/maprama-react-native';
+import type { LngLat, LocationSourceKind } from '@open-yescoin/maprama-protocol';
 import { DemoMap } from '../src/components/DemoMap';
 import { Button, ButtonRow, Chips, EventLog, Readout, ScreenLayout, Section, useEventLog } from '../src/components/ui';
 import { SAMPLE_CHARACTER_MODEL_URI } from '../src/data/sampleModel';

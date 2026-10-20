@@ -7,7 +7,7 @@
 # skipped. Output goes to tools/tile-spike/.data (gitignored): a world built from
 # OSM is ODbL, not Apache-2.0, so it must not be committed.
 #
-# Requires `npm run build -w @maprama/protocol && npm run build -w @maprama/osm`.
+# Requires `npm run build -w @open-yescoin/maprama-protocol && npm run build -w @open-yescoin/maprama-osm`.
 set -u
 
 HERE=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)

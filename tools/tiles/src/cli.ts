@@ -17,7 +17,7 @@
 
 import { readFile, mkdir, writeFile, stat } from 'node:fs/promises';
 import { join } from 'node:path';
-import { surveyPbfNodes } from '@maprama/osm';
+import { surveyPbfNodes } from '@open-yescoin/maprama-osm';
 import { buildArchive, clearWork, DEFAULT_BUFFER, DEFAULT_EXTENT, DEFAULT_PROFILES } from './build.js';
 import { DEFAULT_PAD_DEG } from './chunks.js';
 import { isSyntheticEdge } from './geometry.js';

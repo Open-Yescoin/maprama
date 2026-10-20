@@ -144,6 +144,6 @@ onPress={(e) => {
 
 ## 지금 웹 엔진 전용
 
-마커는 기본 WebView 엔진(`@maprama/engine-web`)에서 동작합니다. `engine="native"`로 띄운 네이티브 엔진은 `setMarkerLayer` / `removeMarkerLayer`를 검증한 뒤 경고 로그만 남기고 무시합니다(네이티브 마커 뷰는 다음 마일스톤). 네이티브 엔진에서 핀이 필요하면 그때까지는 `MapOverlay`를 쓰세요.
+마커는 기본 WebView 엔진(`@open-yescoin/maprama-engine-web`)에서 동작합니다. `engine="native"`로 띄운 네이티브 엔진은 `setMarkerLayer` / `removeMarkerLayer`를 검증한 뒤 경고 로그만 남기고 무시합니다(네이티브 마커 뷰는 다음 마일스톤). 네이티브 엔진에서 핀이 필요하면 그때까지는 `MapOverlay`를 쓰세요.
 
 `ref.snapToBuilding` 역시 웹 엔진 전용입니다. 네이티브 코어는 요청을 해독·검증한 뒤 `unsupported`로 답합니다.

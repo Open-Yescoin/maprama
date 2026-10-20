@@ -1,5 +1,5 @@
 {
-  "name": "@maprama/engine-native",
+  "name": "@open-yescoin/maprama-engine-native",
   "version": "0.0.0",
   "private": true,
   "description": "Maprama native render engine (v2): C++ core + MapLibre Native behind a Fabric view and a TurboModule. Milestone M1: flat map, camera, gestures, camera:change, project/unproject.",
@@ -87,16 +87,16 @@
     ]
   },
   "peerDependencies": {
-    "@maprama/react-native": "*",
+    "@open-yescoin/maprama-react-native": "*",
     "react": ">=18.3.0",
     "react-native": ">=0.80.0"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
     "@jest/globals": "30.5.1",
-    "@maprama/engine-web": "*",
-    "@maprama/protocol": "*",
-    "@maprama/react-native": "*",
+    "@open-yescoin/maprama-engine-web": "*",
+    "@open-yescoin/maprama-protocol": "*",
+    "@open-yescoin/maprama-react-native": "*",
     "@react-native/babel-preset": "0.86.3",
     "@react-native/jest-preset": "0.86.3",
     "@testing-library/react-native": "14.0.1",

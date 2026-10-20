@@ -20,11 +20,11 @@ Run from the repository root:
 
 | Command | What it does |
 | --- | --- |
-| `npm run build` | Builds `@maprama/protocol` first, then every workspace. |
+| `npm run build` | Builds `@open-yescoin/maprama-protocol` first, then every workspace. |
 | `npm run typecheck` | Type-checks every workspace (including `example`). |
 | `npm test` | Runs every workspace's tests and checks the `LICENSE` / `NOTICE` copies. |
 | `npm run docs:dev` / `npm run docs:build` | Documentation site (installs `docs/` dependencies on first use). |
-| `npm run <script> -w <package>` | Runs a script in one workspace, e.g. `npm test -w @maprama/engine-web`. |
+| `npm run <script> -w <package>` | Runs a script in one workspace, e.g. `npm test -w @open-yescoin/maprama-engine-web`. |
 
 CI (`.github/workflows/ci.yml`) runs `npm ci`, `build`, `typecheck`, `test`
 and `docs:build` on Node 22 and 24.

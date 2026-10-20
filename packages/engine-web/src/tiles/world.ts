@@ -46,7 +46,7 @@
  * @module
  */
 
-import type { LngLat, TileWorldSource } from '@maprama/protocol';
+import type { LngLat, TileWorldSource } from '@open-yescoin/maprama-protocol';
 import { openArchive, type PMTilesFactory, type TileArchive } from './archive.js';
 import { assembleTileWorld } from './assemble.js';
 import { TileFrame } from './mercator.js';

@@ -1,7 +1,7 @@
 // Maprama native core — theme resolution (theme.ts `resolveTheme`), DESIGN.md §6.6.
 //
 // Built-in preset data is not transcribed by hand: `scripts/generate-theme-data.mjs` embeds the
-// `@maprama/protocol` build output (PRESETS, TIMES, CINE, PRESET_DEFAULTS, BASE_THEME_DEFAULTS) into
+// `@open-yescoin/maprama-protocol` build output (PRESETS, TIMES, CINE, PRESET_DEFAULTS, BASE_THEME_DEFAULTS) into
 // `cpp/src/ThemeData.cpp`, and `npm test` fails when that file drifts from the protocol package. The
 // conformance suite checks `resolve` against `resolveTheme` outputs exported from TypeScript.
 #pragma once
@@ -114,7 +114,7 @@ json::Value resolvedThemeToJson(const ResolvedTheme& theme);
 
 class ThemeResolver {
  public:
-  /// The resolver over `@maprama/protocol`'s built-in data (generated `ThemeData.cpp`), parsed once.
+  /// The resolver over `@open-yescoin/maprama-protocol`'s built-in data (generated `ThemeData.cpp`), parsed once.
   static const ThemeResolver& builtIn();
 
   /// Loads built-in data `{presets, times, cine, presetDefaults, baseDefaults}` (the generated JSON shape).

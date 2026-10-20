@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Character, type MapramaViewRef } from '@maprama/react-native';
-import type { LngLat, TravelMode } from '@maprama/protocol';
+import { Character, type MapramaViewRef } from '@open-yescoin/maprama-react-native';
+import type { LngLat, TravelMode } from '@open-yescoin/maprama-protocol';
 import { DemoMap } from '../src/components/DemoMap';
 import { Button, ButtonRow, Chips, EventLog, Readout, ScreenLayout, Section, useEventLog } from '../src/components/ui';
 import { SEONGSU_WORLD, STATION, offsetMeters } from '../src/data/seongsu';

@@ -15,7 +15,7 @@ import {
   type ThemeSpec,
   type TimeOfDayPreset,
   type ZoomOutBehavior,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 
 /**
  * three r186 uses physically based light units (the legacy mode of r128 is

@@ -15,7 +15,7 @@
 ## 한 장 띄우기
 
 ```tsx
-import { InfoCard, MapramaView, MarkerLayer } from '@maprama/react-native';
+import { InfoCard, MapramaView, MarkerLayer } from '@open-yescoin/maprama-react-native';
 
 <InfoCard
   id="poi-3821"
@@ -196,4 +196,4 @@ function PlaceMap({ places }: { places: Place[] }) {
 
 ## 네이티브 엔진
 
-`@maprama/engine-native`는 이번 작업 범위 밖입니다. 네이티브 코어는 `setInfoCard` / `removeInfoCard` / `focusOn`을 **파싱하고 검증**하지만 그리지는 않습니다(명령은 경고 로그 후 무시, `focusOn`은 `unsupported` 응답). 네이티브 정보 카드 뷰는 로드맵의 잔여 항목입니다.
+`@open-yescoin/maprama-engine-native`는 이번 작업 범위 밖입니다. 네이티브 코어는 `setInfoCard` / `removeInfoCard` / `focusOn`을 **파싱하고 검증**하지만 그리지는 않습니다(명령은 경고 로그 후 무시, `focusOn`은 `unsupported` 응답). 네이티브 정보 카드 뷰는 로드맵의 잔여 항목입니다.

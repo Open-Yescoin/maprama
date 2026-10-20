@@ -1,7 +1,7 @@
 /**
  * The OpenStreetMap source: a national `.osm.pbf` in, `GeoBundle`s out.
  *
- * The only interesting thing it does is batching. `@maprama/osm`'s
+ * The only interesting thing it does is batching. `@open-yescoin/maprama-osm`'s
  * `extractFromPbf(file, bboxes[])` serves **N areas from one scan of the file**,
  * and a nationwide build has hundreds of regions: calling the single-bbox path
  * per region would re-read a 287 MB file hundreds of times. So
@@ -16,8 +16,8 @@
  * @module
  */
 
-import { buildWorld, KR_ATTRIBUTION, OSM_ATTRIBUTION, extractFromPbf, type BBox } from '@maprama/osm';
-import type { WorldData } from '@maprama/protocol';
+import { buildWorld, KR_ATTRIBUTION, OSM_ATTRIBUTION, extractFromPbf, type BBox } from '@open-yescoin/maprama-osm';
+import type { WorldData } from '@open-yescoin/maprama-protocol';
 import { worldToLngLat, type LngLat } from './mercator.js';
 import type { Region, TileSource } from './sources.js';
 import { emptyBundle, LAYER_NAMES, type GeoBundle, type LayerName } from './types.js';

@@ -1,10 +1,10 @@
 # Maprama Catalog (`example/`)
 
-An Expo Router app that demonstrates every `@maprama/react-native` feature, one screen each:
+An Expo Router app that demonstrates every `@open-yescoin/maprama-react-native` feature, one screen each:
 
 | # | Screen (`app/`) | What it shows |
 | --- | --- | --- |
-| 1 | `themes.tsx` | Preset (`realistic`…`soft`, plus a full preset object from `@maprama/protocol/themes/urban.json`), time of day, cinematic grading, massing, facade details, `zoomOut` with a near/far camera. |
+| 1 | `themes.tsx` | Preset (`realistic`…`soft`, plus a full preset object from `@open-yescoin/maprama-protocol/themes/urban.json`), time of day, cinematic grading, massing, facade details, `zoomOut` with a near/far camera. |
 | 2 | `world.tsx` | `world.kind`: `data` (the bundled OSM Seongsu sample), `url` (local API), `procedural` `town` / `grid`. The map remounts on change because `world` is read at init. |
 | 3 | `character.tsx` | Player `Character` with a bundled CC0 glTF (a `data:` URI) or the engine's default avatar. `location.source`: `simulated` / `device` / `external`, with North/South/East/West buttons pushing external fixes. Live `useCharacterPosition`. |
 | 4 | `travel.tsx` | Tap the map (or a preset) to travel with `walk` / `bike` / `car` / mixed (`walk → car → walk`) / `plane` / `subway`. ETA comes from a `travel:progress` subscription; the status changes on `travel:arrive`. |
@@ -31,9 +31,9 @@ unquoted paths, so a Release build under e.g. `~/Side Projects/` fails in `EXCon
 ```sh
 # from the repo root
 npm install
-npm run build -w @maprama/protocol
-npm run build -w @maprama/engine-web
-npm run build -w @maprama/react-native
+npm run build -w @open-yescoin/maprama-protocol
+npm run build -w @open-yescoin/maprama-engine-web
+npm run build -w @open-yescoin/maprama-react-native
 
 cd example
 npx expo run:ios            # prebuild + pod install + build + launch, starts Metro (debug)
@@ -62,11 +62,11 @@ npx tsc --noEmit -p example                  # from the repo root
 
 ## Monorepo notes
 
-- `example` is an npm workspace (root `package.json` → `workspaces`). Expo detects the workspace root and has Metro watch it, so `@maprama/react-native`, `@maprama/protocol` and `@maprama/engine-web` resolve to the local packages' build output (`lib/`, `dist/`). Rebuild them after changing library code.
+- `example` is an npm workspace (root `package.json` → `workspaces`). Expo detects the workspace root and has Metro watch it, so `@open-yescoin/maprama-react-native`, `@open-yescoin/maprama-protocol` and `@open-yescoin/maprama-engine-web` resolve to the local packages' build output (`lib/`, `dist/`). Rebuild them after changing library code.
 - The repo develops against Expo SDK 57's pairing: `react` / `react-dom` 19.2.3 and `react-native` 0.86.3 (from `expo/bundledNativeModules.json`). `packages/react-native` uses the same versions in its devDependencies, so the root `node_modules` holds a single copy of each and Metro needs no custom resolution. Check with `npm ls react react-native`. The library's `peerDependencies` still allow `react-native >=0.76.0` and `react >=18.3.0`.
 - `react-native-screens` uses SDK 57's `~4.26.0`. `react-native-webview` stays at 14.0.1, matching `packages/react-native`. `npx expo install --check` flags that and `typescript` (SDK 57 expects 13.16.1 and ~6.0.3). The library's peer range allows either webview version.
 - `metro.config.js` is Expo's default config. react-native 0.86.3 ships `rn-get-polyfills`, which Expo's Metro config loads.
-- The config plugin `@maprama/react-native` in `app.json` writes `NSLocationWhenInUseUsageDescription` and `MapramaFeatures` into `Info.plist`.
+- The config plugin `@open-yescoin/maprama-react-native` in `app.json` writes `NSLocationWhenInUseUsageDescription` and `MapramaFeatures` into `Info.plist`.
 
 ## Sample character model
 
@@ -87,8 +87,8 @@ Both need the local API, `services/api`:
 
 ```sh
 # terminal 1, repo root
-npm run build -w @maprama/protocol
-npm run dev:local -w @maprama/api -- --port 8787 --world seongsu=../../tools/osm/samples/seongsu.world.json
+npm run build -w @open-yescoin/maprama-protocol
+npm run dev:local -w @open-yescoin/maprama-api -- --port 8787 --world seongsu=../../tools/osm/samples/seongsu.world.json
 # prints "client key (dev only): mpr_..." and "admin key (dev only): mpr_..."
 ```
 
@@ -107,7 +107,7 @@ EXPO_PUBLIC_MAPRAMA_API_KEY=mpr_... npx expo run:ios
 | `EXPO_PUBLIC_MAPRAMA_TILES_URL` | empty (the tile screen says so and skips) | tile world screen |
 
 The **tile world** screen (17) needs a PMTiles archive built with
-`@maprama/tiles` (`maprama-tiles build --pbf korea.osm.pbf --out korea.pmtiles`)
+`@open-yescoin/maprama-tiles` (`maprama-tiles build --pbf korea.osm.pbf --out korea.pmtiles`)
 and hosted somewhere that answers HTTP range requests with
 `Access-Control-Allow-Origin: *` and
 `Access-Control-Expose-Headers: Content-Range, Content-Length, ETag, Accept-Ranges`

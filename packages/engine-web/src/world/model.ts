@@ -8,7 +8,7 @@
  * @module
  */
 
-import type { BuildingKind, District, LngLat, Poi, Projection, Station, Vec2, WorldBounds } from '@maprama/protocol';
+import type { BuildingKind, District, LngLat, Poi, Projection, Station, Vec2, WorldBounds } from '@open-yescoin/maprama-protocol';
 import type { RoadGraph } from './graph.js';
 
 /** Massing variants for rectangular lots (prototype `massesFor`). */

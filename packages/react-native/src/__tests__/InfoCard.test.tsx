@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { render } from '@testing-library/react-native';
-import type { InfoCardContent, LngLat } from '@maprama/protocol';
+import type { InfoCardContent, LngLat } from '@open-yescoin/maprama-protocol';
 import { InfoCard, MapramaView, type MapramaViewRef } from '../index';
 import { createRef } from 'react';
 import { READY, clearPosted, commandTypes, commands, commandsOf, emit, latestWebView, nextFrame, webViewInstances } from './helpers';

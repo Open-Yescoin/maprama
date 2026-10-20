@@ -34,7 +34,7 @@ import {
   type Projection,
   type Station,
   type Vec2,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 import { buildGraph, type GraphRoad } from '../world/graph.js';
 import { convertBuilding, hashId } from '../world/data.js';
 import type { BuildingModel, WorldModel } from '../world/model.js';

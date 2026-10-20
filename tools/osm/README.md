@@ -1,4 +1,4 @@
-# @maprama/osm
+# @open-yescoin/maprama-osm
 
 Builds Maprama [`WorldData`](https://github.com/CraftsManShip001/maprama/blob/main/packages/protocol/src/world.ts) JSON from
 OpenStreetMap data (via the Overpass API). It can optionally add building
@@ -18,15 +18,15 @@ builds. See [Which input to use](#which-input-to-use).
 Requires Node.js 22.12+.
 
 ```sh
-npm i -D @maprama/osm        # or run it once: npx @maprama/osm --help
+npm i -D @open-yescoin/maprama-osm        # or run it once: npx @open-yescoin/maprama-osm --help
 ```
 
 ## Build from the monorepo
 
 ```sh
-npm run build -w @maprama/protocol   # the contract must be built first
-npm run build -w @maprama/osm
-npm test -w @maprama/osm
+npm run build -w @open-yescoin/maprama-protocol   # the contract must be built first
+npm run build -w @open-yescoin/maprama-osm
+npm test -w @open-yescoin/maprama-osm
 ```
 
 ## Commands
@@ -49,7 +49,7 @@ maprama-osm build --pbf south-korea-latest.osm.pbf \
 Regenerate the checked-in sample from the repository root:
 
 ```sh
-npm run build -w @maprama/protocol && npm run build -w @maprama/osm && npm run sample:seongsu -w @maprama/osm
+npm run build -w @open-yescoin/maprama-protocol && npm run build -w @open-yescoin/maprama-osm && npm run sample:seongsu -w @open-yescoin/maprama-osm
 ```
 
 This writes `tools/osm/samples/seongsu.world.json`. It also writes the raw
@@ -195,7 +195,7 @@ The library entry point takes a list of bboxes and serves all of them from a
 single scan, which is what makes bulk generation practical:
 
 ```js
-import { extractFromPbf } from '@maprama/osm';
+import { extractFromPbf } from '@open-yescoin/maprama-osm';
 
 const results = await extractFromPbf('south-korea-latest.osm.pbf', [seongsu, haeundae, jeonju]);
 for (const { bbox, raw, stats } of results) { /* buildWorld(raw, { name, bbox }) */ }
@@ -203,7 +203,7 @@ for (const { bbox, raw, stats } of results) { /* buildWorld(raw, { name, bbox })
 
 The CLI's `build --pbf` is the one-bbox case, so **calling it N times reads the
 file N times**. For a handful of areas that is fine; for a tile pipeline, use
-`extractFromPbf` with the whole list. `@maprama/tiles` is built on this entry
+`extractFromPbf` with the whole list. `@open-yescoin/maprama-tiles` is built on this entry
 point.
 
 ### Finding where the data is
@@ -213,7 +213,7 @@ many it can ask for at once. `surveyPbfNodes` answers both in one pass over the
 node section:
 
 ```js
-import { surveyPbfNodes } from '@maprama/osm';
+import { surveyPbfNodes } from '@open-yescoin/maprama-osm';
 
 const counts = await surveyPbfNodes('south-korea-latest.osm.pbf', 10);
 // Map "<x>/<y>" -> node count, at zoom 10. Absent means the cell has no nodes
@@ -245,7 +245,7 @@ cost is driven by how many node coordinates it has to resolve.
 
 ## Mapping rules
 
-World space follows `@maprama/protocol`: `+x` = east, `z` = −north, in world
+World space follows `@open-yescoin/maprama-protocol`: `+x` = east, `z` = −north, in world
 units of `unitMeters` meters. Ids are `w<wayId>`, `r<relationId>` and
 `n<nodeId>`. When a way is split by the bbox, or a relation has several outer
 rings, the pieces are suffixed `_0`, `_1`, and so on. Buildings generated from

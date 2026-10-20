@@ -31,7 +31,7 @@
  * @module
  */
 
-import { DEFAULT_SNAP_TO_BUILDING_METERS, type LngLat, type MarkerAnchor, type MarkerIcon, type MarkerShape, type MarkerSpec, type Projection, type SetMarkerLayerCommand } from '@maprama/protocol';
+import { DEFAULT_SNAP_TO_BUILDING_METERS, type LngLat, type MarkerAnchor, type MarkerIcon, type MarkerShape, type MarkerSpec, type Projection, type SetMarkerLayerCommand } from '@open-yescoin/maprama-protocol';
 import type { CameraController } from '../core/camera.js';
 import { snapToBuilding, type AnchorContext } from './anchor.js';
 import { inFront } from './dom-styles.js';

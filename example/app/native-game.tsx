@@ -1,8 +1,8 @@
-// Registers the `native` engine host (C++ core + MapLibre Native) with @maprama/react-native.
-import '@maprama/engine-native';
+// Registers the `native` engine host (C++ core + MapLibre Native) with @open-yescoin/maprama-react-native.
+import '@open-yescoin/maprama-engine-native';
 import { useEffect, useRef, useState } from 'react';
-import { Character, DropLayer, Geofence, useCharacterPosition, type DropCollectInfo, type MapramaViewRef } from '@maprama/react-native';
-import { haversineMeters, type DropType, type LngLat, type Rarity } from '@maprama/protocol';
+import { Character, DropLayer, Geofence, useCharacterPosition, type DropCollectInfo, type MapramaViewRef } from '@open-yescoin/maprama-react-native';
+import { haversineMeters, type DropType, type LngLat, type Rarity } from '@open-yescoin/maprama-protocol';
 import { DemoMap } from '../src/components/DemoMap';
 import { Button, ButtonRow, EventLog, Readout, ScreenLayout, Section, useEventLog } from '../src/components/ui';
 import { SAMPLE_CHARACTER_MODEL_URI } from '../src/data/sampleModel';

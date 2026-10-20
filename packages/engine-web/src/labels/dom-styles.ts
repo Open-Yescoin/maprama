@@ -8,7 +8,7 @@
  * @module
  */
 
-import type { LabelContent, LabelContentMode, LabelsSpec } from '@maprama/protocol';
+import type { LabelContent, LabelContentMode, LabelsSpec } from '@open-yescoin/maprama-protocol';
 import type { CameraController } from '../core/camera.js';
 import { ICON_COLORS, POI_GLYPHS } from './icons.js';
 import { clampLabelX, domLabelVisible, resolveLabelContent, rotatedBox, uprightAngle, overlaps, type Box, type DomLabelStyle, type LabelEntry } from './index.js';

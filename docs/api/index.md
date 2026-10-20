@@ -4,7 +4,7 @@
 
 ## 패키지
 
-### [`@maprama/react-native`](/api/reference/react-native/)
+### [`@open-yescoin/maprama-react-native`](/api/reference/react-native/)
 
 앱이 쓰는 API입니다.
 
@@ -15,7 +15,7 @@
 - 엔진 호스트: [`EngineHost`](/api/reference/react-native/interfaces/EngineHost), [`registerEngineHost`](/api/reference/react-native/functions/registerEngineHost), [`createMessageChannelHost`](/api/reference/react-native/functions/createMessageChannelHost)
 - 오류: [`MapramaError`](/api/reference/react-native/classes/MapramaError)
 
-### [`@maprama/protocol`](/api/reference/protocol/)
+### [`@open-yescoin/maprama-protocol`](/api/reference/protocol/)
 
 호스트와 엔진이 공유하는 계약입니다. 앱에서는 주로 타입과 테마 프리셋을 가져다 씁니다.
 
@@ -28,7 +28,7 @@
 - 좌표: [`createProjection`](/api/reference/protocol/functions/createProjection), [`haversineMeters`](/api/reference/protocol/functions/haversineMeters)
 - 메시지: [`EngineCommand`](/api/reference/protocol/type-aliases/EngineCommand), [`EngineEvent`](/api/reference/protocol/type-aliases/EngineEvent), [`encodeCommand`](/api/reference/protocol/functions/encodeCommand), [`decodeEvent`](/api/reference/protocol/functions/decodeEvent)
 
-`@maprama/react-native`가 다시 내보내는 프로토콜 타입(`ThemeSpec`, `LngLat` 등)은 프로토콜 페이지로 연결됩니다.
+`@open-yescoin/maprama-react-native`가 다시 내보내는 프로토콜 타입(`ThemeSpec`, `LngLat` 등)은 프로토콜 페이지로 연결됩니다.
 
 ## 그 밖의 레퍼런스
 

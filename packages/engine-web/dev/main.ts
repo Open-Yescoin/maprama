@@ -71,8 +71,8 @@ import type {
   WorldData,
   WorldSource,
   ZoomOutBehavior,
-} from '@maprama/protocol';
-import { DEFAULT_VIEW_MODE, HOLO_ICON_TILES, LABEL_CONTENT_MODES, LABEL_STYLES, LOCATION_SOURCE_KINDS, PRESET_NAMES, TIMES_OF_DAY, VIEW_MODES, ZOOM_OUT_BEHAVIORS } from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
+import { DEFAULT_VIEW_MODE, HOLO_ICON_TILES, LABEL_CONTENT_MODES, LABEL_STYLES, LOCATION_SOURCE_KINDS, PRESET_NAMES, TIMES_OF_DAY, VIEW_MODES, ZOOM_OUT_BEHAVIORS } from '@open-yescoin/maprama-protocol';
 import { createDirectTransport, createEngine } from '../src/index.js';
 import type { WorldModel } from '../src/world/model.js';
 

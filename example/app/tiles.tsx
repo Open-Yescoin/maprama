@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Text } from 'react-native';
-import type { LngLat, TileWorldSource } from '@maprama/protocol';
-import { useCameraIdle, type MapramaViewRef } from '@maprama/react-native';
+import type { LngLat, TileWorldSource } from '@open-yescoin/maprama-protocol';
+import { useCameraIdle, type MapramaViewRef } from '@open-yescoin/maprama-react-native';
 import { DemoMap } from '../src/components/DemoMap';
 import { Button, ButtonRow, Chips, EventLog, Readout, ScreenLayout, Section, styles, useEventLog } from '../src/components/ui';
 import { TILES_URL } from '../src/config';

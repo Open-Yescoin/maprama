@@ -16,7 +16,7 @@
     "plugins": [
       "expo-router",
       [
-        "@maprama/react-native",
+        "@open-yescoin/maprama-react-native",
         {
           "features": ["characters", "drops", "labels", "travel"],
           "locationPermissionText": "Maprama Catalog shows your position on the 2.5D map."

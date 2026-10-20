@@ -27,7 +27,7 @@
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import * as P from '@maprama/protocol';
+import * as P from '@open-yescoin/maprama-protocol';
 
 // three.js' FileLoader reports progress with the DOM ProgressEvent (GLTFLoader resolves data: buffers through it).
 globalThis.ProgressEvent ??= class ProgressEvent extends Event {

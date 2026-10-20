@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { WorldPoint } from '@maprama/protocol';
+import type { WorldPoint } from '@open-yescoin/maprama-protocol';
 import { CameraController, DIST_HARD_MAX, DIST_MAX, DIST_MIN } from './camera.js';
 import { fitBounds, fitBoundsOrbit, type FitBoundsInput } from './fit-bounds.js';
 

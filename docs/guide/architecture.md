@@ -4,7 +4,7 @@
 
 ```
 ┌────────────────────────────────────────────────────────────┐
-│ 앱: <MapramaView> · <Character> · ref.travel() · hooks       │  @maprama/react-native
+│ 앱: <MapramaView> · <Character> · ref.travel() · hooks       │  @open-yescoin/maprama-react-native
 ├────────────────────────────────────────────────────────────┤
 │ 선언형 diff · 프레임 배치 · 요청/응답 상관 · 구독 참조 카운트 │
 ├────────────────────────────────────────────────────────────┤
@@ -12,9 +12,9 @@
 │   ├─ WebViewEngineHost (v1) → react-native-webview          │
 │   └─ Native host (v2)        → JSI TurboModule              │
 ├────────────────────────────────────────────────────────────┤
-│ @maprama/protocol 봉투: {"v":1,"seq":N,"kind":…,"msg":…}    │  같은 코덱, 같은 검증
+│ @open-yescoin/maprama-protocol 봉투: {"v":1,"seq":N,"kind":…,"msg":…}    │  같은 코덱, 같은 검증
 ├───────────────────────────────┬────────────────────────────┤
-│ @maprama/engine-web (three.js)│ @maprama/engine-native      │
+│ @open-yescoin/maprama-engine-web (three.js)│ @open-yescoin/maprama-engine-native      │
 │ WebView 또는 브라우저          │ C++ 코어 + MapLibre Native  │
 └───────────────────────────────┴────────────────────────────┘
 ```
@@ -23,7 +23,7 @@
 
 ## 프로토콜
 
-`@maprama/protocol`이 유일한 계약입니다.
+`@open-yescoin/maprama-protocol`이 유일한 계약입니다.
 
 - **봉투**: `encodeCommand(cmd, seq)` / `decodeEvent(text)`가 `{ v: PROTOCOL_VERSION, seq, kind: 'cmd' | 'evt', msg }` JSON 문자열을 만들고 읽습니다. 디코드는 항상 검증을 포함하며 실패하면 이유를 돌려줍니다.
 - **명령** (호스트 → 엔진, `ENGINE_COMMAND_TYPES` 20종): `init`, `setTheme`, `setLabels`, `setLabelContent`, `setUi`, `setCamera`, `upsertCharacters`, `removeCharacters`, `setLocationSource`, `pushLocation`, `travel`, `cancelTravel`, `setDropLayer`, `removeDropLayer`, `setGeofences`, `setBuildingStyle`, `setOverlayAnchors`, `subscribe`, `unsubscribe`, `request`
@@ -54,7 +54,7 @@
 ## 엔진 호스트 교체
 
 ```tsx
-import { registerEngineHost, createMessageChannelHost } from '@maprama/react-native';
+import { registerEngineHost, createMessageChannelHost } from '@open-yescoin/maprama-react-native';
 
 registerEngineHost('native', NativeEngineHost);
 <MapramaView engine="native" world={world} />;
@@ -67,7 +67,7 @@ registerEngineHost('native', NativeEngineHost);
 플레이그라운드와 테스트는 WebView 없이 같은 엔진을 페이지 안에서 돌립니다.
 
 ```ts
-import { createEngine, createDirectTransport } from '@maprama/engine-web';
+import { createEngine, createDirectTransport } from '@open-yescoin/maprama-engine-web';
 
 const transport = createDirectTransport();
 transport.onEvent((event) => console.log(event));
@@ -96,10 +96,10 @@ transport.postCommand({ type: 'init', world: { kind: 'procedural', layout: 'town
 
 ### 현재 상태: M3b (3D 건물 + 지붕·외벽(M2c) + 절차적 월드 + 게임 시스템 + 3D 캐릭터·드롭 모델)
 
-`@maprama/engine-native`를 import하면 `native` 엔진 호스트가 등록되고 `<MapramaView engine="native">`가 네이티브 엔진으로 동작합니다. 네이티브 코드가 들어간 개발 빌드(New Architecture)가 필요하며 Expo Go에서는 동작하지 않습니다.
+`@open-yescoin/maprama-engine-native`를 import하면 `native` 엔진 호스트가 등록되고 `<MapramaView engine="native">`가 네이티브 엔진으로 동작합니다. 네이티브 코드가 들어간 개발 빌드(New Architecture)가 필요하며 Expo Go에서는 동작하지 않습니다.
 
 ```tsx
-import '@maprama/engine-native';
+import '@open-yescoin/maprama-engine-native';
 
 <MapramaView engine="native" world={{ kind: 'data', world }} camera={{ center, distance: 400, pitch: 45 }} />
 ```
@@ -133,7 +133,7 @@ import '@maprama/engine-native';
 ### 층
 
 ```
-TS API (@maprama/react-native, engine="native")             JS 스레드
+TS API (@open-yescoin/maprama-react-native, engine="native")             JS 스레드
 Fabric + JSI: MapramaNativeView · MapramaEngineModule
 플랫폼 래퍼: iOS MLNMapView / Android MapView (MapAdapter 구현) + 라벨 네이티브 뷰 풀
 C++ 코어: Dispatcher · MapSession · WorldStore · WorldStyle · Projection · ThemeResolver

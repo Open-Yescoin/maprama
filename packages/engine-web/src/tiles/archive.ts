@@ -22,7 +22,7 @@
  * @module
  */
 
-import { MTIL_FORMAT, validateTileArchiveMetadata, type TileArchiveMetadata } from '@maprama/protocol';
+import { MTIL_FORMAT, validateTileArchiveMetadata, type TileArchiveMetadata } from '@open-yescoin/maprama-protocol';
 
 /** Thrown when an archive cannot be opened or read. Mapped to `world_load_failed`. */
 export class TileArchiveError extends Error {

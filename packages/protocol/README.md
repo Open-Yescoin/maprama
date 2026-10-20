@@ -1,16 +1,16 @@
-# @maprama/protocol
+# @open-yescoin/maprama-protocol
 
 The shared contract between Maprama engines and hosts: TypeScript types for
 worlds, themes, characters, drops and labels, the command/event message codec
 with runtime validation, geo projection and the theme presets.
 
 Apps normally get this package through
-[`@maprama/react-native`](https://www.npmjs.com/package/@maprama/react-native).
+[`@open-yescoin/maprama-react-native`](https://www.npmjs.com/package/@open-yescoin/maprama-react-native).
 Install it directly to build world data, write an engine or host, or use the
 types and presets on a server.
 
 ```sh
-npm i @maprama/protocol
+npm i @open-yescoin/maprama-protocol
 ```
 
 ## Usage
@@ -19,7 +19,7 @@ npm i @maprama/protocol
 import {
   encodeCommand, decodeEvent, validateWorldData, createProjection, PRESETS,
   type EngineCommand, type WorldData,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 
 const wire = encodeCommand({ type: 'setCamera', camera: { pitch: 45 } }, 1);
 
@@ -30,7 +30,7 @@ if (!result.ok) console.warn(result.error);
 Theme presets are also published as JSON:
 
 ```ts
-import urban from '@maprama/protocol/themes/urban.json';
+import urban from '@open-yescoin/maprama-protocol/themes/urban.json';
 ```
 
 ## Contents

@@ -3,7 +3,7 @@
  */
 
 import { useEffect, useId } from 'react';
-import type { CharacterSpec } from '@maprama/protocol';
+import type { CharacterSpec } from '@open-yescoin/maprama-protocol';
 import { useMapContext } from '../context';
 import { resolveModel } from '../model';
 import type { CharacterLayerProps } from '../types';

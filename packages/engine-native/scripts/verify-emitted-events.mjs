@@ -9,7 +9,7 @@
  */
 
 import { readFileSync } from 'node:fs';
-import { decodeEvent, ENGINE_EVENT_TYPES } from '@maprama/protocol';
+import { decodeEvent, ENGINE_EVENT_TYPES } from '@open-yescoin/maprama-protocol';
 
 const file = process.argv[2];
 if (!file) {

@@ -10,8 +10,8 @@ _Last updated: 2026-09-23._
 
 | Part | State |
 | --- | --- |
-| `@maprama/protocol`, `@maprama/engine-web`, `@maprama/react-native`, `@maprama/osm`, `@maprama/assets`, `@maprama/tiles` | **0.2.0, unreleased.** v0.1.0 is the last tag (GitHub release with tarballs); 0.2.0 adds nationwide tile streaming and is waiting on `npm login`. `@maprama/tiles` is newly publishable — a customer that cannot build its own archive is tied to ours, which is half a library. |
-| `@maprama/engine-native` (v2 engine) | **Beta candidate, private, not published.** M1–M4 done on iOS and Android on the official MapLibre SDKs. |
+| `@open-yescoin/maprama-protocol`, `@open-yescoin/maprama-engine-web`, `@open-yescoin/maprama-react-native`, `@open-yescoin/maprama-osm`, `@open-yescoin/maprama-assets`, `@open-yescoin/maprama-tiles` | **0.2.0, unreleased.** v0.1.0 is the last tag (GitHub release with tarballs); 0.2.0 adds nationwide tile streaming and is waiting on `npm login`. `@open-yescoin/maprama-tiles` is newly publishable — a customer that cannot build its own archive is tied to ours, which is half a library. |
+| `@open-yescoin/maprama-engine-native` (v2 engine) | **Beta candidate, private, not published.** M1–M4 done on iOS and Android on the official MapLibre SDKs. |
 | `services/api` | Private Cloudflare Workers service; no hardening pass yet. |
 | Docs | <https://craftsmanship001.github.io/maprama/> (Korean), built from `docs/` and deployed by CI. |
 | npm | **Not published.** All six packages carry LICENSE + NOTICE and pack cleanly (`npm pack` verified); publishing needs `npm login` by the maintainer. |
@@ -51,7 +51,7 @@ _Last updated: 2026-09-23._
   the web engine's PBR-lite shading.
 - **Tile worlds are web-only, and the overview level is heavy.** `WorldSource` has
   `{ kind: 'tiles', url, center }` (MTIL v1 over PMTiles, `design/tile-format.md`). The build side is
-  `@maprama/tiles`, which has produced the **nationwide South Korea archive: 126.9 MiB, 109,455 tiles,
+  `@open-yescoin/maprama-tiles`, which has produced the **nationwide South Korea archive: 126.9 MiB, 109,455 tiles,
   29.5 min** — measured, not extrapolated; **engine-web streams it** and was driven across the whole
   country end to end (Gangnam, Seongsu, Busan, a Han-river tile seam, Gurye, Namwon, Odaesan, open sea);
   the native engine decodes the payload format (`maprama/TileFormat.hpp`, conformance-tested) but does
@@ -72,7 +72,7 @@ _Last updated: 2026-09-23._
   (~70 ms together), and ambient traffic cars still teleport when the road graph changes shape. All of
   these numbers are headless software GL: treat them as ratios, not device figures.
 
-- **Layer sources can be swapped, and parks already are.** `@maprama/tiles` routes each `WorldData`
+- **Layer sources can be swapped, and parks already are.** `@open-yescoin/maprama-tiles` routes each `WorldData`
   layer through a `TileSource` (`tools/tiles/src/sources.ts`), and `--kr-parks` replaces OSM parks with
   the Korean 토지이음 (도시계획)시설정보 dataset (공공누리 제1유형). Doing it touched **no pipeline code** —
   one source implementation and one routing line — which is the evidence that buildings, roads and water
@@ -167,7 +167,7 @@ Driven by the first integrator (a location-based game app). Their priority order
    the pitch lock and the transition are the remaining work.
 
 Also requested, lower priority: `ref.setWorld(source)` without a remount, and a flat basemap outside the
-diorama. **Tile-backed worlds are no longer on this list — they are built**: `@maprama/tiles` produces
+diorama. **Tile-backed worlds are no longer on this list — they are built**: `@open-yescoin/maprama-tiles` produces
 the nationwide archive and engine-web streams it (see the gap entry above for what is still rough).
 Replacing a nationwide map now needs `setWorld` only if the app wants to change world *source* without a
 remount; a tile world already covers the whole country in one `init`. A single-city "diorama view"

@@ -1,4 +1,4 @@
-// decodeCommand / decodeEvent conformance against golden results from @maprama/protocol.
+// decodeCommand / decodeEvent conformance against golden results from @open-yescoin/maprama-protocol.
 #include <string>
 
 #include "maprama/protocol.hpp"

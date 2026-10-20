@@ -1,4 +1,4 @@
-// MTIL v1 tile decoding conformance against @maprama/protocol's reader
+// MTIL v1 tile decoding conformance against @open-yescoin/maprama-protocol's reader
 // (cpp/tests/fixtures/tile.json, written by scripts/export-tile-fixtures.mjs).
 //
 // The fixture carries the exact bytes of each tile and the JavaScript reader's

@@ -1,4 +1,4 @@
-import { PRESETS, TIMES } from '@maprama/protocol';
+import { PRESETS, TIMES } from '@open-yescoin/maprama-protocol';
 import { describe, expect, it } from 'vitest';
 import { LIGHT_SCALE, renderParamsFor } from './params.js';
 

@@ -91,7 +91,7 @@ paths:
           schema: { type: string }
       responses:
         '200':
-          description: WorldData (schema version 1, see `@maprama/protocol`).
+          description: WorldData (schema version 1, see `@open-yescoin/maprama-protocol`).
           headers:
             ETag: { $ref: '#/components/headers/ETag' }
             Cache-Control: { $ref: '#/components/headers/CacheControl' }
@@ -102,7 +102,7 @@ paths:
             application/json:
               schema:
                 type: object
-                description: WorldData as defined by `@maprama/protocol`.
+                description: WorldData as defined by `@open-yescoin/maprama-protocol`.
                 additionalProperties: true
         '304':
           description: Not modified.
@@ -543,7 +543,7 @@ webhooks:
       description: |
         Sent to the app's endpoint with `Maprama-Signature: t=<unix>,v1=<hex HMAC-SHA256(secret, "<t>.<raw body>")>`,
         `Maprama-Event` and `Maprama-Delivery` headers. Verify with
-        `verifyWebhookSignature` from `@maprama/api/verify`. Respond 2xx; non-2xx
+        `verifyWebhookSignature` from `@open-yescoin/maprama-api/verify`. Respond 2xx; non-2xx
         or network errors are retried up to 3 attempts in total.
       security: []
       parameters:
@@ -682,7 +682,7 @@ components:
       items: { type: number }
     DropSpec:
       type: object
-      description: '`DropSpec` from `@maprama/protocol`. `id` = `d1.<campaignId>.<window>.<geohash>.<index>`.'
+      description: '`DropSpec` from `@open-yescoin/maprama-protocol`. `id` = `d1.<campaignId>.<window>.<geohash>.<index>`.'
       required: [id, type, coordinate]
       properties:
         id: { type: string }

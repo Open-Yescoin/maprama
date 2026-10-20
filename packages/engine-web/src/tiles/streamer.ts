@@ -24,7 +24,7 @@
  * @module
  */
 
-import { decodeTile, resolveTileAttribution, type MtilTile } from '@maprama/protocol';
+import { decodeTile, resolveTileAttribution, type MtilTile } from '@open-yescoin/maprama-protocol';
 import type { TileArchive } from './archive.js';
 import { tileKey, tileOf, type TileId } from './mercator.js';
 

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { VIEW_TRANSITION_MS } from '@maprama/protocol';
+import { VIEW_TRANSITION_MS } from '@open-yescoin/maprama-protocol';
 import { ViewTransition, viewDurationMs } from './view-mode.js';
 
 /** Runs the transition to completion at 60 fps and returns the `t` of every frame. */

@@ -166,7 +166,7 @@ z15 · 위도 37.5°에서 한 칸 = **0.118 m**입니다.
 > **다음 단계가 각오해야 할 것:** 공개 API가 월드 단위 `{x, z}`를 주고받는 곳
 > (`project`/`unproject`, `camera.center`, 캐릭터/마커/지오펜스 좌표)은 rebase 때 의미가 달라집니다.
 > 앵커를 SDK 밖으로 노출하지 않으려면 **공개 API를 경위도 기준으로 바꾸고** 월드 단위는 내부 전용으로
-> 내리는 편이 깔끔합니다. 이건 `@maprama/protocol`의 파괴적 변경이고, 이 브리프 범위 밖이라
+> 내리는 편이 깔끔합니다. 이건 `@open-yescoin/maprama-protocol`의 파괴적 변경이고, 이 브리프 범위 밖이라
 > 여기서는 **필요하다는 사실만** 못 박아 둡니다.
 >
 > **미측정:** rebase 한 번에 드는 시간, 그리고 rebase 순간 화면이 튀지 않는지는 확인하지 않았습니다.
@@ -217,7 +217,7 @@ z15 · 위도 37.5°에서 한 칸 = **0.118 m**입니다.
   > **틀렸습니다.** 기하가 타일 + 여백으로 클립되므로 합성 변은 `-256`과 `8448`에 놓이고,
   > `0`/`extent`를 보는 렌더러는 **하나도 걸러내지 못한 채 강 한가운데에 벽을 세웁니다.**
   > 한강 반포(126.9971/37.5200) 주변 z15 타일 4장 실측: 클립 사각형 규칙 **12개 검출**,
-  > `0`/`extent` 규칙 **0개 검출**. `@maprama/tiles`의 `isSyntheticEdge(a, b, extent, buffer)`가
+  > `0`/`extent` 규칙 **0개 검출**. `@open-yescoin/maprama-tiles`의 `isSyntheticEdge(a, b, extent, buffer)`가
   > 올바른 규칙이고, `maprama-tiles water` 명령으로 재확인할 수 있습니다.
   > (**여전히 미측정:** 이 규칙으로 실제 렌더링이 충분한지는 엔진 작업에서 확인해야 합니다.)
 - 대가(중복 저장): 성수 z15에서 클립 조각 140개 / 통째 피처 484개. 줌이 올라갈수록 늘어나며
@@ -405,7 +405,7 @@ WebView는 **Maprama가 실제로 쓰는 설정 그대로** `source={{ html }}`�
 
 ## 7. `WorldSource`에 `kind: 'tiles'` 제안 (문서만 — 코드 변경 없음)
 
-`@maprama/protocol`은 이 브랜치에서 건드리지 않았습니다. 모양만 제안합니다.
+`@open-yescoin/maprama-protocol`은 이 브랜치에서 건드리지 않았습니다. 모양만 제안합니다.
 
 ```ts
 /** 전국 스트리밍: PMTiles 아카이브 하나에서 필요한 타일만 받는다. */
@@ -578,7 +578,7 @@ if (header.tileType !== TileType.Mvt) throw new ApiError(404, 'NOT_FOUND', `Tile
 
 ```sh
 npm install
-npm run build -w @maprama/protocol && npm run build -w @maprama/osm
+npm run build -w @open-yescoin/maprama-protocol && npm run build -w @open-yescoin/maprama-osm
 
 cd tools/tile-spike
 node src/cli.mjs build          # WorldData -> 타일 -> PMTiles 아카이브

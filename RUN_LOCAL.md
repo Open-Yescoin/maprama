@@ -11,11 +11,11 @@ npm install --prefer-offline --no-audit --no-fund
 ## 2. Build the packages needed for local development
 
 ```sh
-npm run build -w @maprama/protocol
-npm run build -w @maprama/engine-web
-npm run build -w @maprama/react-native
-npm run build -w @maprama/api
-npm run typecheck -w @maprama/example
+npm run build -w @open-yescoin/maprama-protocol
+npm run build -w @open-yescoin/maprama-engine-web
+npm run build -w @open-yescoin/maprama-react-native
+npm run build -w @open-yescoin/maprama-api
+npm run typecheck -w @open-yescoin/maprama-example
 ```
 
 If you also need the OSM or tiles CLIs, run the full build:
@@ -27,7 +27,7 @@ npm run build
 ## 3. Start the local API
 
 ```sh
-npm run dev:local -w @maprama/api -- --port 8787 --world seongsu=../../tools/osm/samples/seongsu.world.json
+npm run dev:local -w @open-yescoin/maprama-api -- --port 8787 --world seongsu=../../tools/osm/samples/seongsu.world.json
 ```
 
 Copy the printed `client key`.
@@ -37,7 +37,7 @@ Copy the printed `client key`.
 Use the client key from the API server:
 
 ```sh
-EXPO_PUBLIC_MAPRAMA_API_KEY=mpr_xxx npm run start -w @maprama/example -- --localhost
+EXPO_PUBLIC_MAPRAMA_API_KEY=mpr_xxx npm run start -w @open-yescoin/maprama-example -- --localhost
 ```
 
 Metro runs at:

@@ -1,4 +1,4 @@
-# @maprama/assets
+# @open-yescoin/maprama-assets
 
 `maprama` is a CLI that inspects and optimizes user-supplied glTF 2.0 / GLB
 models (characters, drops, vehicles and landmarks) so they work well in Maprama
@@ -9,15 +9,15 @@ engines. It is built on [glTF Transform](https://gltf-transform.dev),
 Requires Node.js 22.12+.
 
 ```sh
-npm i -D @maprama/assets     # or run it once: npx @maprama/assets inspect model.glb
+npm i -D @open-yescoin/maprama-assets     # or run it once: npx @open-yescoin/maprama-assets inspect model.glb
 ```
 
 To build and test it from the monorepo:
 
 ```sh
-npm run build -w @maprama/protocol
-npm run build -w @maprama/assets
-npm test -w @maprama/assets
+npm run build -w @open-yescoin/maprama-protocol
+npm run build -w @open-yescoin/maprama-assets
+npm test -w @open-yescoin/maprama-assets
 ```
 
 ## Engine conventions

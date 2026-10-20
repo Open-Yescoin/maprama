@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View, useWindowDimensions } from 'react-native';
-import { MarkerLayer, useCameraIdle, type MapramaViewRef } from '@maprama/react-native';
-import type { LngLat } from '@maprama/protocol';
+import { MarkerLayer, useCameraIdle, type MapramaViewRef } from '@open-yescoin/maprama-react-native';
+import type { LngLat } from '@open-yescoin/maprama-protocol';
 import { DemoMap } from '../src/components/DemoMap';
 import { Button, ButtonRow, EventLog, Readout, Section, useEventLog } from '../src/components/ui';
 import { NAMED_POIS, SEONGSU_WORLD, STATION, offsetMeters } from '../src/data/seongsu';

@@ -5,7 +5,7 @@
  */
 
 import { createContext, useContext } from 'react';
-import type { OverlayPosition } from '@maprama/protocol';
+import type { OverlayPosition } from '@open-yescoin/maprama-protocol';
 import type { CommandBatcher } from './batching';
 import type { MapController } from './ref';
 

@@ -32,7 +32,7 @@ import type {
   TravelMode,
   WorldAvatarSpec,
   LngLat,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 import { Group } from 'three';
 import { EngineError } from '../bridge/dispatcher.js';
 import { OverlayTracker, ThrottledTopic, type TrackedPosition } from '../bridge/subscriptions.js';

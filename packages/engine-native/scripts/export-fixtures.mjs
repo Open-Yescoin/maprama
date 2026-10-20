@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Exports golden conformance fixtures from the built `@maprama/protocol`
+ * Exports golden conformance fixtures from the built `@open-yescoin/maprama-protocol`
  * package (dist) into `cpp/tests/fixtures/`. The C++ core must reproduce every
  * expected value exactly (decode results and error strings) or within 1e-6
  * (projection math).
@@ -21,13 +21,13 @@
  *                        the sample worlds (Seongsu included) and of generated town / grid worlds, content
  *                        modes, HUD exclusions, holo placement, visibility and clamping samples (DESIGN.md §6.5)
  *
- * Run `npm run build -w @maprama/protocol` and `npm run build -w @maprama/engine-web` first (the root
+ * Run `npm run build -w @open-yescoin/maprama-protocol` and `npm run build -w @open-yescoin/maprama-engine-web` first (the root
  * `npm run build` does both).
  */
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import * as P from '@maprama/protocol';
+import * as P from '@open-yescoin/maprama-protocol';
 import { loadWebLabels } from './web-labels.mjs';
 
 /** Imports a built engine-web module (dist) with a helpful message when it has not been built. */
@@ -36,11 +36,11 @@ async function importEngineWeb(specifier) {
     return await import(specifier);
   } catch (e) {
     throw new Error(
-      `export-fixtures: cannot import ${specifier} (run \`npm run build -w @maprama/engine-web\` first): ${e.message}`,
+      `export-fixtures: cannot import ${specifier} (run \`npm run build -w @open-yescoin/maprama-engine-web\` first): ${e.message}`,
     );
   }
 }
-const W = await importEngineWeb('@maprama/engine-web');
+const W = await importEngineWeb('@open-yescoin/maprama-engine-web');
 // engine-web's pure label modules (not in its dist bundle): transpiled from src/labels by web-labels.mjs.
 const WL = await loadWebLabels();
 

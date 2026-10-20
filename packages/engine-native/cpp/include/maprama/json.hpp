@@ -1,7 +1,7 @@
 // Maprama native core — minimal JSON value with JavaScript semantics.
 //
 // The core must decode envelopes *identically* to `decodeCommand` in
-// `@maprama/protocol`, including error strings. That requires JS semantics
+// `@open-yescoin/maprama-protocol`, including error strings. That requires JS semantics
 // that off-the-shelf C++ JSON libraries do not provide:
 //   - every number is an IEEE-754 double; `1e400` parses to Infinity (V8
 //     `JSON.parse` accepts it) instead of failing;

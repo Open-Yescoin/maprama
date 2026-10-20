@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals
 import { createRef, useRef } from 'react';
 import { Text } from 'react-native';
 import { act, render } from '@testing-library/react-native';
-import type { EngineCommand, EngineEvent, EngineInfo } from '@maprama/protocol';
+import type { EngineCommand, EngineEvent, EngineInfo } from '@open-yescoin/maprama-protocol';
 import {
   Character,
   MapramaError,

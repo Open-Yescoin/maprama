@@ -1,4 +1,4 @@
-import type { InfoCardSpec, Projection } from '@maprama/protocol';
+import type { InfoCardSpec, Projection } from '@open-yescoin/maprama-protocol';
 import { describe, expect, it } from 'vitest';
 import type { CameraController } from '../core/camera.js';
 import {

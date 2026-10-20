@@ -1,5 +1,5 @@
-// Registers the `native` engine host (C++ core + MapLibre Native) with @maprama/react-native.
-import '@maprama/engine-native';
+// Registers the `native` engine host (C++ core + MapLibre Native) with @open-yescoin/maprama-react-native.
+import '@open-yescoin/maprama-engine-native';
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import {
@@ -17,8 +17,8 @@ import {
   type RoofShape,
   type TimeOfDay,
   type WorldSource,
-} from '@maprama/protocol';
-import { MapOverlay, useCameraState, type LabelContentFunction, type MapramaViewRef } from '@maprama/react-native';
+} from '@open-yescoin/maprama-protocol';
+import { MapOverlay, useCameraState, type LabelContentFunction, type MapramaViewRef } from '@open-yescoin/maprama-react-native';
 import { DemoMap } from '../src/components/DemoMap';
 import { Button, ButtonRow, Chips, EventLog, Readout, ScreenLayout, Section, Toggle, useEventLog } from '../src/components/ui';
 import { SAMPLE_BUILDING, SEONGSU_WORLD, STATION, STATION_NAME, offsetMeters } from '../src/data/seongsu';

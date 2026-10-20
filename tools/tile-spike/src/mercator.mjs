@@ -1,5 +1,5 @@
 /** Web-Mercator slippy-tile maths (EPSG:3857 / XYZ), plus the inverse of the
- *  equirectangular local-tangent-plane projection `@maprama/protocol` uses.
+ *  equirectangular local-tangent-plane projection `@open-yescoin/maprama-protocol` uses.
  *
  *  Kept dependency-free so the spike can be re-run from a bare checkout.
  */

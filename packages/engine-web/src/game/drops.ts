@@ -18,7 +18,7 @@
  * @module
  */
 
-import type { DropCollectEvent, DropSpec, DropType, LngLat, Rarity, WorldPoint } from '@maprama/protocol';
+import type { DropCollectEvent, DropSpec, DropType, LngLat, Rarity, WorldPoint } from '@open-yescoin/maprama-protocol';
 import {
   AdditiveBlending,
   CanvasTexture,

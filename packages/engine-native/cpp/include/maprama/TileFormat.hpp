@@ -4,7 +4,7 @@
 // is answered with `unsupported` by MapSession), but it must be able to *read*
 // the bytes: the format is part of the protocol, and a decoder that is written
 // and tested now is a decoder that cannot silently drift from the TypeScript
-// one in `@maprama/protocol` (`src/tile.ts`). `cpp/tests/tile_tests.cpp` runs
+// one in `@open-yescoin/maprama-protocol` (`src/tile.ts`). `cpp/tests/tile_tests.cpp` runs
 // both against the same golden fixture.
 //
 // Pure: no network, no gzip, no PMTiles. Give it the bytes of one

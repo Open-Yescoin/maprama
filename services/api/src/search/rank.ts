@@ -1,4 +1,4 @@
-import { haversineMeters, type LngLat } from '@maprama/protocol';
+import { haversineMeters, type LngLat } from '@open-yescoin/maprama-protocol';
 import { SEARCH_LIMITS } from '../config.js';
 import type { Place } from '../deps.js';
 import { textScore } from './normalize.js';

@@ -38,7 +38,7 @@ export default function CatalogIndex() {
       keyExtractor={(item) => item.slug}
       ListHeaderComponent={
         <Text style={styles.intro}>
-          Every @maprama/react-native feature, one screen each. Map data on real-data screens: © OpenStreetMap contributors (ODbL).
+          Every @open-yescoin/maprama-react-native feature, one screen each. Map data on real-data screens: © OpenStreetMap contributors (ODbL).
         </Text>
       }
       renderItem={({ item }) => (

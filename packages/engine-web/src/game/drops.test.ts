@@ -1,5 +1,5 @@
-import type { DropSpec } from '@maprama/protocol';
-import { validateEngineEvent } from '@maprama/protocol';
+import type { DropSpec } from '@open-yescoin/maprama-protocol';
+import { validateEngineEvent } from '@open-yescoin/maprama-protocol';
 import { MeshStandardMaterial } from 'three';
 import { describe, expect, it } from 'vitest';
 import type { SceneApi } from '../scene-api.js';

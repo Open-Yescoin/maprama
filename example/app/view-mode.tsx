@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
-import { VIEW_MODES, type ViewMode } from '@maprama/react-native';
-import type { MapramaErrorEvent, MapramaViewRef } from '@maprama/react-native';
+import { VIEW_MODES, type ViewMode } from '@open-yescoin/maprama-react-native';
+import type { MapramaErrorEvent, MapramaViewRef } from '@open-yescoin/maprama-react-native';
 import { DemoMap } from '../src/components/DemoMap';
 import { Button, ButtonRow, Chips, EventLog, Readout, ScreenLayout, Section, Toggle, useEventLog } from '../src/components/ui';
 import { SEONGSU_WORLD, STATION } from '../src/data/seongsu';

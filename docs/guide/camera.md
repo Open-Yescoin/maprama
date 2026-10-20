@@ -63,7 +63,7 @@ onError={(e) => {
 카메라의 수직 시야각은 **40°**입니다. 상수로 공개돼 있으니 직접 적어 넣지 마세요.
 
 ```ts
-import { CAMERA_FOV_DEG, visibleSpanMeters } from '@maprama/react-native';
+import { CAMERA_FOV_DEG, visibleSpanMeters } from '@open-yescoin/maprama-react-native';
 
 visibleSpanMeters(1200); // 874 m — 타깃에서 화면 세로로 보이는 지면 길이
 ```
@@ -113,7 +113,7 @@ if (!fitted) {
 "화면에 지금 뭐가 보이나"는 지도가 **멈춘 뒤에** 물어야 하는 질문입니다. `camera:change`는 제스처 내내 계속 오기 때문에 앱이 직접 디바운스하고, 네 모서리를 `unproject`하고, 시야각 40°를 하드코딩해 반경을 다시 구해야 했습니다. `camera:idle`은 그 답을 한 번에 줍니다.
 
 ```tsx
-import { useCameraIdle } from '@maprama/react-native';
+import { useCameraIdle } from '@open-yescoin/maprama-react-native';
 
 const idle = useCameraIdle(map, { throttleMs: 500 });
 

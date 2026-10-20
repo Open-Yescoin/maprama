@@ -34,7 +34,7 @@
 프리셋의 원본 데이터는 JSON으로도 배포됩니다.
 
 ```ts
-import urban from '@maprama/protocol/themes/urban.json';
+import urban from '@open-yescoin/maprama-protocol/themes/urban.json';
 <MapramaView theme={{ base: urban, timeOfDay: 'night' }} />
 ```
 
@@ -62,7 +62,7 @@ import urban from '@maprama/protocol/themes/urban.json';
 `resolveTheme(spec)`이 모든 값을 확정합니다. 우선순위는 **spec 필드 → `PRESET_DEFAULTS[base]` → `BASE_THEME_DEFAULTS`** 입니다. 엔진은 이 결과만 봅니다.
 
 ```ts
-import { resolveTheme } from '@maprama/protocol';
+import { resolveTheme } from '@open-yescoin/maprama-protocol';
 
 const t = resolveTheme({ base: 'toy', timeOfDay: 'night' });
 t.buildings.massing; // 프리셋 기본값

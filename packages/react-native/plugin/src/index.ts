@@ -1,8 +1,8 @@
 /**
- * Expo config plugin for `@maprama/react-native`.
+ * Expo config plugin for `@open-yescoin/maprama-react-native`.
  *
  * ```json
- * { "expo": { "plugins": [["@maprama/react-native", { "features": ["characters", "drops"], "locationPermissionText": "Show you on the map" }]] } }
+ * { "expo": { "plugins": [["@open-yescoin/maprama-react-native", { "features": ["characters", "drops"], "locationPermissionText": "Show you on the map" }]] } }
  * ```
  *
  * - Adds iOS `NSLocationWhenInUseUsageDescription` and Android
@@ -49,14 +49,14 @@ export const ANDROID_LOCATION_PERMISSIONS = ['android.permission.ACCESS_FINE_LOC
 /** Validates options and fills defaults. */
 export function normalizeProps(props: MapramaPluginProps | void | null): Required<Omit<MapramaPluginProps, 'locationPermissionText'>> & Pick<MapramaPluginProps, 'locationPermissionText'> {
   const features = props?.features ?? [...MAPRAMA_FEATURES];
-  if (!Array.isArray(features)) throw new Error('@maprama/react-native: "features" must be an array');
+  if (!Array.isArray(features)) throw new Error('@open-yescoin/maprama-react-native: "features" must be an array');
   for (const feature of features) {
     if (!(MAPRAMA_FEATURES as readonly string[]).includes(feature)) {
-      throw new Error(`@maprama/react-native: unknown feature "${String(feature)}" (expected one of ${MAPRAMA_FEATURES.join(', ')})`);
+      throw new Error(`@open-yescoin/maprama-react-native: unknown feature "${String(feature)}" (expected one of ${MAPRAMA_FEATURES.join(', ')})`);
     }
   }
   if (props?.locationPermissionText !== undefined && typeof props.locationPermissionText !== 'string') {
-    throw new Error('@maprama/react-native: "locationPermissionText" must be a string');
+    throw new Error('@open-yescoin/maprama-react-native: "locationPermissionText" must be a string');
   }
   return {
     features: [...new Set(features)],
@@ -101,4 +101,4 @@ const withMaprama: ConfigPlugin<MapramaPluginProps | void> = (config, props) => 
   return config;
 };
 
-export default createRunOncePlugin(withMaprama, '@maprama/react-native', '0.0.0');
+export default createRunOncePlugin(withMaprama, '@open-yescoin/maprama-react-native', '0.0.0');

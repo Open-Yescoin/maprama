@@ -4,7 +4,7 @@
  * `example/.env.local` (git-ignored) or export them in the shell.
  */
 
-/** Base URL of the Maprama API (`npm run dev:local -w @maprama/api` listens on 8787). */
+/** Base URL of the Maprama API (`npm run dev:local -w @open-yescoin/maprama-api` listens on 8787). */
 export const API_BASE_URL: string = process.env.EXPO_PUBLIC_MAPRAMA_API_URL ?? 'http://localhost:8787';
 
 /** Client API key printed by the local dev server on start (`client key (dev only): mpr_...`). */

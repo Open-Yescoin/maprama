@@ -1,5 +1,5 @@
 {
-  "name": "@maprama/osm",
+  "name": "@open-yescoin/maprama-osm",
   "version": "0.2.0",
   "description": "Builds Maprama WorldData JSON from OpenStreetMap (Overpass) data, with optional Korean national building heights.",
   "keywords": [
@@ -58,7 +58,7 @@
     "sample:seongsu": "node dist/bin.js sample seongsu"
   },
   "dependencies": {
-    "@maprama/protocol": "^0.2.0",
+    "@open-yescoin/maprama-protocol": "^0.3.0",
     "@turf/helpers": "7.4.0",
     "@turf/intersect": "7.4.0",
     "osm-pbf-parser-node": "1.1.4"

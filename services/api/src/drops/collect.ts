@@ -4,7 +4,7 @@
  * The SDK judges collection instantly on-device and forwards
  * `{dropId, collectId, userId, fix}`; this module decides whether it counts.
  */
-import { haversineMeters } from '@maprama/protocol';
+import { haversineMeters } from '@open-yescoin/maprama-protocol';
 import { COLLECT_RULES } from '../config.js';
 import type { CollectFix, CollectRecord, ServiceDeps } from '../deps.js';
 import { badRequest, type ErrorCode } from '../errors.js';

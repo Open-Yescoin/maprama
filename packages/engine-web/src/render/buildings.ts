@@ -33,7 +33,7 @@ import {
   type Raycaster,
 } from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-import type { BuildingKind, BuildingStyle, Massing, ModelSource, Vec2 } from '@maprama/protocol';
+import type { BuildingKind, BuildingStyle, Massing, ModelSource, Vec2 } from '@open-yescoin/maprama-protocol';
 import { cssHexToNumber, mixHex, mulberry32, offsetHslHex } from '../util/math.js';
 import type { BuildingModel, MassShape, RoofKind } from '../world/model.js';
 import { bbox, centroid, normalizeRing, offsetRing, pointInPolygon, scaleRing } from '../world/polygon.js';

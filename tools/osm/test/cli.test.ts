@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterAll, describe, expect, it } from 'vitest';
-import { validateWorldData, type WorldData } from '@maprama/protocol';
+import { validateWorldData, type WorldData } from '@open-yescoin/maprama-protocol';
 import { main } from '../src/cli.js';
 
 const dir = mkdtempSync(join(tmpdir(), 'maprama-osm-cli-'));

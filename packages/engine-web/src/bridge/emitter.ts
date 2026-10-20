@@ -4,7 +4,7 @@
  * @module
  */
 
-import type { EngineEvent, EngineEventType } from '@maprama/protocol';
+import type { EngineEvent, EngineEventType } from '@open-yescoin/maprama-protocol';
 
 export type EventOf<T extends EngineEventType> = Extract<EngineEvent, { type: T }>;
 export type EventListener<T extends EngineEventType> = (event: EventOf<T>) => void;

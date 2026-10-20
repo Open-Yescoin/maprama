@@ -42,7 +42,7 @@ import {
   type InfoRowIcon,
   type LabelIcon,
   type Projection,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 import type { CameraController } from '../core/camera.js';
 import { inFront } from './dom-styles.js';
 import { HOLO_ICONS, ICON_COLORS } from './icons.js';

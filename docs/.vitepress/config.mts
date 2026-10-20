@@ -13,7 +13,7 @@ function typedocSidebar(): DefaultTheme.SidebarItem[] {
   const file = join(docsRoot, 'api', 'reference', 'typedoc-sidebar.json');
   if (!existsSync(file)) return [];
   const items = JSON.parse(readFileSync(file, 'utf8')) as DefaultTheme.SidebarItem[];
-  const names: Record<string, string> = { protocol: '@maprama/protocol', 'react-native': '@maprama/react-native' };
+  const names: Record<string, string> = { protocol: '@open-yescoin/maprama-protocol', 'react-native': '@open-yescoin/maprama-react-native' };
   return items.map((item) => ({ ...item, text: names[item.text ?? ''] ?? item.text }));
 }
 

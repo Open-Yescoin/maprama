@@ -4,7 +4,7 @@
  * and screen ⇄ world projection. Uses three.js math only (no WebGL), so it
  * works in node tests.
  *
- * Conventions (match `@maprama/protocol` `CameraSpec`):
+ * Conventions (match `@open-yescoin/maprama-protocol` `CameraSpec`):
  * - `pitch` degrees, 0 = straight down, clamped to 0–60.
  * - `bearing` degrees clockwise from north = the compass direction at the top of the screen.
  * - `distance` world units here (the protocol uses meters; convert with `unitMeters`), clamped to
@@ -21,7 +21,7 @@
  * @module
  */
 
-import { CAMERA_FOV_DEG, type CameraIdleReason, type ContentInset } from '@maprama/protocol';
+import { CAMERA_FOV_DEG, type CameraIdleReason, type ContentInset } from '@open-yescoin/maprama-protocol';
 import { PerspectiveCamera, Plane, Raycaster, Vector2, Vector3 } from 'three';
 import { clamp, DEG, wrapDeg } from '../util/math.js';
 import { basisFor, groundAt } from './fit-bounds.js';

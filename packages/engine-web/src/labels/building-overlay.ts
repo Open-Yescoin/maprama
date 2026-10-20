@@ -1,5 +1,5 @@
 /** Roof-anchored labels for host-authored places, using Maprama's holo cards and collision rules. */
-import type { LabelIcon, LngLat } from '@maprama/protocol';
+import type { LabelIcon, LngLat } from '@open-yescoin/maprama-protocol';
 import type { SceneApi } from '../scene-api.js';
 import { HoloLabels } from './holo.js';
 import { ensureLabelStyles } from './dom-styles.js';

@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { View } from 'react-native';
-import { Character, DropLayer, type MapramaViewRef, type DropCollectInfo } from '@maprama/react-native';
-import type { DropType, LngLat, Rarity } from '@maprama/protocol';
+import { Character, DropLayer, type MapramaViewRef, type DropCollectInfo } from '@open-yescoin/maprama-react-native';
+import type { DropType, LngLat, Rarity } from '@open-yescoin/maprama-protocol';
 import { DemoMap } from '../src/components/DemoMap';
 import { Button, ButtonRow, EventLog, Readout, ScreenLayout, Section, Toast, Toggle, useEventLog } from '../src/components/ui';
 import { API_BASE_URL, API_KEY, DROPS_CHANNEL, probeApi } from '../src/config';

@@ -32,7 +32,7 @@ import {
   type TileWorldSource,
   type ViewMode,
   type WorldSource,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 import { Group, type Fog } from 'three';
 import { Dispatcher, EngineError, UNSUPPORTED } from '../bridge/dispatcher.js';
 import { EventEmitter, type EventListener } from '../bridge/emitter.js';

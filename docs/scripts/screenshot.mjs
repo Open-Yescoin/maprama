@@ -11,7 +11,7 @@
 //           (captured mid-route), then `travel:arrive` arrives;
 //   drops   the demo layer renders 8 drops with rarity beams/rings, and the JSX
 //           panel for `source="service"` includes `userId` and only props that
-//           exist in `@maprama/react-native`.
+//           exist in `@open-yescoin/maprama-react-native`.
 // Exits 1 when a page logs a console error, throws, logs a browser error
 // entry, shows an `unsupported` note, fails its scenario, or never becomes
 // ready. Chrome and the server are always shut down before exit.
@@ -149,7 +149,7 @@ const JSX_TEXT = `document.querySelector('.mpr-pg .code pre')?.textContent || ''
 
 function checkJsx(jsx) {
   const bad = jsxProps(jsx).filter(([c, p]) => !RN_PROPS[c].includes(p)).map(([c, p]) => `${c}.${p}`);
-  return bad.length ? `JSX uses props that @maprama/react-native does not have: ${bad.join(', ')}` : null;
+  return bad.length ? `JSX uses props that @open-yescoin/maprama-react-native does not have: ${bad.join(', ')}` : null;
 }
 
 const SCENARIOS = {

@@ -1,5 +1,5 @@
 {
-  "name": "@maprama/tiles",
+  "name": "@open-yescoin/maprama-tiles",
   "version": "0.2.0",
   "description": "Builds an MTIL v1 / PMTiles archive for a whole country from Maprama WorldData sources.",
   "license": "Apache-2.0 AND ODbL-1.0",
@@ -28,8 +28,8 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@maprama/osm": "^0.2.0",
-    "@maprama/protocol": "^0.2.0",
+    "@open-yescoin/maprama-osm": "^0.2.0",
+    "@open-yescoin/maprama-protocol": "^0.3.0",
     "pmtiles": "4.5.0"
   },
   "devDependencies": {

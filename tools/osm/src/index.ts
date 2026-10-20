@@ -1,5 +1,5 @@
 /**
- * `@maprama/osm`: OpenStreetMap (Overpass) → Maprama `WorldData` builder.
+ * `@open-yescoin/maprama-osm`: OpenStreetMap (Overpass) → Maprama `WorldData` builder.
  *
  * @packageDocumentation
  */

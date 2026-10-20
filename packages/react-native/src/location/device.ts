@@ -9,7 +9,7 @@
  * @module
  */
 
-import type { LocationFix, LocationSourceKind } from '@maprama/protocol';
+import type { LocationFix, LocationSourceKind } from '@open-yescoin/maprama-protocol';
 import type { MapramaLocationProps } from '../types';
 
 /** The subset of `expo-location` used by the host. */

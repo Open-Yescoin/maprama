@@ -25,7 +25,7 @@ import type {
   PoiCategory,
   Projection,
   RoadClass,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 import type { WorldModel } from '../world/model.js';
 import { KIND_SUBTITLES, POI_SUBTITLES } from './icons.js';
 

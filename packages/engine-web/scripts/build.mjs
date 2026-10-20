@@ -1,5 +1,5 @@
-// Builds @maprama/engine-web:
-//   dist/index.js (+ .d.ts)   ESM library build (three and @maprama/protocol external)
+// Builds @open-yescoin/maprama-engine-web:
+//   dist/index.js (+ .d.ts)   ESM library build (three and @open-yescoin/maprama-protocol external)
 //   dist/engine.iife.js       self-contained IIFE, global `MapramaEngine`
 //   dist/engine.html          single-file HTML (IIFE inlined, full-viewport container, WebView transport)
 //   dist/engine-html.js/.d.ts `export const ENGINE_HTML: string`
@@ -29,7 +29,7 @@ await esbuild.build({
   outfile: join(dist, 'index.js'),
   format: 'esm',
   sourcemap: true,
-  external: ['three', 'three/*', '@maprama/protocol'],
+  external: ['three', 'three/*', '@open-yescoin/maprama-protocol'],
 });
 
 await esbuild.build({

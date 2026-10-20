@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
 import { act, render } from '@testing-library/react-native';
-import { decodeCommand, encodeEvent, type EngineCommand, type EngineEvent } from '@maprama/protocol';
-import { MapramaView, getEngineHost, type EngineHost, type EngineHostError } from '@maprama/react-native';
+import { decodeCommand, encodeEvent, type EngineCommand, type EngineEvent } from '@open-yescoin/maprama-protocol';
+import { MapramaView, getEngineHost, type EngineHost, type EngineHostError } from '@open-yescoin/maprama-react-native';
 import { setFrameSchedulerForTesting } from '../../../react-native/src/batching';
 import { NATIVE_ENGINE_HOST, NativeEngineHost, setEngineModuleForTesting } from '../NativeEngineHost';
 import {

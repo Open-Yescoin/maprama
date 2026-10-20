@@ -17,7 +17,7 @@
  * @module
  */
 
-import type { WorldPoint } from '@maprama/protocol';
+import type { WorldPoint } from '@open-yescoin/maprama-protocol';
 import { clamp, DEG } from '../util/math.js';
 
 /**

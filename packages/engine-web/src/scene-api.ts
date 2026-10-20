@@ -46,7 +46,7 @@ import type {
   SubscriptionTopic,
   ViewMode,
   WorldPoint,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 import type { Group, PerspectiveCamera, Scene, Vector3, WebGLRenderer } from 'three';
 import type { CommandHandler, RequestHandler } from './bridge/dispatcher.js';
 import type { EventListener } from './bridge/emitter.js';
@@ -59,7 +59,7 @@ import type { TextureSet } from './theme/textures.js';
 import type { SnapResult } from './world/graph.js';
 import type { WorldModel } from './world/model.js';
 import type { TileWorldHandle } from './tiles/world.js';
-import type { EngineCommandType } from '@maprama/protocol';
+import type { EngineCommandType } from '@open-yescoin/maprama-protocol';
 
 /** Handler for one subscription topic. */
 export interface SubscriptionHandler {

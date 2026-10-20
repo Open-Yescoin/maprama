@@ -16,7 +16,7 @@
 
 import { polygon as turfPolygon, featureCollection } from '@turf/helpers';
 import { intersect } from '@turf/intersect';
-import type { Projection, Vec2 } from '@maprama/protocol';
+import type { Projection, Vec2 } from '@open-yescoin/maprama-protocol';
 import type { ExternalHeight } from './classify.js';
 import { parseLevels } from './classify.js';
 import {

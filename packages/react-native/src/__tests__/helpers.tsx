@@ -1,6 +1,6 @@
 import { beforeEach } from '@jest/globals';
 import { act } from '@testing-library/react-native';
-import { decodeCommand, encodeEvent, type EngineCommand, type EngineEvent } from '@maprama/protocol';
+import { decodeCommand, encodeEvent, type EngineCommand, type EngineEvent } from '@open-yescoin/maprama-protocol';
 import { setFrameSchedulerForTesting } from '../batching';
 import { webViewInstances, type FakeWebViewInstance } from '../../jest/react-native-webview';
 

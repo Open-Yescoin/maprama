@@ -12,8 +12,8 @@ module.exports = {
   transformIgnorePatterns: ['node_modules/(?!((jest-)?react-native|@react-native(-community)?|react-native-webview)/)'],
   moduleNameMapper: {
     // Test against the sources of the React Native package (no build needed) with its WebView fakes.
-    '^@maprama/react-native$': '<rootDir>/../react-native/src/index.ts',
-    '^@maprama/engine-web/engine-html$': '<rootDir>/../react-native/jest/engine-html.js',
+    '^@open-yescoin/maprama-react-native$': '<rootDir>/../react-native/src/index.ts',
+    '^@open-yescoin/maprama-engine-web/engine-html$': '<rootDir>/../react-native/jest/engine-html.js',
     '^react-native-webview$': '<rootDir>/../react-native/jest/react-native-webview.tsx',
   },
 };

@@ -93,7 +93,7 @@ struct Schemas {
                     {"url", object({{"url", nonEmptyString}})},
                     {"procedural", object({{"layout", oneOfEnum<ProceduralLayout>()}}, {{"seed", integer}})},
                     // A streamed PMTiles archive (design/tile-format.md). Decoded and validated here
-                    // so the message contract stays identical to @maprama/protocol; the native engine
+                    // so the message contract stays identical to @open-yescoin/maprama-protocol; the native engine
                     // does not render tile worlds yet and answers `unsupported` (DESIGN.md §7).
                     {"tiles", object({{"url", nonEmptyString}, {"center", lngLat}},
                                      {{"detailZoom", zoomLevel}, {"overviewZoom", zoomLevel}, {"tileBudget", positiveInteger}})},

@@ -177,7 +177,7 @@ export type ProceduralLayout = (typeof PROCEDURAL_LAYOUTS)[number];
  * A streamed tile world: one PMTiles archive the engine reads pieces of with
  * HTTP range requests, instead of one document it loads whole.
  *
- * The format is `design/tile-format.md` (MTIL v1); `@maprama/protocol`'s
+ * The format is `design/tile-format.md` (MTIL v1); `@open-yescoin/maprama-protocol`'s
  * {@link decodeTile} is the reader. A tile world can be the size of a country,
  * so the engine keeps a *render anchor* and re-bases world coordinates around
  * it as the camera travels — see the engine guide for what that changes about

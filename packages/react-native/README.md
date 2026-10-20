@@ -1,8 +1,8 @@
-# @maprama/react-native
+# @open-yescoin/maprama-react-native
 
 A 2.5D game map for React Native. It supports characters, multi-mode travel, collectible drops, holographic labels, geofences and React Native views pinned to map coordinates.
 
-The map is declarative: you describe it with components, drive it with an imperative `ref` API, and opt in to continuous values (character position, camera) through hooks. Rendering runs in a swappable **engine host**. The v1 host runs `@maprama/engine-web` inside `react-native-webview`. A future native engine can replace it without changing app code.
+The map is declarative: you describe it with components, drive it with an imperative `ref` API, and opt in to continuous values (character position, camera) through hooks. Rendering runs in a swappable **engine host**. The v1 host runs `@open-yescoin/maprama-engine-web` inside `react-native-webview`. A future native engine can replace it without changing app code.
 
 ## Requirements
 
@@ -15,7 +15,7 @@ The map is declarative: you describe it with components, drive it with an impera
 ### Bare React Native
 
 ```sh
-npm i @maprama/react-native react-native-webview
+npm i @open-yescoin/maprama-react-native react-native-webview
 cd ios && pod install
 ```
 
@@ -27,7 +27,7 @@ For `location={{ source: 'device' }}`, add the location permissions yourself:
 ### Expo (development build / prebuild)
 
 ```sh
-npx expo install @maprama/react-native react-native-webview
+npx expo install @open-yescoin/maprama-react-native react-native-webview
 # optional, recommended for device location:
 npx expo install expo-location
 ```
@@ -36,7 +36,7 @@ npx expo install expo-location
 {
   "expo": {
     "plugins": [
-      ["@maprama/react-native", { "features": ["characters", "drops", "labels", "travel"], "locationPermissionText": "Show you on the map" }]
+      ["@open-yescoin/maprama-react-native", { "features": ["characters", "drops", "labels", "travel"], "locationPermissionText": "Show you on the map" }]
     ]
   }
 }
@@ -57,8 +57,8 @@ import { useRef } from 'react';
 import {
   MapramaView, Character, CharacterLayer, DropLayer, Geofence, MapOverlay,
   useCharacterPosition, type MapramaViewRef,
-} from '@maprama/react-native';
-import urban from '@maprama/protocol/themes/urban.json'; // or simply base: 'urban'
+} from '@open-yescoin/maprama-react-native';
+import urban from '@open-yescoin/maprama-protocol/themes/urban.json'; // or simply base: 'urban'
 
 export function GameMap() {
   const map = useRef<MapramaViewRef>(null);
@@ -220,7 +220,7 @@ The low-level client is exported as `fetchNearbyDrops` / `verifyDropCollect`.
 ```ts
 interface EngineHost {
   readonly kind: string;
-  send(command: EngineCommand): void;               // @maprama/protocol command
+  send(command: EngineCommand): void;               // @open-yescoin/maprama-protocol command
   onEvent(listener: (event: EngineEvent) => void): () => void;
   readonly ready: Promise<EngineInfo>;
   destroy(): void;

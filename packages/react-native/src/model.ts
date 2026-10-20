@@ -5,7 +5,7 @@
  */
 
 import { Image } from 'react-native';
-import type { ModelSource } from '@maprama/protocol';
+import type { ModelSource } from '@open-yescoin/maprama-protocol';
 import type { ModelInput } from './types';
 
 /**

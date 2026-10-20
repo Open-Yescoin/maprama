@@ -1,4 +1,4 @@
-import { haversineMeters, type DropSpec, type LngLat } from '@maprama/protocol';
+import { haversineMeters, type DropSpec, type LngLat } from '@open-yescoin/maprama-protocol';
 import { describe, expect, it } from 'vitest';
 import { deriveReceiptSecret } from '../src/util/crypto.js';
 import { verifyReceipt, verifyWebhookSignature } from '../src/verify.js';

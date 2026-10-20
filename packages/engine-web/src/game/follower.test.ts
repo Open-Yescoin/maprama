@@ -1,4 +1,4 @@
-import { TRAVEL_MODES, type TravelMode, type WorldData } from '@maprama/protocol';
+import { TRAVEL_MODES, type TravelMode, type WorldData } from '@open-yescoin/maprama-protocol';
 import { describe, expect, it } from 'vitest';
 import { loadWorldData } from '../world/data.js';
 import {

@@ -15,7 +15,7 @@ import {
   type RouteLeg,
   type RouteResult,
   type TravelMode,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 import type { RequestHandler } from '../bridge/dispatcher.js';
 import { EngineError } from '../bridge/dispatcher.js';
 import { snapToBuilding as snapBuilding } from '../labels/anchor.js';

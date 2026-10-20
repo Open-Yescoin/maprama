@@ -1,4 +1,4 @@
-# @maprama/api
+# @open-yescoin/maprama-api
 
 The paid hosted Maprama service, next to the open-source SDK: world data and
 vector tiles, place search and reverse geocoding, public transit, dynamic
@@ -24,10 +24,10 @@ Everything is testable locally without a Cloudflare account.
 - `src/app.ts`: `createApp(deps: ServiceDeps)`; no global state, all I/O injected.
 - `src/worker.ts`: Workers entry; binds `DB` (D1), `TILES` (R2), `RECEIPT_SECRET`.
 - `src/deps.ts`: `KeysRepo`, `UsageRepo`, `PlacesRepo`, `TransitRepo`, `DropsRepo`, `WebhooksRepo`, `BlobStore`, `Clock`.
-- `src/verify.ts` (`@maprama/api/verify`): pure Web Crypto helpers for app servers. It has no imports.
+- `src/verify.ts` (`@open-yescoin/maprama-api/verify`): pure Web Crypto helpers for app servers. It has no imports.
 - `migrations/0001_init.sql`: D1 schema.
 - `openapi.yaml`: every endpoint, error code and auth scheme.
-- Contract types (`LngLat`, `DropSpec`, `WorldData`, ...) come from `@maprama/protocol`.
+- Contract types (`LngLat`, `DropSpec`, `WorldData`, ...) come from `@open-yescoin/maprama-protocol`.
 
 ### Endpoints and billable units
 
@@ -160,7 +160,7 @@ Delivery makes up to 3 attempts, with 1 s and 4 s backoff, an 8 s timeout each a
 
 ```ts
 import express from 'express';
-import { verifyWebhookSignature, verifyReceipt } from '@maprama/api/verify';
+import { verifyWebhookSignature, verifyReceipt } from '@open-yescoin/maprama-api/verify';
 
 const app = express();
 app.post('/maprama/webhook', express.text({ type: 'application/json' }), async (req, res) => {
@@ -201,12 +201,12 @@ app can be checked with the same `verifyReceipt`.
 ```sh
 # from the repo root
 npm install
-npm run build -w @maprama/protocol   # the root build runs in folder order
+npm run build -w @open-yescoin/maprama-protocol   # the root build runs in folder order
 
 cd services/api
 npm test                             # vitest: in-memory adapters + real D1 adapters on node:sqlite
 npm run typecheck
-npm run build                        # tsc → dist/ (library + @maprama/api/verify)
+npm run build                        # tsc → dist/ (library + @open-yescoin/maprama-api/verify)
 
 # Node dev server with in-memory storage; prints a dev client key and admin key
 npm run dev:local -- --port 8787 --world seongsu=../../tools/osm/samples/seongsu.world.json --tiles seongsu=./seongsu.pmtiles

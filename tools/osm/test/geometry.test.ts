@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { Vec2 } from '@maprama/protocol';
+import type { Vec2 } from '@open-yescoin/maprama-protocol';
 import {
   assembleRings,
   clipPolylineToRect,

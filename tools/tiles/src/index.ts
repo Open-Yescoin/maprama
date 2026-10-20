@@ -1,5 +1,5 @@
 /**
- * `@maprama/tiles`: builds an MTIL v1 / PMTiles archive for a whole country from
+ * `@open-yescoin/maprama-tiles`: builds an MTIL v1 / PMTiles archive for a whole country from
  * an OSM extract, and reads one back.
  *
  * @packageDocumentation

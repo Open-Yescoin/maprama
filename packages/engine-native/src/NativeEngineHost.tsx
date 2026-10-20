@@ -11,7 +11,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { StyleSheet } from 'react-native';
-import { createMessageChannelHost, type EngineHostComponentProps } from '@maprama/react-native';
+import { createMessageChannelHost, type EngineHostComponentProps } from '@open-yescoin/maprama-react-native';
 import MapramaNativeView from './specs/MapramaNativeViewNativeComponent';
 import NativeMapramaEngineModule, { type Spec } from './specs/NativeMapramaEngineModule';
 import { attachEngineReceiver, ensureEngineEvents } from './events';
@@ -81,7 +81,7 @@ export function NativeEngineHost({ style, onHost, onHostError, options }: Engine
       callbacks.current.onHostError({
         code: 'host_load_failed',
         message:
-          'MapramaEngineModule is not linked: @maprama/engine-native needs a development build (New Architecture) that includes its native code',
+          'MapramaEngineModule is not linked: @open-yescoin/maprama-engine-native needs a development build (New Architecture) that includes its native code',
         fatal: true,
       });
       return undefined;

@@ -1,4 +1,4 @@
-# @maprama/tiles
+# @open-yescoin/maprama-tiles
 
 Builds the **nationwide MTIL v1 / PMTiles archive** the engine streams from, and
 reads one back.
@@ -12,11 +12,11 @@ source routing, and tests.
 
 ## Why a separate package rather than a `maprama-osm` subcommand
 
-`@maprama/osm` is a **source adapter**: OSM (Overpass or `.pbf`) in, `WorldData`
+`@open-yescoin/maprama-osm` is a **source adapter**: OSM (Overpass or `.pbf`) in, `WorldData`
 out. Tiling is downstream of that and deliberately source-agnostic — the Korean
 national building dataset (GIS건물통합정보) is expected to supply `buildings`
 before long, and a tiler living inside the OSM CLI would be wired to one source
-by construction. So `@maprama/tiles` depends on `@maprama/osm` as *one registered
+by construction. So `@open-yescoin/maprama-tiles` depends on `@open-yescoin/maprama-osm` as *one registered
 source* (`src/osm-source.ts`) and knows nothing else about OSM.
 
 `tools/tile-spike` was left where it is: `design/tile-format.md` cites it for the
@@ -25,7 +25,7 @@ numbers behind the format, and those numbers should stay reproducible.
 ## Commands
 
 ```sh
-npm run build -w @maprama/protocol && npm run build -w @maprama/osm && npm run build -w @maprama/tiles
+npm run build -w @open-yescoin/maprama-protocol && npm run build -w @open-yescoin/maprama-osm && npm run build -w @open-yescoin/maprama-tiles
 
 node tools/tiles/dist/bin.js survey  --pbf korea.osm.pbf --work .work
 node tools/tiles/dist/bin.js build   --pbf korea.osm.pbf --work .work --out korea.pmtiles

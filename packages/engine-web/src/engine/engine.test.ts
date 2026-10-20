@@ -7,7 +7,7 @@ import {
   type EngineCommandType,
   type EngineEvent,
   type RequestCommand,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 import { describe, expect, it } from 'vitest';
 import { NOT_IMPLEMENTED, UNSUPPORTED } from '../bridge/dispatcher.js';
 import { createDirectTransport } from '../bridge/transport.js';

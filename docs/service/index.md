@@ -82,7 +82,7 @@ Authorization: Bearer mpr_...
 Cloudflare 계정 없이도 전부 로컬에서 테스트할 수 있습니다.
 
 ```sh
-npm run build -w @maprama/protocol
+npm run build -w @open-yescoin/maprama-protocol
 cd services/api
 npm run dev:local -- --port 8787 --world seongsu=../../tools/osm/samples/seongsu.world.json
 curl -H "Authorization: Bearer $KEY" 'http://localhost:8787/v1/search?q=성수역'

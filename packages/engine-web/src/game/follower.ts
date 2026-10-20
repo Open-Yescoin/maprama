@@ -10,7 +10,7 @@
  * @module
  */
 
-import { DEFAULT_UNIT_METERS, TRAVEL_MODES, type Station, type TravelMode, type WorldPoint } from '@maprama/protocol';
+import { DEFAULT_UNIT_METERS, TRAVEL_MODES, type Station, type TravelMode, type WorldPoint } from '@open-yescoin/maprama-protocol';
 import { clamp } from '../util/math.js';
 import { route, snap, type RoadGraph } from '../world/graph.js';
 import type { WorldKind } from '../world/model.js';

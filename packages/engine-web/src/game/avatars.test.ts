@@ -13,7 +13,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { Group, Scene, type Sprite } from 'three';
 import { WebGLRenderLists } from 'three/src/renderers/webgl/WebGLRenderLists.js';
 import { WebGLProperties } from 'three/src/renderers/webgl/WebGLProperties.js';
-import type { LngLat } from '@maprama/protocol';
+import type { LngLat } from '@open-yescoin/maprama-protocol';
 import gsap from 'gsap';
 import { avatarGeometry, drawAvatarDisc, drawAvatarFrame, WorldAvatars } from './avatars.js';
 import type { AnchorContext } from '../labels/anchor.js';

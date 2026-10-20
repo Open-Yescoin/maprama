@@ -1,4 +1,4 @@
-import type { Vec2 } from '@maprama/protocol';
+import type { Vec2 } from '@open-yescoin/maprama-protocol';
 import { describe, expect, it } from 'vitest';
 import { buildingAt, nearestOnRing, resolveWorldAnchor, snapToBuilding, type AnchorBuilding, type AnchorContext } from './anchor.js';
 

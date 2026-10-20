@@ -1,4 +1,4 @@
-import { DEFAULT_SNAP_TO_BUILDING_METERS, type MarkerSpec, type Projection, type SetMarkerLayerCommand } from '@maprama/protocol';
+import { DEFAULT_SNAP_TO_BUILDING_METERS, type MarkerSpec, type Projection, type SetMarkerLayerCommand } from '@open-yescoin/maprama-protocol';
 import { describe, expect, it } from 'vitest';
 import type { CameraController } from '../core/camera.js';
 import type { AnchorContext } from './anchor.js';

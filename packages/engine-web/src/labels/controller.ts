@@ -10,7 +10,7 @@
  * @module
  */
 
-import type { LabelContent, LabelInfo, LabelsSpec, LabelStyle, MapUiSpec, Projection } from '@maprama/protocol';
+import type { LabelContent, LabelInfo, LabelsSpec, LabelStyle, MapUiSpec, Projection } from '@open-yescoin/maprama-protocol';
 import type { SceneApi } from '../scene-api.js';
 import type { WorldModel } from '../world/model.js';
 import { DomLabels, ensureLabelStyles } from './dom-styles.js';

@@ -23,7 +23,7 @@
  */
 
 import { Group, Mesh, type BufferGeometry, type MeshBasicMaterial } from 'three';
-import type { Vec2 } from '@maprama/protocol';
+import type { Vec2 } from '@open-yescoin/maprama-protocol';
 import type { MaterialFactory } from '../theme/materials.js';
 import type { RenderParams } from '../theme/params.js';
 import type { WorldModel } from '../world/model.js';

@@ -16,7 +16,7 @@
 
 import gsap from 'gsap';
 import { CanvasTexture, Group, SRGBColorSpace, Sprite, SpriteMaterial, TextureLoader, type Texture } from 'three';
-import type { WorldAvatarFaceSpec, WorldAvatarSpec } from '@maprama/protocol';
+import type { WorldAvatarFaceSpec, WorldAvatarSpec } from '@open-yescoin/maprama-protocol';
 import type { SceneApi } from '../scene-api.js';
 import { resolveMarkerPoint } from '../labels/markers.js';
 import type { AnchorContext } from '../labels/anchor.js';

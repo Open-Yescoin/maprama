@@ -1,10 +1,10 @@
 /**
- * `@maprama/engine-native`: the native engine (v2) for `@maprama/react-native`.
+ * `@open-yescoin/maprama-engine-native`: the native engine (v2) for `@open-yescoin/maprama-react-native`.
  *
  * Importing this package registers the `native` engine host, so apps opt in with
  *
  * ```tsx
- * import '@maprama/engine-native';
+ * import '@open-yescoin/maprama-engine-native';
  * <MapramaView engine="native" … />
  * ```
  *
@@ -14,7 +14,7 @@
  * @packageDocumentation
  */
 
-import { registerEngineHost } from '@maprama/react-native';
+import { registerEngineHost } from '@open-yescoin/maprama-react-native';
 import { NATIVE_ENGINE_HOST, NativeEngineHost } from './NativeEngineHost';
 
 registerEngineHost(NATIVE_ENGINE_HOST, NativeEngineHost);

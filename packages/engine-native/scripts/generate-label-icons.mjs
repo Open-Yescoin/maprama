@@ -20,7 +20,7 @@
 
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import * as P from '@maprama/protocol';
+import * as P from '@open-yescoin/maprama-protocol';
 import { loadWebLabels } from './web-labels.mjs';
 
 const outPath = fileURLToPath(new URL('../cpp/src/LabelIcons.cpp', import.meta.url));

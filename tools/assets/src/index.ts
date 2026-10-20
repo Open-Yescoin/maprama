@@ -1,5 +1,5 @@
 /**
- * `@maprama/assets`: inspect and optimize glTF/GLB models for Maprama engines.
+ * `@open-yescoin/maprama-assets`: inspect and optimize glTF/GLB models for Maprama engines.
  *
  * @packageDocumentation
  */

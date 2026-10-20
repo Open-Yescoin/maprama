@@ -15,7 +15,7 @@
     "node": ">=22.12.0"
   },
   "scripts": {
-    "build:protocol": "npm run build -w @maprama/protocol",
+    "build:protocol": "npm run build -w @open-yescoin/maprama-protocol",
     "build": "node scripts/build-workspaces.mjs",
     "test": "node scripts/check-legal-files.mjs && npm run build:protocol && npm run test --workspaces --if-present",
     "typecheck": "npm run build:protocol && npm run typecheck --workspaces --if-present",

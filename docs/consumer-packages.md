@@ -1,10 +1,15 @@
-# Consumer packages
+# Publishing Maprama packages
 
-Maprama is the only editable source for `@maprama/protocol` and `@maprama/engine-web`. Consumer repositories keep versioned tarballs so Cloudflare Pages and server builds use the exact tested bytes without a release-time download.
+The Open-Yescoin fork is the source of `@open-yescoin/maprama-protocol` and `@open-yescoin/maprama-engine-web`. Consumers install exact versions from npm. Do not copy package source or tarballs into consumer repositories.
 
-1. Commit the source in `Open-Yescoin/maprama` and ensure its CI passes (`npm ci`, build, typecheck and test).
-2. Run `node scripts/pack-consumers.mjs` from that clean commit. It rebuilds protocol and engine-web and writes tarballs plus `manifest.json` under ignored `releases/maprama-<commit>/`.
-3. Copy the same protocol tarball to `kindra-admin` and `self-admin`; copy engine-web to `self-admin` and `kiss-me-front`. `kiss-me-front` also needs the same protocol tarball. Set `file:` dependencies and regenerate each pnpm lockfile. Keep the manifest with each consumer's vendored files.
-4. Verify each consumer from a clean checkout with `pnpm install --frozen-lockfile`, its typecheck and production build. The consumer manifest's source commit and SHA-256 values identify the release exactly.
+## Release order
 
-Each change of package contents requires a new package version. Never replace an existing tarball while retaining its version. Update the backend before publishing city-map data that requires a new protocol command; deploy the Mini App engine before publishing that data to players. Roll back a consumer by restoring the previous package, manifest and lockfile together.
+1. Merge the source and version changes to `main`. CI must pass the build, typecheck, tests and docs build on Node 22 and 24.
+2. Publish `@open-yescoin/maprama-protocol` first, then `@open-yescoin/maprama-engine-web`. The engine package declares the matching protocol version as a dependency.
+3. Confirm both public registry entries and install them in a clean directory. Check the package exports and the installed protocol version.
+4. Update each consumer's exact dependency versions and lockfile. Verify frozen installs and builds in a clean Linux environment before deploying dev.
+5. Test the dev city editing, publication, map rendering, building labels and character avatars. Deploy prod only after dev passes.
+
+Publishing is a release decision, not part of every commit. A Maprama change can be developed and tested without publishing until consumers need it. For later releases, bump both package versions together and run the `npm-release.yml` workflow from `main` after configuring npm trusted publishing for both packages. This workflow uses GitHub OIDC and does not store a long-lived npm token.
+
+Published npm versions are immutable. Fixes require a new version; never replace a tarball at the same version.

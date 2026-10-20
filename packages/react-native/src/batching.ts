@@ -22,7 +22,7 @@ import type {
   MarkerAnchor,
   MarkerSpec,
   OverlayAnchor,
-} from '@maprama/protocol';
+} from '@open-yescoin/maprama-protocol';
 
 /** Schedules a callback for the next frame. */
 export type FrameScheduler = (callback: () => void) => void;
