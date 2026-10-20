@@ -29,7 +29,7 @@ const patch = (version) => {
 };
 const git = (...args) => execFileSync('git', args, { cwd: root, encoding: 'utf8' }).trim();
 const npmVersions = (name) => {
-  const raw = execFileSync('npm', ['view', name, 'versions', '--json', `--registry=${registry}`], { cwd: root, encoding: 'utf8' });
+  const raw = execFileSync('npm', ['view', name, 'versions', '--json', '--prefer-online', `--registry=${registry}`], { cwd: root, encoding: 'utf8' });
   const versions = JSON.parse(raw);
   const stable = (Array.isArray(versions) ? versions : [versions]).filter((version) => /^\d+\.\d+\.\d+$/.test(version));
   if (!stable.length) throw new Error(`No stable version found on npm for ${name}`);
