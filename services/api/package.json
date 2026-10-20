@@ -41,7 +41,7 @@
     "lint:openapi": "npx --yes @redocly/cli@2.53.0 lint openapi.yaml"
   },
   "dependencies": {
-    "@open-yescoin/maprama-protocol": "^0.3.0",
+    "@open-yescoin/maprama-protocol": "^0.3.1",
     "hono": "4.13.8",
     "pmtiles": "4.5.0"
   },

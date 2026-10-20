@@ -58,7 +58,7 @@
     "sample:seongsu": "node dist/bin.js sample seongsu"
   },
   "dependencies": {
-    "@open-yescoin/maprama-protocol": "^0.3.0",
+    "@open-yescoin/maprama-protocol": "^0.3.1",
     "@turf/helpers": "7.4.0",
     "@turf/intersect": "7.4.0",
     "osm-pbf-parser-node": "1.1.4"

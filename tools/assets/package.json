@@ -57,7 +57,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@open-yescoin/maprama-protocol": "^0.3.0",
+    "@open-yescoin/maprama-protocol": "^0.3.1",
     "@gltf-transform/core": "4.5.0",
     "@gltf-transform/extensions": "4.5.0",
     "@gltf-transform/functions": "4.5.0",

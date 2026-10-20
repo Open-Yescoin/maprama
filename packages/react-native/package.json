@@ -89,8 +89,8 @@
     }
   },
   "dependencies": {
-    "@open-yescoin/maprama-engine-web": "^0.3.0",
-    "@open-yescoin/maprama-protocol": "^0.3.0"
+    "@open-yescoin/maprama-engine-web": "^0.3.1",
+    "@open-yescoin/maprama-protocol": "^0.3.1"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
