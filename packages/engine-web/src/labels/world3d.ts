@@ -51,6 +51,7 @@ export class WorldLabels3D {
   private textures: Texture[] = [];
   private mats: Material[] = [];
   private groundText: { m: Mesh; tx?: number; tz?: number; kind: 'road' | 'district' }[] = [];
+  private pins: { entry: LabelEntry; group: Group }[] = [];
   built = '';
 
   constructor(private readonly doc: Document) {
@@ -141,11 +142,15 @@ export class WorldLabels3D {
       }
     }
     for (const e of entries) if (e.kind === 'poi') this.addPoiPin(e, title(e), mats, groundY);
-    this.group.traverse((o) => { o.raycast = () => {}; });
+    this.group.traverse((o) => { if (!o.userData.labelId) o.raycast = () => {}; });
   }
 
   /** Turns ground road text to face the camera bearing (degrees). */
-  step(bearingDeg: number): void {
+  step(bearingDeg: number, groundY = 0, heightScale = 1, distance = 0): void {
+    for (const { entry, group } of this.pins) {
+      group.position.set(entry.x, groundY + ((entry.anchorY ?? groundY) - groundY) * heightScale - 0.03, entry.z);
+      group.visible = entry.maxDistance === undefined || distance <= entry.maxDistance;
+    }
     const b = (bearingDeg * Math.PI) / 180, fx = Math.sin(b), fz = -Math.cos(b);
     for (const gt of this.groundText) {
       if (gt.kind === 'road' && gt.tx !== undefined && gt.tz !== undefined) {
@@ -167,13 +172,15 @@ export class WorldLabels3D {
     this.textures = [];
     this.mats = [];
     this.groundText = [];
+    this.pins = [];
     this.built = '';
   }
 
   private addPoiPin(e: LabelEntry, text: string, mats: MaterialFactory, groundY: number): void {
     const col = cssHexToNumber(ICON_COLORS[e.icon]);
     const g = new Group();
-    g.position.set(e.x, groundY - 0.03, e.z);
+    g.position.set(e.x, (e.anchorY ?? groundY) - 0.03, e.z);
+    g.userData.labelId = e.id;
     const pole = new Mesh(new CylinderGeometry(0.03, 0.03, 1.2, 6).translate(0, 0.6, 0), mats.make(0xe8e8e8, { roughness: 0.5 }));
     const ball = new Mesh(new SphereGeometry(0.26, 16, 12).translate(0, 1.34, 0), mats.make(col, { roughness: 0.35, glow: 0.25, glowColor: col }));
     pole.castShadow = ball.castShadow = true;
@@ -186,6 +193,8 @@ export class WorldLabels3D {
     sp.position.set(0, 1.95, 0);
     sp.renderOrder = 9;
     g.add(sp);
+    g.traverse(object => { object.userData.labelId = e.id; });
+    this.pins.push({ entry: e, group: g });
     this.group.add(g);
   }
 

@@ -188,19 +188,31 @@ interface DomLabel {
 }
 
 /** The DOM label layer for the map-app styles. */
+/** One accessible press handler for both native DOM label styles and holo cards. */
+export function bindLabelPress(element: HTMLElement, press: () => void): void {
+  element.style.pointerEvents = 'auto';
+  element.style.cursor = 'pointer';
+  element.tabIndex = 0;
+  element.setAttribute('role', 'button');
+  element.addEventListener('pointerdown', event => event.stopPropagation());
+  element.addEventListener('click', event => { event.preventDefault(); event.stopPropagation(); press(); });
+  element.addEventListener('keydown', event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); event.stopPropagation(); press(); } });
+}
+
 export class DomLabels {
   private labels: DomLabel[] = [];
   private lastUpdate = -Infinity;
 
   constructor(private readonly layer: HTMLElement) {}
 
-  build(entries: readonly LabelEntry[]): void {
+  build(entries: readonly LabelEntry[], onPress?: (id: string) => void): void {
     this.clear();
     const doc = this.layer.ownerDocument;
     for (const e of [...entries].sort((a, b) => a.pri - b.pri)) {
       const el = doc.createElement('div');
       el.className = 'mpr-ml ' + (e.kind === 'district' ? (e.water ? 'mpr-ml-water' : 'mpr-ml-district') : e.kind === 'road' ? 'mpr-ml-road' + (e.roadClass === 'arterial' ? ' art' : '') : 'mpr-ml-poi');
       el.dataset.labelId = e.id;
+      if (onPress) bindLabelPress(el, () => onPress(e.id));
       el.style.display = 'none';
       this.layer.appendChild(el);
       this.labels.push({ entry: e, el, w: 0, h: 0, shown: false, key: '' });
@@ -222,7 +234,7 @@ export class DomLabels {
    * 60 fps like before but — unlike a frame counter — never skips an isolated
    * on-demand frame (after a resize, say), which would leave labels stale.
    */
-  update(cam: CameraController, style: DomLabelStyle, spec: LabelsSpec, entries: Readonly<Record<string, LabelContent>>, zoomOut: number, exclusions: readonly Box[], now: number): void {
+  update(cam: CameraController, style: DomLabelStyle, spec: LabelsSpec, entries: Readonly<Record<string, LabelContent>>, zoomOut: number, exclusions: readonly Box[], now: number, heightScale = 1): void {
     if (now - this.lastUpdate < MIN_INTERVAL_MS) return;
     this.lastUpdate = now;
     const mode: LabelContentMode = spec.content ?? 'nameAndType';
@@ -230,10 +242,10 @@ export class DomLabels {
     const placed: Box[] = [...exclusions];
     for (const l of this.labels) {
       const e = l.entry;
-      let show = domLabelVisible(style, e, dist, zoomOut);
+      let show = domLabelVisible(style, e, dist, zoomOut) && (e.maxDistance === undefined || dist <= e.maxDistance);
       let sx = 0, sy = 0;
       if (show) {
-        const s = cam.worldToScreen(e.x, 0.3, e.z);
+        const s = cam.worldToScreen(e.x, e.anchorY === undefined ? 0.3 : 0.3 + (e.anchorY - 0.3) * heightScale, e.z);
         if (!(s.x >= X0 - 0.025 * W && s.x <= X0 + 1.025 * W && s.y >= Y0 - 0.025 * H && s.y <= Y0 + 1.025 * H) || !inFront(cam, e.x, e.z)) show = false;
         sx = s.x;
         sy = s.y;

@@ -29,6 +29,31 @@ transport.postCommand({
 
 ## Entry points
 
+### Unified labels (0.4)
+
+`BuildingLabelOverlay` has been removed. Send authored places through the existing
+`setLabels` command; they share the native index, styles, visibility switch and
+marker / info-card collision exclusions. Keep label configuration and authored
+entries in the same command because `setLabels` replaces the full specification.
+
+```ts
+transport.postCommand({ type: 'setLabels', labels: {
+  enabled: true, includeBase: false, style: 'holo',
+  entries: [
+    { id: 'building:shop-1', buildingId: 'shop-1', title: 'Corner Coffee', icon: 'cafe' },
+    { id: 'poi:park-1', coordinate: { lng: 126.98, lat: 37.56 }, title: 'Neighborhood Park', icon: 'park' },
+  ],
+} });
+// label:press reports labelId, coordinate and, for roof anchors, buildingId.
+```
+
+`includeBase` defaults to true. An authored entry with the same id as a base POI
+replaces it; removing that entry restores the base label. Authored entries are
+also included in `labelsIndex` and support `setLabelContent`. Building anchors
+follow the renderer's current roof, including replacement models and transforms.
+Upgrade engine-web and protocol together. The C++ native engine's authored-label
+rendering is not implemented in this release.
+
 | Import | Contents |
 | --- | --- |
 | `@open-yescoin/maprama-engine-web` | ESM library (`three` and `@open-yescoin/maprama-protocol` are dependencies, not bundled). |

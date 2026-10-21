@@ -30,8 +30,6 @@ export type { CommandHandler, CommandOf, RequestHandler } from './bridge/dispatc
 export { EventEmitter } from './bridge/emitter.js';
 
 export type { SceneApi, SubscriptionHandler } from './scene-api.js';
-export { BuildingLabelOverlay } from './labels/building-overlay.js';
-export type { BuildingLabelSpec } from './labels/building-overlay.js';
 export { CameraController, DIST_HARD_MAX, DIST_HARD_MIN, DIST_MAX, DIST_MIN, PITCH_MAX, PITCH_MIN, farFor, nearFor } from './core/camera.js';
 export type { DistanceLimits } from './core/camera.js';
 export { FIT_ITERATIONS, fitBounds, fitBoundsOrbit } from './core/fit-bounds.js';

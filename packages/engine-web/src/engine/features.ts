@@ -195,7 +195,8 @@ export class Features {
     this.avatars.removeLayer(layerId);
   }
 
-  labelsChanged(): void {
+  labelsChanged(force = false): void {
+    this.labels.settingsChanged(force);
     const changed = this.labels.indexIfChanged();
     if (changed) this.scene.emit({ type: 'labelsIndex', labels: changed });
   }
@@ -204,6 +205,8 @@ export class Features {
     this.content = { ...entries };
     this.labels.contentChanged();
   }
+
+  pressLabel(x: number, y: number): boolean { return this.labels.pressAt(x, y); }
 
   setLocationSource(kind: LocationSourceKind): void {
     this.location.setKind(kind);

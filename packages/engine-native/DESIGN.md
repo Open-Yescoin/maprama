@@ -420,6 +420,7 @@ Statuses: **Current (M1)** is what the core does today [V: `cpp/src/Dispatcher.c
 | `infoCard:press` | info cards (`engine-web`: a click on the card's DOM, which captures its own touches) | The card body or one of its `content.actions` buttons was pressed | Immediate; `actionId` present only for an action button. Takes precedence over `building:press` / `map:press`, which are not emitted for the same press | not emitted yet (no native info-card views) | **M5** |
 | `infoCard:dismiss` | info cards (`engine-web`: the close button of a `dismissible` card) | The close button was pressed | Immediate; the engine does **not** remove the card — the host sends `removeInfoCard` | not emitted yet | **M5** |
 | `view:change` | the view controller (`engine-web`: `render/view-mode.ts`) | A `setView` (or `init.view`) changed the mode, or a view transition settled | Twice per animated switch (`animating: true` at the start, `animating: false` when it lands) and once for an instant switch or a `setView` for the mode the engine is already in; `view` is always the mode being moved **to** | not emitted yet (no native flat view) | **M5** |
+| `label:press` | engine-web unified label controller | Label card / pin press | Per press | Wire schema supported; native authored-label rendering and emission remain unimplemented | Web only |
 <!-- protocol-events:end -->
 
 The table coverage is enforced by `npm test` [V: `scripts/check-design-coverage.mjs` fails when a name in

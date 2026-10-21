@@ -149,13 +149,13 @@ struct Schemas {
             });
 
     // labels.ts
-    const Check labelsSpec = object({}, {{"enabled", boolean},
+    const Check labelsSpec = object({}, {{"enabled", boolean}, {"includeBase", boolean},
                                          {"style", oneOfEnum<LabelStyle>()},
                                          {"icons", oneOfEnum<HoloIconTile>()},
                                          {"content", oneOfEnum<LabelContentMode>()}});
     const Check labelInfo = object(
         {{"id", nonEmptyString}, {"kind", oneOfEnum<LabelKind>()}, {"name", str}, {"lngLat", lngLat}},
-        {{"category", oneOfEnum<PoiCategory>()}, {"subtitle", str}});
+        {{"category", oneOfEnum<PoiCategory>()}, {"subtitle", str}, {"buildingId", id}});
     const Check labelContent = object({{"title", str}}, {{"subtitle", str}, {"icon", oneOfEnum<LabelIcon>()}});
 
     // info-card.ts
@@ -440,6 +440,7 @@ struct Schemas {
         {"infoCard:press", object({{"id", id}}, {{"actionId", nonEmptyString}})},
         {"infoCard:dismiss", object({{"id", id}})},
         {"view:change", object({{"view", viewMode}, {"animating", boolean}})},
+        {"label:press", object({{"labelId", id}, {"coordinate", lngLat}}, {{"buildingId", id}})},
     };
     engineEvent = discriminated("type", std::move(events));
   }

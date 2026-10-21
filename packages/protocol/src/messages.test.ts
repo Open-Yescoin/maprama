@@ -25,6 +25,18 @@ import { sampleWorld } from './__fixtures__/world.js';
 const here = { lng: 126.978, lat: 37.5665 };
 const there = { lng: 126.99, lat: 37.57 };
 
+describe('authored labels', () => {
+  it('rejects missing anchors, duplicate ids and invalid placement settings', () => {
+    for (const entries of [
+      [{ id: 'one', title: 'Missing anchor' }],
+      [{ id: 'one', title: 'A', coordinate: here }, { id: 'one', title: 'B', coordinate: there }],
+      [{ id: 'one', title: 'A', coordinate: { lng: 200, lat: 0 } }],
+      [{ id: 'one', title: 'A', coordinate: here, maxDistance: -1 }],
+      [{ id: 'one', title: 'A', coordinate: here, priority: Number.NaN }],
+    ]) expect(validateEngineCommand({ type: 'setLabels', labels: { entries } }).ok).toBe(false);
+  });
+});
+
 type CommandFixtures = { [K in EngineCommandType]: Extract<EngineCommand, { type: K }>[] };
 type EventFixtures = { [K in EngineEventType]: Extract<EngineEvent, { type: K }>[] };
 
@@ -70,7 +82,7 @@ const commands: CommandFixtures = {
       },
     },
   ],
-  setLabels: [{ type: 'setLabels', labels: { style: 'sticker' } }],
+  setLabels: [{ type: 'setLabels', labels: { style: 'sticker' } }, { type: 'setLabels', labels: { enabled: true, includeBase: false, entries: [{ id: 'building:b1', buildingId: 'b1', title: 'Cafe', icon: 'cafe' }, { id: 'poi:p1', coordinate: here, title: 'Park', maxDistance: 70, priority: 5 }] } }],
   setLabelContent: [
     {
       type: 'setLabelContent',
@@ -292,6 +304,7 @@ const events: EventFixtures = {
       ],
     },
   ],
+  'label:press': [{ type: 'label:press', labelId: 'building:b1', buildingId: 'b1', coordinate: here }, { type: 'label:press', labelId: 'poi:p1', coordinate: there }],
   'map:press': [{ type: 'map:press', coordinate: here }],
   'building:press': [{ type: 'building:press', buildingId: 'b1', coordinate: here }],
   'marker:press': [{ type: 'marker:press', layerId: 'poi', markerId: 'm2', coordinate: there, point: { x: 180.5, y: 402 } }],
@@ -358,10 +371,10 @@ describe('fixtures cover the protocol', () => {
     expect(Object.keys(commands).sort()).toEqual([...ENGINE_COMMAND_TYPES].sort());
     expect(Object.keys(events).sort()).toEqual([...ENGINE_EVENT_TYPES].sort());
     expect(ENGINE_COMMAND_TYPES).toHaveLength(28);
-    expect(ENGINE_EVENT_TYPES).toHaveLength(21);
+    expect(ENGINE_EVENT_TYPES).toHaveLength(22);
     expect(ENGINE_COMMAND_TYPES).toContain('setWorldAvatars');
     expect(ENGINE_COMMAND_TYPES).toContain('removeWorldAvatars');
-    expect(ENGINE_EVENT_TYPES.slice(-5)).toEqual(['marker:press', 'camera:idle', 'infoCard:press', 'infoCard:dismiss', 'view:change']);
+    expect(ENGINE_EVENT_TYPES.slice(-6, -1)).toEqual(['marker:press', 'camera:idle', 'infoCard:press', 'infoCard:dismiss', 'view:change']);
     expect(SUBSCRIPTION_TOPICS.at(-1)).toBe('camera:idle');
     expect(REQUEST_METHODS.slice(-2)).toEqual(['focusOn', 'snapToBuilding']);
     expect(PROTOCOL_VERSION).toBe(1);

@@ -10,7 +10,7 @@
 
 import type { LabelContent, LabelContentMode } from '@open-yescoin/maprama-protocol';
 import type { CameraController } from '../core/camera.js';
-import { inFront } from './dom-styles.js';
+import { bindLabelPress, inFront } from './dom-styles.js';
 import { HOLO_ICONS, ICON_COLORS } from './icons.js';
 import { clampLabelX, HOLO_HEIGHT, holoEligible, placeHolo, resolveLabelContent, type Box, type HoloCandidate, type LabelEntry } from './index.js';
 
@@ -64,9 +64,7 @@ export class HoloLabels {
       txt.append(b, sm);
       card.append(ico, txt);
       if (onPress) {
-        card.style.pointerEvents = 'auto';
-        card.style.cursor = 'pointer';
-        card.addEventListener('click', (event) => { event.preventDefault(); event.stopPropagation(); onPress(e.id); });
+        bindLabelPress(card, () => onPress(e.id));
       }
       panel.append(card);
       root.append(line, dot, panel);

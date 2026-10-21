@@ -31,6 +31,8 @@ import { KIND_SUBTITLES, POI_SUBTITLES } from './icons.js';
 
 /** A label with the engine-side placement data. */
 export interface LabelEntry extends LabelInfo {
+  /** Authored entries share the base label controller and layout pass. */
+  authored?: boolean;
   /** Anchor in world units. */
   x: number;
   z: number;
@@ -113,6 +115,7 @@ export function toLabelInfo(e: LabelEntry): LabelInfo {
   const info: LabelInfo = { id: e.id, kind: e.kind, name: e.name, lngLat: { ...e.lngLat } };
   if (e.category) info.category = e.category;
   if (e.subtitle !== undefined) info.subtitle = e.subtitle;
+  if (e.buildingId) info.buildingId = e.buildingId;
   return info;
 }
 

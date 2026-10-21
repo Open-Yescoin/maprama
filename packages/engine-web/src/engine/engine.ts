@@ -512,6 +512,7 @@ export class Engine implements EngineHandle {
     }
     this.rebuildWorldGeometry();
     for (const item of [...next.values()].flat()) this.buildingsR.setStyle(item.id, { replaceModel: { ...item.model, ...(item.heightMeters ? { heightMeters: item.heightMeters * item.scale } : {}) } });
+    this.features?.labelsChanged(true);
     this.core?.requestRender();
     this.core?.requestShadowUpdate();
   }
@@ -1084,6 +1085,7 @@ export class Engine implements EngineHandle {
     if (!this.worldModel) return;
     // Markers come first: a press that hits one emits `marker:press` only.
     if (this.features?.pressMarker(x, y)) return;
+    if (this.features?.pressLabel(x, y)) return;
     const ground = this.cam.screenToGround(x, y);
     // In the flat view there is no extruded geometry to hit: the press is resolved against the
     // footprints under the ground point, which is what the flat layer actually draws.

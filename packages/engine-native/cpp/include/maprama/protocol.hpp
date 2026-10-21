@@ -34,11 +34,11 @@ inline constexpr std::array<std::string_view, 28> kEngineCommandTypes{
 };
 
 /// `ENGINE_EVENT_TYPES`, in declaration order (new events are appended, so indices are stable).
-inline constexpr std::array<std::string_view, 21> kEngineEventTypes{
+inline constexpr std::array<std::string_view, 22> kEngineEventTypes{
     "ready",          "error",         "labelsIndex",    "map:press",      "building:press", "drop:collect",
     "travel:start",   "travel:progress", "travel:arrive", "travel:cancel", "geofence:enter", "geofence:exit",
     "character:position", "camera:change", "overlay:positions", "response", "marker:press", "camera:idle",
-    "infoCard:press", "infoCard:dismiss", "view:change",
+    "infoCard:press", "infoCard:dismiss", "view:change", "label:press",
 };
 
 struct ValidationResult {

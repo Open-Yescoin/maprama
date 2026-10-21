@@ -743,6 +743,14 @@ export interface LabelsIndexEvent {
   labels: LabelInfo[];
 }
 
+/** A label was pressed; label touches do not also press the map or building. */
+export interface LabelPressEvent {
+  type: 'label:press';
+  labelId: string;
+  coordinate: LngLat;
+  buildingId?: string;
+}
+
 /** The ground was pressed (not on a building). */
 export interface MapPressEvent {
   type: 'map:press';
@@ -1049,6 +1057,7 @@ export type EngineEvent =
   | ReadyEvent
   | ErrorEvent
   | LabelsIndexEvent
+  | LabelPressEvent
   | MapPressEvent
   | BuildingPressEvent
   | MarkerPressEvent
@@ -1299,6 +1308,7 @@ const eventChecks: { [K in EngineEventType]: Check } = {
   'infoCard:press': object({ id }, { actionId: nonEmptyString }),
   'infoCard:dismiss': object({ id }),
   'view:change': object({ view: checkViewMode, animating: boolean }),
+  'label:press': object({ labelId: id, coordinate: checkLngLat }, { buildingId: id }),
 };
 
 /** Every command `type`, in declaration order. */
